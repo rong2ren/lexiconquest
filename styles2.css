@@ -7,15 +7,24 @@
     box-sizing: border-box;
 }
 
+/* sticky-header */
+.sticky-header {
+  position: fixed;
+  top: 0; /* This makes the header stick to the top of the viewport */
+  background-color: #FFFFFF; /* Add a background color so content doesn't show through */
+  padding: 10px 20px; /* Add some padding */
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3)
+  z-index: 100; /* Ensure the header is above other content */
+  width: 100%; /* Make sure the header spans the full width */
+}
+
 /* Body and Background */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background: #cfcbcb;
     min-height: 100vh;
-    display: flex;
+    display: flex; 
     justify-content: center;
-    align-items: center;
-    padding: 20px;
 }
 
 /* Main Container */
@@ -23,6 +32,8 @@ body {
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    margin-top: 150px;
+    margin-bottom: 50px;
     padding: 40px;
     width: 100%;
     max-width: 500px;
@@ -42,10 +53,21 @@ body {
 }
 
 /* Typography */
-h1, h2 {
+h1 {
+    color: #000000;
+    margin-left:10px;
+    margin-right: 15px;
+    text-align: left;
+    font-size: 30px;
+    font-family: Verdana
+}
+
+h2 {
     color: #333;
     margin-bottom: 30px;
-    text-align: center;
+    text-align: left;
+    font-size: 40px;
+    font-family: Arial /*Verdana*/
 }
 
 h3 {

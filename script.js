@@ -80,6 +80,7 @@ class LexiconQuest {
 
         // Form events
         document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
+        document.getElementById('google-login-btn').addEventListener('click', () => this.handleGoogleLogin());
         document.getElementById('signup-form').addEventListener('submit', (e) => this.handleSignup(e));
         document.getElementById('forgot-password-btn').addEventListener('click', () => this.showSection('forgot-password'));
         document.getElementById('forgot-password-form').addEventListener('submit', (e) => this.handlePasswordRecovery(e));
@@ -147,6 +148,38 @@ class LexiconQuest {
         }
     }
 
+    async handleGoogleLogin() {
+        if (!this.firebaseReady) {
+            this.showMessage('Authentication system not ready', 'error');
+            return;
+        }
+
+        try {
+            const provider = new window.firebaseServices.GoogleAuthProvider();
+            const result = await window.firebaseServices.signInWithPopup(window.firebaseAuth, provider);
+            
+            // Check if this is a new user and create profile if needed
+            const userDoc = window.firebaseServices.doc(window.firebaseDB, 'users', result.user.uid);
+            const docSnap = await window.firebaseServices.getDoc(userDoc);
+            
+            if (!docSnap.exists()) {
+                // New user - create profile with Google info
+                await window.firebaseServices.setDoc(userDoc, {
+                    email: result.user.email,
+                    kidsNames: [], // Empty initially, can be filled later
+                    surveyResults: {},
+                    createdAt: new Date().toISOString(),
+                    provider: 'google'
+                });
+            }
+            
+            this.showMessage('Welcome!', 'success');
+        } catch (error) {
+            console.error('Google login error:', error);
+            this.showMessage(this.getFirebaseErrorMessage(error), 'error');
+        }
+    }
+
     async handleSignup(e) {
         e.preventDefault();
         if (!this.firebaseReady) {
@@ -204,7 +237,7 @@ class LexiconQuest {
 
         try {
             await window.firebaseServices.sendPasswordResetEmail(window.firebaseAuth, email);
-            this.showMessage(`Password recovery email sent to ${email}`, 'success');
+            this.showMessage(`Password recovery email sent to ${email}. Please check your spam folder if you don't receive it within a few minutes.`, 'success');
             setTimeout(() => this.showSection('home'), 3000);
         } catch (error) {
             console.error('Password recovery error:', error);
