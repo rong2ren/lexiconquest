@@ -1,16 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Survey Platform</title>
-    
-    <!-- Link to external CSS file -->
+    <title>Lexicon Quest</title>
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Remove the <style> tags and everything inside them -->
 </head>
 <body>
-    <!-- Rest of your HTML stays the same -->
+    <div class="container">
+        <header>
+            <h1>Lexicon Quest</h1>
+            <nav id="nav">
+                <div id="nav-authenticated" class="nav-section" style="display: none;">
+                    <span id="welcome-message"></span>
+                    <button id="profile-btn" class="nav-btn">Profile</button>
+                    <button id="surveys-btn" class="nav-btn">Surveys</button>
+                    <button id="logout-btn" class="nav-btn">Sign Out</button>
+                </div>
+                <div id="nav-guest" class="nav-section">
+                    <button id="login-btn" class="nav-btn">Login</button>
+                    <button id="signup-btn" class="nav-btn">Sign Up</button>
+                </div>
+            </nav>
+        </header>
+
+        <main id="main-content">
+            <section id="home-section">
+                <h2>Welcome to Lexicon Quest</h2>
+                <p>Discover the power of words and language through interactive surveys and personalized learning experiences.</p>
+                <div class="cta-buttons">
+                    <button id="get-started-btn" class="btn btn-primary">Get Started</button>
+                    <button id="learn-more-btn" class="btn btn-secondary">Learn More</button>
+                </div>
+            </section>
+
+            <section id="login-section" style="display: none;">
+                <h2>Login</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="button" id="forgot-password-btn" class="btn btn-link">Forgot Password?</button>
+                </form>
+            </section>
+
+            <section id="signup-section" style="display: none;">
+                <h2>Sign Up</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-email">Parent Email:</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password:</label>
+                        <input type="password" id="signup-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-confirm-password">Confirm Password:</label>
+                        <input type="password" id="signup-confirm-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kids-names">Kids' Names (comma separated):</label>
+                        <input type="text" id="kids-names" placeholder="e.g., Alice, Bob, Charlie" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+            </section>
+
+            <section id="forgot-password-section" style="display: none;">
+                <h2>Password Recovery</h2>
+                <form id="forgot-password-form">
+                    <div class="form-group">
+                        <label for="recovery-email">Email:</label>
+                        <input type="email" id="recovery-email" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Recovery Email</button>
+                </form>
+            </section>
+
+            <section id="profile-section" style="display: none;">
+                <h2>Profile</h2>
+                <div id="profile-info">
+                    <div class="profile-field">
+                        <label>Parent Email:</label>
+                        <span id="profile-email"></span>
+                        <button id="edit-email-btn" class="btn btn-small">Edit</button>
+                    </div>
+                    <div class="profile-field">
+                        <label>Kids' Names:</label>
+                        <span id="profile-kids"></span>
+                        <button id="edit-kids-btn" class="btn btn-small">Edit</button>
+                    </div>
+                </div>
+                <div id="edit-profile-form" style="display: none;">
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="edit-email">Parent Email:</label>
+                            <input type="email" id="edit-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-kids-names">Kids' Names (comma separated):</label>
+                            <input type="text" id="edit-kids-names" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary">Cancel</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="surveys-section" style="display: none;">
+                <h2>Available Surveys</h2>
+                <div class="surveys-list">
+                    <div class="survey-card">
+                        <h3>Vocabulary Level Assessment</h3>
+                        <p>Determine your child's current vocabulary level with this quick assessment.</p>
+                        <button class="btn btn-primary start-survey" data-survey="vocab-level">Start Survey</button>
+                    </div>
+                    <div class="survey-card">
+                        <h3>Learning Style Preferences</h3>
+                        <p>Discover how your child learns best to personalize their experience.</p>
+                        <button class="btn btn-primary start-survey" data-survey="learning-style">Start Survey</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="survey-vocab-level" style="display: none;">
+                <h2>Vocabulary Level Assessment</h2>
+                <form id="vocab-level-form">
+                    <div class="question">
+                        <h3>What is your child's age?</h3>
+                        <div class="choices">
+                            <label><input type="radio" name="age" value="5-7"> 5-7 years</label>
+                            <label><input type="radio" name="age" value="8-10"> 8-10 years</label>
+                            <label><input type="radio" name="age" value="11-13"> 11-13 years</label>
+                            <label><input type="radio" name="age" value="14+"> 14+ years</label>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <h3>Which word best describes "enormous"?</h3>
+                        <div class="choices">
+                            <label><input type="radio" name="enormous" value="tiny"> Tiny</label>
+                            <label><input type="radio" name="enormous" value="huge"> Huge</label>
+                            <label><input type="radio" name="enormous" value="medium"> Medium</label>
+                            <label><input type="radio" name="enormous" value="colorful"> Colorful</label>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <h3>How often does your child read independently?</h3>
+                        <div class="choices">
+                            <label><input type="radio" name="reading" value="daily"> Daily</label>
+                            <label><input type="radio" name="reading" value="weekly"> A few times a week</label>
+                            <label><input type="radio" name="reading" value="monthly"> Occasionally</label>
+                            <label><input type="radio" name="reading" value="rarely"> Rarely</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Assessment</button>
+                </form>
+            </section>
+
+            <section id="survey-learning-style" style="display: none;">
+                <h2>Learning Style Preferences</h2>
+                <form id="learning-style-form">
+                    <div class="question">
+                        <h3>How does your child learn best?</h3>
+                        <div class="choices">
+                            <label><input type="radio" name="learning-method" value="visual"> Looking at pictures and diagrams</label>
+                            <label><input type="radio" name="learning-method" value="auditory"> Listening to explanations</label>
+                            <label><input type="radio" name="learning-method" value="kinesthetic"> Hands-on activities</label>
+                            <label><input type="radio" name="learning-method" value="reading"> Reading and writing</label>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <h3>What motivates your child most?</h3>
+                        <div class="choices">
+                            <label><input type="radio" name="motivation" value="competition"> Competition with others</label>
+                            <label><input type="radio" name="motivation" value="achievement"> Personal achievement</label>
+                            <label><input type="radio" name="motivation" value="rewards"> Rewards and prizes</label>
+                            <label><input type="radio" name="motivation" value="fun"> Fun activities</label>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <h3>Preferred lesson length?</h3>
+                        <div class="choices">
+                            <label><input type="radio" name="duration" value="short"> 5-10 minutes</label>
+                            <label><input type="radio" name="duration" value="medium"> 10-20 minutes</label>
+                            <label><input type="radio" name="duration" value="long"> 20+ minutes</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Preferences</button>
+                </form>
+            </section>
+
+            <section id="results-section" style="display: none;">
+                <h2>Survey Results</h2>
+                <div id="results-content"></div>
+                <button id="back-to-surveys-btn" class="btn btn-secondary">Back to Surveys</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
