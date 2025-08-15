@@ -1,14 +1,74 @@
 class LexiconQuest {
     constructor() {
         this.currentUser = null;
-        this.users = JSON.parse(localStorage.getItem('lexicon-users') || '{}');
         this.currentSection = 'home';
+        this.firebaseReady = false;
         this.init();
     }
 
-    init() {
+    async init() {
+        // Wait for Firebase to be available
+        await this.waitForFirebase();
         this.bindEvents();
-        this.checkAuthState();
+        this.setupAuthListener();
+    }
+
+    async waitForFirebase() {
+        let attempts = 0;
+        while (!window.firebaseAuth && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        
+        if (window.firebaseAuth) {
+            this.firebaseReady = true;
+            console.log('Firebase initialized successfully');
+        } else {
+            console.error('Firebase failed to initialize');
+            this.showMessage('Failed to initialize authentication system', 'error');
+        }
+    }
+
+    setupAuthListener() {
+        if (!this.firebaseReady) return;
+        
+        // Listen for authentication state changes
+        window.firebaseServices.onAuthStateChanged(window.firebaseAuth, async (user) => {
+            if (user) {
+                // User is signed in
+                this.currentUser = {
+                    uid: user.uid,
+                    email: user.email
+                };
+                
+                // Load additional user data from Firestore
+                await this.loadUserProfile();
+                this.updateUI();
+            } else {
+                // User is signed out
+                this.currentUser = null;
+                this.updateUI();
+            }
+        });
+    }
+
+    async loadUserProfile() {
+        if (!this.currentUser || !this.firebaseReady) return;
+
+        try {
+            const userDoc = window.firebaseServices.doc(window.firebaseDB, 'users', this.currentUser.uid);
+            const docSnap = await window.firebaseServices.getDoc(userDoc);
+            
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                this.currentUser = {
+                    ...this.currentUser,
+                    ...userData
+                };
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
     }
 
     bindEvents() {
@@ -38,14 +98,6 @@ class LexiconQuest {
         document.getElementById('back-to-surveys-btn').addEventListener('click', () => this.showSection('surveys'));
     }
 
-    checkAuthState() {
-        const savedUser = localStorage.getItem('lexicon-current-user');
-        if (savedUser) {
-            this.currentUser = JSON.parse(savedUser);
-            this.updateUI();
-        }
-    }
-
     showSection(sectionName) {
         // Hide all sections and pages
         const sections = document.querySelectorAll('[id$="-section"]');
@@ -70,31 +122,36 @@ class LexiconQuest {
         }
     }
 
-    handleGetStarted() {
-        if (this.currentUser) {
-            this.showSection('surveys');
-        } else {
-            this.showSection('signup');
-        }
-    }
-
-    handleLogin(e) {
+    async handleLogin(e) {
         e.preventDefault();
+        if (!this.firebaseReady) {
+            this.showMessage('Authentication system not ready', 'error');
+            return;
+        }
+
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
 
-        if (this.users[email] && this.users[email].password === password) {
-            this.currentUser = this.users[email];
-            localStorage.setItem('lexicon-current-user', JSON.stringify(this.currentUser));
-            this.updateUI();
+        try {
+            const userCredential = await window.firebaseServices.signInWithEmailAndPassword(
+                window.firebaseAuth, email, password
+            );
             this.showMessage('Welcome back!', 'success');
-        } else {
-            this.showMessage('Invalid email or password', 'error');
+            // Clear form
+            document.getElementById('login-form').reset();
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showMessage(this.getFirebaseErrorMessage(error), 'error');
         }
     }
 
-    handleSignup(e) {
+    async handleSignup(e) {
         e.preventDefault();
+        if (!this.firebaseReady) {
+            this.showMessage('Authentication system not ready', 'error');
+            return;
+        }
+
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
@@ -105,38 +162,51 @@ class LexiconQuest {
             return;
         }
 
-        if (this.users[email]) {
-            this.showMessage('Email already exists', 'error');
+        if (password.length < 6) {
+            this.showMessage('Password must be at least 6 characters', 'error');
             return;
         }
 
-        const newUser = {
-            email: email,
-            password: password,
-            kidsNames: kidsNames.split(',').map(name => name.trim()),
-            surveyResults: {}
-        };
+        try {
+            // Create user account
+            const userCredential = await window.firebaseServices.createUserWithEmailAndPassword(
+                window.firebaseAuth, email, password
+            );
 
-        this.users[email] = newUser;
-        localStorage.setItem('lexicon-users', JSON.stringify(this.users));
+            // Save additional user data to Firestore
+            const userDoc = window.firebaseServices.doc(window.firebaseDB, 'users', userCredential.user.uid);
+            await window.firebaseServices.setDoc(userDoc, {
+                email: email,
+                kidsNames: kidsNames.split(',').map(name => name.trim()),
+                surveyResults: {},
+                createdAt: new Date().toISOString()
+            });
 
-        this.currentUser = newUser;
-        localStorage.setItem('lexicon-current-user', JSON.stringify(this.currentUser));
-
-        this.updateUI();
-        this.showMessage('Account created successfully!', 'success');
+            this.showMessage('Account created successfully!', 'success');
+            // Clear form
+            document.getElementById('signup-form').reset();
+        } catch (error) {
+            console.error('Signup error:', error);
+            this.showMessage(this.getFirebaseErrorMessage(error), 'error');
+        }
     }
 
-    handlePasswordRecovery(e) {
+    async handlePasswordRecovery(e) {
         e.preventDefault();
+        if (!this.firebaseReady) {
+            this.showMessage('Authentication system not ready', 'error');
+            return;
+        }
+
         const email = document.getElementById('recovery-email').value;
 
-        if (this.users[email]) {
-            // In a real app, this would send an email
-            this.showMessage(`Password recovery instructions sent to ${email}`, 'success');
-            setTimeout(() => this.showSection('login'), 2000);
-        } else {
-            this.showMessage('Email not found', 'error');
+        try {
+            await window.firebaseServices.sendPasswordResetEmail(window.firebaseAuth, email);
+            this.showMessage(`Password recovery email sent to ${email}`, 'success');
+            setTimeout(() => this.showSection('home'), 3000);
+        } catch (error) {
+            console.error('Password recovery error:', error);
+            this.showMessage(this.getFirebaseErrorMessage(error), 'error');
         }
     }
 
@@ -152,17 +222,22 @@ class LexiconQuest {
         }
     }
 
-    logout() {
-        this.currentUser = null;
-        localStorage.removeItem('lexicon-current-user');
-        this.updateUI();
-        this.showMessage('Logged out successfully', 'success');
+    async logout() {
+        if (!this.firebaseReady) return;
+
+        try {
+            await window.firebaseServices.signOut(window.firebaseAuth);
+            this.showMessage('Logged out successfully', 'success');
+        } catch (error) {
+            console.error('Logout error:', error);
+            this.showMessage('Error logging out', 'error');
+        }
     }
 
     updateProfileDisplay() {
         if (this.currentUser) {
             document.getElementById('profile-email').textContent = this.currentUser.email;
-            document.getElementById('profile-kids').textContent = this.currentUser.kidsNames.join(', ');
+            document.getElementById('profile-kids').textContent = this.currentUser.kidsNames ? this.currentUser.kidsNames.join(', ') : '';
         }
     }
 
@@ -171,7 +246,7 @@ class LexiconQuest {
         document.getElementById('edit-profile-form').classList.add('active');
         
         document.getElementById('edit-email').value = this.currentUser.email;
-        document.getElementById('edit-kids-names').value = this.currentUser.kidsNames.join(', ');
+        document.getElementById('edit-kids-names').value = this.currentUser.kidsNames ? this.currentUser.kidsNames.join(', ') : '';
     }
 
     hideEditProfile() {
@@ -179,35 +254,38 @@ class LexiconQuest {
         document.getElementById('edit-profile-form').classList.remove('active');
     }
 
-    handleProfileUpdate(e) {
+    async handleProfileUpdate(e) {
         e.preventDefault();
+        if (!this.firebaseReady || !this.currentUser) return;
+
         const newEmail = document.getElementById('edit-email').value;
         const newKidsNames = document.getElementById('edit-kids-names').value;
 
-        // Update user data
-        const oldEmail = this.currentUser.email;
-        this.currentUser.email = newEmail;
-        this.currentUser.kidsNames = newKidsNames.split(',').map(name => name.trim());
+        try {
+            // Update Firestore document
+            const userDoc = window.firebaseServices.doc(window.firebaseDB, 'users', this.currentUser.uid);
+            await window.firebaseServices.updateDoc(userDoc, {
+                kidsNames: newKidsNames.split(',').map(name => name.trim()),
+                updatedAt: new Date().toISOString()
+            });
 
-        // Update in storage
-        if (oldEmail !== newEmail) {
-            delete this.users[oldEmail];
+            // Update local user data
+            this.currentUser.kidsNames = newKidsNames.split(',').map(name => name.trim());
+
+            this.hideEditProfile();
+            this.updateProfileDisplay();
+            this.showMessage('Profile updated successfully!', 'success');
+        } catch (error) {
+            console.error('Profile update error:', error);
+            this.showMessage('Error updating profile', 'error');
         }
-        this.users[newEmail] = this.currentUser;
-        localStorage.setItem('lexicon-users', JSON.stringify(this.users));
-        localStorage.setItem('lexicon-current-user', JSON.stringify(this.currentUser));
-
-        this.hideEditProfile();
-        this.updateProfileDisplay();
-        this.updateUI();
-        this.showMessage('Profile updated successfully!', 'success');
     }
 
     startSurvey(surveyType) {
         this.showSection(`survey-${surveyType}`);
     }
 
-    handleVocabSurvey(e) {
+    async handleVocabSurvey(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const responses = {};
@@ -243,22 +321,27 @@ class LexiconQuest {
             ];
         }
 
-        // Store results
-        this.currentUser.surveyResults.vocabLevel = {
-            level: level,
-            responses: responses,
-            recommendations: recommendations,
-            date: new Date().toISOString()
-        };
-
-        this.users[this.currentUser.email] = this.currentUser;
-        localStorage.setItem('lexicon-users', JSON.stringify(this.users));
-        localStorage.setItem('lexicon-current-user', JSON.stringify(this.currentUser));
+        // Save results to Firestore
+        if (this.currentUser && this.firebaseReady) {
+            try {
+                const userDoc = window.firebaseServices.doc(window.firebaseDB, 'users', this.currentUser.uid);
+                await window.firebaseServices.updateDoc(userDoc, {
+                    [`surveyResults.vocabLevel`]: {
+                        level: level,
+                        responses: responses,
+                        recommendations: recommendations,
+                        date: new Date().toISOString()
+                    }
+                });
+            } catch (error) {
+                console.error('Error saving survey results:', error);
+            }
+        }
 
         this.showResults('Vocabulary Level Assessment', level, recommendations);
     }
 
-    handleLearningSurvey(e) {
+    async handleLearningSurvey(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const responses = {};
@@ -308,17 +391,22 @@ class LexiconQuest {
                 ];
         }
 
-        // Store results
-        this.currentUser.surveyResults.learningStyle = {
-            style: style,
-            responses: responses,
-            plan: plan,
-            date: new Date().toISOString()
-        };
-
-        this.users[this.currentUser.email] = this.currentUser;
-        localStorage.setItem('lexicon-users', JSON.stringify(this.users));
-        localStorage.setItem('lexicon-current-user', JSON.stringify(this.currentUser));
+        // Save results to Firestore
+        if (this.currentUser && this.firebaseReady) {
+            try {
+                const userDoc = window.firebaseServices.doc(window.firebaseDB, 'users', this.currentUser.uid);
+                await window.firebaseServices.updateDoc(userDoc, {
+                    [`surveyResults.learningStyle`]: {
+                        style: style,
+                        responses: responses,
+                        plan: plan,
+                        date: new Date().toISOString()
+                    }
+                });
+            } catch (error) {
+                console.error('Error saving survey results:', error);
+            }
+        }
 
         this.showResults('Learning Style Assessment', `${style.charAt(0).toUpperCase() + style.slice(1)} Learner`, plan);
     }
@@ -326,19 +414,19 @@ class LexiconQuest {
     showResults(surveyTitle, result, recommendations) {
         const resultsContent = document.getElementById('results-content');
         resultsContent.innerHTML = `
-            <div class="results-card">
+            <div class="results-card" style="background: linear-gradient(135deg, #e8f4fd, #f0f8ff); padding: 30px; border-radius: 15px; border: 2px solid #4facfe;">
                 <h3>${surveyTitle}</h3>
-                <div class="result-main">
+                <div class="result-main" style="font-size: 1.5rem; text-align: center; margin-bottom: 25px; color: #1e3c72;">
                     <strong>Result: ${result}</strong>
                 </div>
                 <div class="recommendations">
-                    <h4>Recommendations:</h4>
-                    <ul>
-                        ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    <h4 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">Recommendations:</h4>
+                    <ul style="list-style: none; padding-left: 0;">
+                        ${recommendations.map(rec => `<li style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 5px; border-left: 4px solid #4facfe; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">${rec}</li>`).join('')}
                     </ul>
                 </div>
-                <div class="next-steps">
-                    <p>These recommendations are based on your responses. Try implementing these suggestions for the best learning experience!</p>
+                <div class="next-steps" style="margin-top: 25px; padding: 20px; background: rgba(79, 172, 254, 0.1); border-radius: 10px; text-align: center; font-style: italic;">
+                    <p>These recommendations are based on your responses and are now saved to your account. Try implementing these suggestions for the best learning experience!</p>
                 </div>
             </div>
         `;
@@ -366,6 +454,25 @@ class LexiconQuest {
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
         }, 5000);
+    }
+
+    getFirebaseErrorMessage(error) {
+        switch (error.code) {
+            case 'auth/user-not-found':
+                return 'No account found with this email address';
+            case 'auth/wrong-password':
+                return 'Invalid password';
+            case 'auth/email-already-in-use':
+                return 'An account with this email already exists';
+            case 'auth/weak-password':
+                return 'Password is too weak';
+            case 'auth/invalid-email':
+                return 'Invalid email address';
+            case 'auth/too-many-requests':
+                return 'Too many failed attempts. Please try again later';
+            default:
+                return error.message || 'An error occurred';
+        }
     }
 }
 
