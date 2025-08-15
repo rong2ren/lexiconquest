@@ -29,7 +29,6 @@ class LexiconQuest {
 
         // Profile events
         document.getElementById('edit-email-btn').addEventListener('click', () => this.showEditProfile());
-        document.getElementById('edit-kids-btn').addEventListener('click', () => this.showEditProfile());
         document.getElementById('profile-form').addEventListener('submit', (e) => this.handleProfileUpdate(e));
         document.getElementById('cancel-edit-btn').addEventListener('click', () => this.hideEditProfile());
 
@@ -51,14 +50,20 @@ class LexiconQuest {
     }
 
     showSection(sectionName) {
-        // Hide all sections
-        const sections = document.querySelectorAll('main section');
+        // Hide all sections and pages
+        const sections = document.querySelectorAll('[id$="-section"]');
+        const pages = document.querySelectorAll('.page');
         sections.forEach(section => section.style.display = 'none');
+        pages.forEach(page => page.classList.remove('active'));
 
         // Show requested section
         const targetSection = document.getElementById(`${sectionName}-section`);
         if (targetSection) {
-            targetSection.style.display = 'block';
+            if (targetSection.classList.contains('page')) {
+                targetSection.classList.add('active');
+            } else {
+                targetSection.style.display = 'block';
+            }
             this.currentSection = sectionName;
         }
 
@@ -168,7 +173,7 @@ class LexiconQuest {
 
     showEditProfile() {
         document.getElementById('profile-info').style.display = 'none';
-        document.getElementById('edit-profile-form').style.display = 'block';
+        document.getElementById('edit-profile-form').classList.add('active');
         
         document.getElementById('edit-email').value = this.currentUser.email;
         document.getElementById('edit-kids-names').value = this.currentUser.kidsNames.join(', ');
@@ -176,7 +181,7 @@ class LexiconQuest {
 
     hideEditProfile() {
         document.getElementById('profile-info').style.display = 'block';
-        document.getElementById('edit-profile-form').style.display = 'none';
+        document.getElementById('edit-profile-form').classList.remove('active');
     }
 
     handleProfileUpdate(e) {
@@ -346,24 +351,25 @@ class LexiconQuest {
     }
 
     showMessage(message, type) {
-        // Remove existing messages
-        const existingMessage = document.querySelector('.message');
-        if (existingMessage) {
-            existingMessage.remove();
+        // Hide existing messages
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+
+        // Show appropriate message
+        if (type === 'error') {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        } else if (type === 'success') {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
         }
-
-        // Create new message
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message message-${type}`;
-        messageDiv.textContent = message;
-
-        // Insert at top of container
-        const container = document.querySelector('.container');
-        container.insertBefore(messageDiv, container.firstChild);
 
         // Remove after 5 seconds
         setTimeout(() => {
-            messageDiv.remove();
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
         }, 5000);
     }
 }
