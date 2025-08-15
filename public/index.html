@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexicon Quest</title>
+    <link rel="stylesheet" href="styles2.css">
+    <style>
+        body {
+        margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="sticky-header">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center;">
+                <img src="artifact/logo/emblem.png" alt="Lexicon Quest Logo" style="border-radius: 50%; width: 80px; height: 80px; object-fit: contain; margin-right: 15px;">
+                <h1 style="margin: 0;">Lexicon Quest</h1>
+            </div>
+            <div id="header-nav" style="display: none;">
+                <button id="logout-btn" class="secondary-btn" style="margin: 0;">Sign Out</button>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <main>
+            <!-- Logged in blank page -->
+            <div id="logged-in-section" style="display: none;">
+                <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Magical Journey Starts Here</h2>
+                <p style="text-align: center; color: #666;">You are successfully logged in.</p>
+            </div>
+
+            <!-- Home Section -->
+            <div id="home-section">
+                <h2>Sign In</h2>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                
+                <button type="button" id="google-login-btn" class="secondary-btn" style="margin-top: 15px;">
+                    🔍 Continue with Google
+                </button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <div class="link" id="forgot-password-btn">Forgot Password?</div>
+                    <div class="link" id="signup-btn" style="margin-top: 10px;">Don't have an account? Sign Up</div>
+                </div>
+            </div>
+
+
+            <!-- Signup Section -->
+            <div id="signup-section" class="page">
+                <h2>Sign Up</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-email">Parent Email:</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password:</label>
+                        <input type="password" id="signup-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-confirm-password">Confirm Password:</label>
+                        <input type="password" id="signup-confirm-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kids-names">Kids' Names (comma separated):</label>
+                        <input type="text" id="kids-names" placeholder="e.g., Alice, Bob, Charlie" required>
+                    </div>
+                    <button type="submit">Sign Up</button>
+                </form>
+            </div>
+
+            <!-- Forgot Password Section -->
+            <div id="forgot-password-section" class="page">
+                <h2>Password Recovery</h2>
+                <form id="forgot-password-form">
+                    <div class="form-group">
+                        <label for="recovery-email">Email:</label>
+                        <input type="email" id="recovery-email" required>
+                    </div>
+                    <button type="submit">Send Recovery Email</button>
+                </form>
+            </div>
+
+            <!-- Messages -->
+            <div class="error" id="error-message"></div>
+            <div class="success" id="success-message"></div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAddHjvRgjBUfR4OBAwWJs_rhuf3gkX-2Q",
+            authDomain: "lexicon-quest.firebaseapp.com",
+            projectId: "lexicon-quest",
+            storageBucket: "lexicon-quest.firebasestorage.app",
+            messagingSenderId: "107916687613",
+            appId: "1:107916687613:web:dcc3236f8eb84d6a0da694",
+            measurementId: "G-Y5R9TTH4PT"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        // Make Firebase services available globally
+        window.firebaseAuth = auth;
+        window.firebaseDB = db;
+        window.firebaseServices = {
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged,
+            sendPasswordResetEmail,
+            GoogleAuthProvider,
+            signInWithPopup,
+            doc,
+            setDoc,
+            getDoc,
+            updateDoc
+        };
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
