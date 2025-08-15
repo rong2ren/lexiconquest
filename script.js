@@ -99,17 +99,19 @@ class LexiconQuest {
     }
 
     showSection(sectionName) {
-        // Hide all sections and pages
-        const sections = document.querySelectorAll('[id$="-section"]');
-        const pages = document.querySelectorAll('.page');
-        sections.forEach(section => section.style.display = 'none');
-        pages.forEach(page => page.classList.remove('active'));
+        // Hide all sections first
+        const allSections = document.querySelectorAll('[id$="-section"]');
+        allSections.forEach(section => {
+            section.style.display = 'none';
+            section.classList.remove('active');
+        });
 
         // Show requested section
         const targetSection = document.getElementById(`${sectionName}-section`);
         if (targetSection) {
             if (targetSection.classList.contains('page')) {
                 targetSection.classList.add('active');
+                targetSection.style.display = 'block';
             } else {
                 targetSection.style.display = 'block';
             }
@@ -459,15 +461,17 @@ class LexiconQuest {
     getFirebaseErrorMessage(error) {
         switch (error.code) {
             case 'auth/user-not-found':
-                return 'No account found with this email address';
+                return 'This Email or Password does not match our records';
             case 'auth/wrong-password':
-                return 'Invalid password';
+                return 'This Email or Password does not match our records';
+            case 'auth/invalid-credential':
+                return 'This Email or Password does not match our records';
             case 'auth/email-already-in-use':
                 return 'An account with this email already exists';
             case 'auth/weak-password':
-                return 'Password is too weak';
+                return 'Password must be at least 6 characters';
             case 'auth/invalid-email':
-                return 'Invalid email address';
+                return 'Please enter a valid email address';
             case 'auth/too-many-requests':
                 return 'Too many failed attempts. Please try again later';
             default:
