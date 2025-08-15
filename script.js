@@ -13,13 +13,10 @@ class LexiconQuest {
 
     bindEvents() {
         // Navigation events
-        document.getElementById('login-btn').addEventListener('click', () => this.showSection('login'));
         document.getElementById('signup-btn').addEventListener('click', () => this.showSection('signup'));
         document.getElementById('profile-btn').addEventListener('click', () => this.showSection('profile'));
         document.getElementById('surveys-btn').addEventListener('click', () => this.showSection('surveys'));
         document.getElementById('logout-btn').addEventListener('click', () => this.logout());
-        document.getElementById('get-started-btn').addEventListener('click', () => this.handleGetStarted());
-        document.getElementById('learn-more-btn').addEventListener('click', () => this.showSection('surveys'));
 
         // Form events
         document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
@@ -90,7 +87,6 @@ class LexiconQuest {
             this.currentUser = this.users[email];
             localStorage.setItem('lexicon-current-user', JSON.stringify(this.currentUser));
             this.updateUI();
-            this.showSection('home');
             this.showMessage('Welcome back!', 'success');
         } else {
             this.showMessage('Invalid email or password', 'error');
@@ -128,7 +124,6 @@ class LexiconQuest {
         localStorage.setItem('lexicon-current-user', JSON.stringify(this.currentUser));
 
         this.updateUI();
-        this.showSection('home');
         this.showMessage('Account created successfully!', 'success');
     }
 
@@ -148,11 +143,12 @@ class LexiconQuest {
     updateUI() {
         if (this.currentUser) {
             document.getElementById('nav-authenticated').style.display = 'flex';
-            document.getElementById('nav-guest').style.display = 'none';
+            document.getElementById('home-section').style.display = 'none';
             document.getElementById('welcome-message').textContent = `Welcome, ${this.currentUser.email}`;
+            this.showSection('surveys');
         } else {
             document.getElementById('nav-authenticated').style.display = 'none';
-            document.getElementById('nav-guest').style.display = 'flex';
+            document.getElementById('home-section').style.display = 'block';
         }
     }
 
@@ -160,7 +156,6 @@ class LexiconQuest {
         this.currentUser = null;
         localStorage.removeItem('lexicon-current-user');
         this.updateUI();
-        this.showSection('home');
         this.showMessage('Logged out successfully', 'success');
     }
 
