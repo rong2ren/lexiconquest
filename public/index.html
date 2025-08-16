@@ -27,12 +27,16 @@
         <main>
             <!-- Logged in blank page -->
             <div id="logged-in-section" style="display: none;">
-                <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Magical Journey Starts Here</h2>
-                <p style="text-align: center; color: #666;">You are successfully logged in.</p>
+                <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Your Adventure Continues Here!</h2>
+                <h3 style="text-align: center; color: #333; margin-bottom: 10px;">Choose the current issue you are on:</h2>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="issue2-btn" class="secondary-btn">Issue 2 - The First Meet</button>
+                </div>
             </div>
 
+
             <!-- Home Section -->
-            <div id="home-section">
+            <div id="home-section" style="display: none;">
                 <h2>Sign In</h2>
                 
                 <form id="login-form">
@@ -47,13 +51,22 @@
                     <button type="submit">Login</button>
                 </form>
                 
-                <button type="button" id="google-login-btn" class="secondary-btn" style="margin-top: 15px;">
-                    🔍 Continue with Google
-                </button>
+                <!-- Login error message -->
+                <div class="error" id="login-error-message" style="margin-top: 10px;"></div>
                 
                 <div style="text-align: center; margin-top: 15px;">
                     <div class="link" id="forgot-password-btn">Forgot Password?</div>
-                    <div class="link" id="signup-btn" style="margin-top: 10px;">Don't have an account? Sign Up</div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px; color: #666;">- or -</div>
+                
+                <button type="button" id="google-login-btn" class="secondary-btn" style="margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <img src="artifact/logo/google logo.png" alt="Google" style="width: 20px; height: 20px;">
+                    Continue with Google
+                </button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <div class="link" id="signup-btn">Don't have an account? Sign Up</div>
                 </div>
             </div>
 
@@ -74,12 +87,12 @@
                         <label for="signup-confirm-password">Confirm Password:</label>
                         <input type="password" id="signup-confirm-password" required>
                     </div>
-                    <div class="form-group">
-                        <label for="kids-names">Kids' Names (comma separated):</label>
-                        <input type="text" id="kids-names" placeholder="e.g., Alice, Bob, Charlie" required>
-                    </div>
                     <button type="submit">Sign Up</button>
                 </form>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <div class="link" id="signin-btn">Already have an account? Sign in</div>
+                </div>
             </div>
 
             <!-- Forgot Password Section -->
@@ -94,7 +107,7 @@
                 </form>
             </div>
 
-            <!-- Messages -->
+            <!-- Global Messages -->
             <div class="error" id="error-message"></div>
             <div class="success" id="success-message"></div>
         </main>

@@ -11,6 +11,9 @@ class LexiconQuest {
         await this.waitForFirebase();
         this.bindEvents();
         this.setupAuthListener();
+        
+        // Show loading state initially
+        this.showLoadingState();
     }
 
     async waitForFirebase() {
@@ -60,6 +63,8 @@ class LexiconQuest {
     bindEvents() {
         // Navigation events
         document.getElementById('signup-btn').addEventListener('click', () => this.showSection('signup'));
+        document.getElementById('signin-btn').addEventListener('click', () => this.showSection('home'));
+        document.getElementById('issue2-btn').addEventListener('click', () => this.openIssue2Survey());
         document.getElementById('logout-btn').addEventListener('click', () => this.logout());
 
         // Form events
@@ -106,12 +111,12 @@ class LexiconQuest {
             const userCredential = await window.firebaseServices.signInWithEmailAndPassword(
                 window.firebaseAuth, email, password
             );
-            this.showMessage('Welcome back!', 'success');
+            // this.showMessage('Welcome back!', 'success');
             // Clear form
             document.getElementById('login-form').reset();
         } catch (error) {
             console.error('Login error:', error);
-            this.showMessage(this.getFirebaseErrorMessage(error), 'error');
+            this.showLoginError(this.getFirebaseErrorMessage(error));
         }
     }
 
@@ -237,12 +242,31 @@ class LexiconQuest {
     }
 
 
+    showLoginError(message) {
+        // Hide all error messages first
+        const errorMessage = document.getElementById('error-message');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        errorMessage.style.display = 'none';
+        loginErrorMessage.style.display = 'none';
+        
+        // Show login-specific error
+        loginErrorMessage.textContent = message;
+        loginErrorMessage.style.display = 'block';
+        
+        // Remove after 5 seconds
+        setTimeout(() => {
+            loginErrorMessage.style.display = 'none';
+        }, 5000);
+    }
+
     showMessage(message, type) {
         // Hide existing messages
         const errorMessage = document.getElementById('error-message');
         const successMessage = document.getElementById('success-message');
+        const loginErrorMessage = document.getElementById('login-error-message');
         errorMessage.style.display = 'none';
         successMessage.style.display = 'none';
+        loginErrorMessage.style.display = 'none';
 
         // Show appropriate message
         if (type === 'error') {
@@ -258,6 +282,17 @@ class LexiconQuest {
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
         }, 5000);
+    }
+
+    openIssue2Survey() {
+        window.open('https://tally.so/r/3yQ4q4', '_blank');
+    }
+
+    showLoadingState() {
+        // Hide all sections initially to prevent flash
+        document.getElementById('home-section').style.display = 'none';
+        document.getElementById('logged-in-section').style.display = 'none';
+        document.getElementById('header-nav').style.display = 'none';
     }
 
     getFirebaseErrorMessage(error) {
