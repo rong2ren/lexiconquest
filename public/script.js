@@ -44,12 +44,23 @@ class LexiconQuest {
                     email: user.email
                 };
                 
+                // Set Mixpanel user identity and register email for all events
+                mixpanel.identify(user.uid);
+                mixpanel.register({
+                    'user_email': user.email,
+                    'user_id': user.uid
+                });
+                
                 // Load additional user data from Firestore
                 await this.loadUserProfile();
                 this.updateUI();
             } else {
                 // User is signed out
                 this.currentUser = null;
+                
+                // Reset Mixpanel identity and clear registered properties
+                mixpanel.reset();
+                
                 this.updateUI();
             }
         });
@@ -107,15 +118,32 @@ class LexiconQuest {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
 
+        // Track login attempt
+        mixpanel.track('Login Attempted', {
+            method: 'email'
+        });
+
         try {
             const userCredential = await window.firebaseServices.signInWithEmailAndPassword(
                 window.firebaseAuth, email, password
             );
-            // this.showMessage('Welcome back!', 'success');
+            
+            // Track successful login
+            mixpanel.track('Login Success', {
+                method: 'email'
+            });
+            
             // Clear form
             document.getElementById('login-form').reset();
         } catch (error) {
             console.error('Login error:', error);
+            
+            // Track login failure
+            mixpanel.track('Login Failed', {
+                method: 'email',
+                error: error.code
+            });
+            
             this.showLoginError(this.getFirebaseErrorMessage(error));
         }
     }
@@ -126,6 +154,11 @@ class LexiconQuest {
             return;
         }
 
+        // Track Google login attempt
+        mixpanel.track('Login Attempted', {
+            method: 'google'
+        });
+
         try {
             const provider = new window.firebaseServices.GoogleAuthProvider();
             const result = await window.firebaseServices.signInWithPopup(window.firebaseAuth, provider);
@@ -134,7 +167,9 @@ class LexiconQuest {
             const userDoc = window.firebaseServices.doc(window.firebaseDB, 'users', result.user.uid);
             const docSnap = await window.firebaseServices.getDoc(userDoc);
             
-            if (!docSnap.exists()) {
+            const isNewUser = !docSnap.exists();
+            
+            if (isNewUser) {
                 // New user - create profile with Google info
                 await window.firebaseServices.setDoc(userDoc, {
                     email: result.user.email,
@@ -143,11 +178,29 @@ class LexiconQuest {
                     createdAt: new Date().toISOString(),
                     provider: 'google'
                 });
+                
+                // Track new user signup
+                mixpanel.track('Signup Success', {
+                    method: 'google'
+                });
             }
             
-            this.showMessage('Welcome!', 'success');
+            // Track successful login
+            mixpanel.track('Login Success', {
+                method: 'google',
+                isNewUser: isNewUser
+            });
+            
+            //this.showMessage('Welcome!', 'success');
         } catch (error) {
             console.error('Google login error:', error);
+            
+            // Track login failure
+            mixpanel.track('Login Failed', {
+                method: 'google',
+                error: error.code
+            });
+            
             this.showMessage(this.getFirebaseErrorMessage(error), 'error');
         }
     }
@@ -285,6 +338,8 @@ class LexiconQuest {
     }
 
     openIssue2Survey() {
+        // Track issue 2 survey click
+        mixpanel.track('Issue 2 Survey Clicked');
         window.open('https://tally.so/r/3yQ4q4', '_blank');
     }
 
