@@ -300,8 +300,17 @@ export function LoginPage() {
                 disabled={loading}
                 className="w-full bg-white hover:bg-gray-50 disabled:bg-slate-600 text-gray-900 disabled:text-slate-400 font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-3"
               >
-                <img src="/images/google logo.png" alt="Google" className="h-5 w-5" />
-                Continue with Google
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
+                    Signing in with Google...
+                  </>
+                ) : (
+                  <>
+                    <img src="/images/google logo.png" alt="Google" className="h-5 w-5" />
+                    Continue with Google
+                  </>
+                )}
               </button>
             </>
           )}
