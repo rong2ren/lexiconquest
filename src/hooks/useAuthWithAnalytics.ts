@@ -77,11 +77,27 @@ export function useAuthWithAnalytics() {
     }
   };
 
+  // Enhanced reset password with analytics
+  const resetPasswordWithTracking = async (email: string) => {
+    try {
+      trackEvent('Password Reset Attempted', { email });
+      await auth.resetPassword(email);
+      trackEvent('Password Reset Email Sent', { email });
+    } catch (error) {
+      trackEvent('Password Reset Failed', { 
+        email, 
+        error: (error as any).code 
+      });
+      throw error;
+    }
+  };
+
   return {
     ...auth,
     login: loginWithTracking,
     loginWithGoogle: loginWithGoogleTracking,
     signup: signupWithTracking,
-    logout: logoutWithTracking
+    logout: logoutWithTracking,
+    resetPassword: resetPasswordWithTracking
   };
 }
