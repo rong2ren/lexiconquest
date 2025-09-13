@@ -44,42 +44,42 @@ export function Header() {
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-white">Lexicon Quest</h1>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* 4 Essential Action Buttons */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* 4 Essential Action Buttons - Improved */}
             <Button 
               onClick={handleAddProfile}
-              className="group flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-400 hover:via-purple-500 hover:to-purple-600 text-white rounded-xl shadow-md hover:shadow-purple-500/25 hover:shadow-lg transition-all duration-300 text-sm font-semibold border border-purple-400/20 hover:border-purple-300/40 hover:scale-105"
+              className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
               title="Add New Child Profile"
             >
-              <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:scale-110" />
-              <span className="hidden sm:inline font-medium">Add</span>
+              <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Add</span>
             </Button>
 
             <Button 
               onClick={handleSwitchProfile}
-              className="group flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-indigo-700 hover:from-indigo-400 hover:via-indigo-500 hover:to-indigo-600 text-white rounded-xl shadow-md hover:shadow-indigo-500/25 hover:shadow-lg transition-all duration-300 text-sm font-semibold border border-indigo-400/20 hover:border-indigo-300/40 hover:scale-105"
+              className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
               title="Switch Between Child Profiles"
             >
-              <Users className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:scale-110" />
-              <span className="hidden sm:inline font-medium">Switch</span>
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Switch</span>
             </Button>
 
             <Button 
               onClick={handleBuyIssue}
-              className="group flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-500 via-green-600 to-teal-600 hover:from-emerald-400 hover:via-green-500 hover:to-teal-500 text-white rounded-xl shadow-md hover:shadow-emerald-500/25 hover:shadow-lg transition-all duration-300 text-sm font-semibold border border-emerald-400/20 hover:border-emerald-300/40 hover:scale-105"
+              className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
               title="Buy Next Issue"
             >
-              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:scale-110" />
-              <span className="hidden sm:inline font-medium">Buy Issue</span>
+              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Buy Issue</span>
             </Button>
 
             <Button 
               onClick={handleLogout}
-              className="group flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-slate-500 via-slate-600 to-slate-700 hover:from-slate-400 hover:via-slate-500 hover:to-slate-600 text-white rounded-xl shadow-md hover:shadow-slate-500/25 hover:shadow-lg transition-all duration-300 text-sm font-semibold border border-slate-400/20 hover:border-slate-300/40 hover:scale-105"
+              className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
               title="Logout from Parent Account"
             >
-              <LogOut className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:scale-110" />
-              <span className="hidden sm:inline font-medium">Logout</span>
+              <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>

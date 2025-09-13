@@ -7,6 +7,7 @@ import { Header } from './Header';
 import { KowaiModal } from './KowaiModal';
 import { useState } from 'react';
 import { trackEvent } from '../lib/mixpanel';
+import { useAuth } from '../contexts/AuthContext';
 
 const ownedKowai = [
   {
@@ -28,6 +29,7 @@ const encounteredKowai = [
 
 
 export function ProfilePage() {
+  const { currentUser } = useAuth();
   const [selectedKowai, setSelectedKowai] = useState<string | null>(null);
 
   const handleKowaiClick = (kowai: { id: string; name: string }) => {
@@ -93,11 +95,13 @@ export function ProfilePage() {
             <Card className="p-6 bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-600/30 shadow-lg rounded-2xl">
               <div className="flex items-center gap-4 mb-2">
                 <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                  R
+                  {currentUser?.email?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Rongrong</h3>
-                  <p className="text-slate-400 text-sm">Trainer ID: LQ-00123</p>
+                  <h3 className="text-xl font-bold text-white">
+                    {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'User'}
+                  </h3>
+                  <p className="text-slate-400 text-sm">Trainer ID: {currentUser?.uid?.slice(-6) || 'LQ-00000'}</p>
                 </div>
               </div>
               
