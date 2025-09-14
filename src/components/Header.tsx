@@ -52,7 +52,7 @@ export function Header() {
               title="Add New Child Profile"
             >
               <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Add</span>
+              <span className="hidden sm:inline">Add New Trainer</span>
             </Button>
 
             <Button 
@@ -61,7 +61,7 @@ export function Header() {
               title="Switch Between Child Profiles"
             >
               <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Switch</span>
+              <span className="hidden sm:inline">Switch Trainer</span>
             </Button>
 
             <Button 
@@ -70,7 +70,7 @@ export function Header() {
               title="Buy Next Issue"
             >
               <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Buy Issue</span>
+              <span className="hidden sm:inline">Get Next Issue</span>
             </Button>
 
             <Button 

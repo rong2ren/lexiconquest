@@ -108,12 +108,12 @@ export function LoginPage() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl sm:text-6xl font-black text-white mb-4 drop-shadow-2xl">
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-              Lexicon Quest
-            </span>
+          <h1 className="text-5xl sm:text-6xl font-black text-white mb-4 drop-shadow-2xl" style={{
+            textShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1), 0 0 60px rgba(255, 255, 255, 0.05)'
+          }}>
+            Lexicon Quest
           </h1>
-          <p className="text-lg sm:text-xl text-slate-200 font-medium drop-shadow-lg">A magical STEM learning adventure awaits!</p>
+          <p className="text-lg sm:text-xl text-slate-200 font-medium drop-shadow-lg">Nurturing Thoughtful Readers</p>
         </div>
 
         {/* Login Card */}

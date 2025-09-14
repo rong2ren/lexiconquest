@@ -107,8 +107,8 @@ export function ProfilePage() {
               </div>
               
               {/* Stats Section */}
-              <div className="mb-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-3">
                   <div className="bg-slate-700/30 rounded-lg p-3 text-center border border-slate-600/20">
                     <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
                       <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-pink-400" />
@@ -138,12 +138,16 @@ export function ProfilePage() {
                     <p className="text-white text-lg sm:text-xl font-bold">90</p>
                   </div>
                 </div>
+                <p className="text-slate-400 text-sm">
+                  Your choices shape your adventure. These stats determine your Kowai's personality and can be exchanged for Elemental Keys to unlock new areas.
+                </p>
               </div>
 
               {/* Owned Kowai Section */}
               <div className="mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-white">Owned Kowai</h3>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-white mb-1">Owned Kowai</h3>
+                  <p className="text-slate-400 text-sm">Your loyal companions who fight by your side.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {ownedKowai.map((kowai) => (
@@ -154,8 +158,9 @@ export function ProfilePage() {
 
               {/* Encountered Kowai Section */}
               <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-white">Encountered Kowai</h3>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-white mb-1">Encountered Kowai</h3>
+                  <p className="text-slate-400 text-sm">Kowai you've met on your journey.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {encounteredKowai.map((kowai) => (
