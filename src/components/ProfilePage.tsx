@@ -5,6 +5,7 @@ import { Card } from './ui/card';
 import { KowaiCard } from './KowaiCard';
 import { Header } from './Header';
 import { KowaiModal } from './KowaiModal';
+import { Footer } from './Footer';
 import { useState } from 'react';
 import { trackEvent } from '../lib/mixpanel';
 import { useAuth } from '../contexts/AuthContext';
@@ -174,6 +175,10 @@ export function ProfilePage() {
         isOpen={selectedKowai !== null} 
         onClose={handleCloseModal} 
       />
+
+      {/* Footer */}
+      <Footer />
+
     </div>
   );
 }

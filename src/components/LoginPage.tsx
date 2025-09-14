@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, HelpCircle } from 'lucide-react';
 import { useAuthWithAnalytics } from '../hooks/useAuthWithAnalytics';
+import { InfoModal } from './InfoModal';
 
 type LoginMode = 'login' | 'signup' | 'forgot-password';
 
@@ -12,6 +13,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -327,8 +329,25 @@ export function LoginPage() {
               {success}
             </div>
           )}
+
+          {/* Help Button */}
+          <div className="text-center mt-6 pt-4 border-t border-slate-700">
+            <button
+              onClick={() => setShowInfoModal(true)}
+              className="text-slate-400 hover:text-white text-sm transition-colors flex items-center justify-center gap-2 mx-auto"
+            >
+              <HelpCircle className="h-4 w-4" />
+              Need help? Learn more about Lexicon Quest
+            </button>
+          </div>
         </motion.div>
       </motion.div>
+
+      {/* Info Modal */}
+      <InfoModal 
+        isOpen={showInfoModal} 
+        onClose={() => setShowInfoModal(false)} 
+      />
     </div>
   );
 }
