@@ -78,7 +78,7 @@ export function ProfilePage() {
                     onClick={handleBeginQuest}
                     className="relative px-8 sm:px-16 py-4 sm:py-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-2xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
                   >
-                    <span className="relative z-10">Begin Your Quest</span>
+                    <span className="relative z-10">Resume Your Quest</span>
                   </Button>
                 </div>
               </div>
