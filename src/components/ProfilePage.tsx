@@ -67,12 +67,12 @@ export function ProfilePage() {
             <div className="relative z-10 p-6 sm:p-8 md:p-12 py-12 sm:py-16 md:py-20 text-center">
               <div className="max-w-3xl mx-auto">
                 <div className="mb-6">
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-3 bg-gradient-to-r from-yellow-200 via-white to-blue-200 bg-clip-text text-transparent drop-shadow-lg">
-                    Welcome to Lexicon Quest
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight mb-3 bg-gradient-to-r from-yellow-200 via-white to-blue-200 bg-clip-text text-transparent drop-shadow-lg">
+                    Your Legend Awaits, {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Adventurer'}
                   </h1>
                   <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-blue-400 mx-auto rounded-full"></div>
                 </div>
-                <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">Your magical adventure awaits</p>
+                <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">What will you discover today?</p>
                 <div className="relative inline-block">
                   <Button 
                     onClick={handleBeginQuest}
