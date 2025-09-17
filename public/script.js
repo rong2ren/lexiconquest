@@ -275,10 +275,14 @@ class LexiconQuest {
         if (this.currentUser) {
             document.getElementById('header-nav').style.display = 'block';
             document.getElementById('home-section').style.display = 'none';
+            document.getElementById('signup-section').style.display = 'none';
+            document.getElementById('forgot-password-section').style.display = 'none';
             document.getElementById('logged-in-section').style.display = 'block';
         } else {
             document.getElementById('header-nav').style.display = 'none';
             document.getElementById('home-section').style.display = 'block';
+            document.getElementById('signup-section').style.display = 'none';
+            document.getElementById('forgot-password-section').style.display = 'none';
             document.getElementById('logged-in-section').style.display = 'none';
         }
     }
