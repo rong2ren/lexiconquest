@@ -215,7 +215,8 @@ class LexiconQuest {
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
-        const kidsNames = document.getElementById('kids-names').value;
+        const kidsNamesElement = document.getElementById('kids-names');
+        const kidsNames = kidsNamesElement ? kidsNamesElement.value : '';
 
         if (password !== confirmPassword) {
             this.showMessage('Passwords do not match', 'error');
