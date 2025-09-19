@@ -1,26 +1,10 @@
 import { motion } from 'framer-motion';
-import { UserPlus, Users, ShoppingCart, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuthWithAnalytics } from '../hooks/useAuthWithAnalytics';
 
 export function Header() {
   const { logout } = useAuthWithAnalytics();
-
-  // Action handlers
-  const handleAddProfile = () => {
-    // Open add profile modal for new child under current parent email
-    console.log('Add Profile clicked');
-  };
-
-  const handleSwitchProfile = () => {
-    // Open profile switcher modal to switch between child profiles
-    console.log('Switch Profile clicked');
-  };
-
-  const handleBuyIssue = () => {
-    // Navigate to purchase page for current parent account
-    console.log('Buy Issue clicked');
-  };
 
   const handleLogout = async () => {
     try {
@@ -45,34 +29,6 @@ export function Header() {
             <h1 className="text-lg sm:text-xl font-bold text-white">Lexicon Quest</h1>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* 4 Essential Action Buttons - Improved */}
-            <Button 
-              onClick={handleAddProfile}
-              className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
-              title="Add New Child Profile"
-            >
-              <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Add New Trainer</span>
-            </Button>
-
-            <Button 
-              onClick={handleSwitchProfile}
-              className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
-              title="Switch Between Child Profiles"
-            >
-              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Switch Trainer</span>
-            </Button>
-
-            <Button 
-              onClick={handleBuyIssue}
-              className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"
-              title="Buy Next Issue"
-            >
-              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Get Next Issue</span>
-            </Button>
-
             <Button 
               onClick={handleLogout}
               className="flex items-center gap-1 px-2 sm:px-3 py-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-400 hover:to-slate-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200"

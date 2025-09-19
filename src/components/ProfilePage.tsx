@@ -1,45 +1,7 @@
-import { motion } from 'framer-motion';
-import { Shield, Star, Search, Heart } from 'lucide-react';
 import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { KowaiCard } from './KowaiCard';
 import { Header } from './Header';
-import { KowaiModal } from './KowaiModal';
-import { Footer } from './Footer';
-import { useState } from 'react';
 import { trackEvent } from '../lib/mixpanel';
-import { useAuth } from '../contexts/AuthContext';
-
-const ownedKowai = [
-  {
-    id: '1',
-    name: 'fanelle'
-  },
-  {
-    id: '2',
-    name: 'scorki'
-  }
-];
-
-const encounteredKowai = [
-  {
-    id: '3',
-    name: 'peblaff'
-  }
-];
-
-
 export function ProfilePage() {
-  const { currentUser } = useAuth();
-  const [selectedKowai, setSelectedKowai] = useState<string | null>(null);
-
-  const handleKowaiClick = (kowai: { id: string; name: string }) => {
-    setSelectedKowai(kowai.name);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedKowai(null);
-  };
 
   // Handle opening the Tally survey
   const handleBeginQuest = () => {
@@ -68,7 +30,7 @@ export function ProfilePage() {
               <div className="max-w-3xl mx-auto">
                 <div className="mb-6">
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight mb-3 bg-gradient-to-r from-yellow-200 via-white to-blue-200 bg-clip-text text-transparent drop-shadow-lg">
-                    Your Legend Awaits, {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Adventurer'}
+                    Your Legend Awaits, adventurer
                   </h1>
                   <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-blue-400 mx-auto rounded-full"></div>
                 </div>
@@ -86,103 +48,7 @@ export function ProfilePage() {
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto relative">
-          {/* User Profile Section */}
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="p-6 bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-600/30 shadow-lg rounded-2xl">
-              <div className="flex items-center gap-4 mb-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                  {currentUser?.email?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">
-                    {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'User'}
-                  </h3>
-                  <p className="text-slate-400 text-sm">Trainer ID: {currentUser?.uid?.slice(-6) || 'LQ-00000'}</p>
-                </div>
-              </div>
-              
-              {/* Stats Section */}
-              <div className="mb-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-3">
-                  <div className="bg-slate-700/30 rounded-lg p-3 text-center border border-slate-600/20">
-                    <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                      <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-pink-400" />
-                      <p className="text-pink-400 text-sm sm:text-base md:text-xl font-medium">Bravery</p>
-                    </div>
-                    <p className="text-white text-lg sm:text-xl font-bold">78</p>
-                  </div>
-                  <div className="bg-slate-700/30 rounded-lg p-3 text-center border border-slate-600/20">
-                    <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                      <Star className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
-                      <p className="text-blue-400 text-sm sm:text-base md:text-xl font-medium">Wisdom</p>
-                    </div>
-                    <p className="text-white text-lg sm:text-xl font-bold">85</p>
-                  </div>
-                  <div className="bg-slate-700/30 rounded-lg p-3 text-center border border-slate-600/20">
-                    <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                      <Search className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-                      <p className="text-purple-400 text-sm sm:text-base md:text-xl font-medium">Curiosity</p>
-                    </div>
-                    <p className="text-white text-lg sm:text-xl font-bold">72</p>
-                  </div>
-                  <div className="bg-slate-700/30 rounded-lg p-3 text-center border border-slate-600/20">
-                    <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                      <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
-                      <p className="text-green-400 text-sm sm:text-base md:text-xl font-medium">Empathy</p>
-                    </div>
-                    <p className="text-white text-lg sm:text-xl font-bold">90</p>
-                  </div>
-                </div>
-                <p className="text-slate-400 text-sm">
-                  Your choices shape your adventure. These stats determine your Kowai's personality and can be exchanged for Elemental Keys to unlock new areas.
-                </p>
-              </div>
-
-              {/* Owned Kowai Section */}
-              <div className="mb-6">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white mb-1">Owned Kowai</h3>
-                  <p className="text-slate-400 text-sm">Your loyal companions who fight by your side.</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {ownedKowai.map((kowai) => (
-                    <KowaiCard key={kowai.id} kowai={kowai} onClick={handleKowaiClick} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Encountered Kowai Section */}
-              <div>
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white mb-1">Encountered Kowai</h3>
-                  <p className="text-slate-400 text-sm">Kowai you've met on your journey.</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {encounteredKowai.map((kowai) => (
-                    <KowaiCard key={kowai.id} kowai={kowai} onClick={handleKowaiClick} />
-                  ))}
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-
-        </main>
       </div>
-
-      {/* Kowai Modal */}
-      <KowaiModal 
-        kowaiName={selectedKowai || ''} 
-        isOpen={selectedKowai !== null} 
-        onClose={handleCloseModal} 
-      />
-
-      {/* Footer */}
-      <Footer />
 
     </div>
   );

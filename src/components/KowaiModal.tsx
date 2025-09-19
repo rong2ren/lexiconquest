@@ -1,63 +1,6 @@
 import { motion } from 'framer-motion';
-import { X, Sparkles, Cloud, Zap } from 'lucide-react';
-
-interface KowaiData {
-  name: string;
-  specialLook: string[];
-  personality: string[];
-  attacks: string[];
-}
-
-const kowaiData: Record<string, KowaiData> = {
-  fanelle: {
-    name: 'FANELLE',
-    specialLook: [
-      "Fanelle's antlers grow clusters of glowing crystals that change color depending on its emotions.",
-      "Sensitive ears help Fanelle hear sounds from great distances — even snowflakes falling."
-    ],
-    personality: [
-      "Loves rainy and snowy nights and places where the winds are gentle.",
-      "Natural peacemaker — it dislikes conflict and tries to bring harmony to any group.",
-      "Shy at first, but once Fanelle bonds with a Trainer, it gives them its full trust and stays deeply loyal."
-    ],
-    attacks: [
-      "Crystal Bloom: Fanelle sends a burst of sparkling energy from its antlers, stunning nearby enemies.",
-      "Stone Veil: Can form a protective crystal shield around itself or a friend for a short time."
-    ]
-  },
-  scorki: {
-    name: 'SCORKI',
-    specialLook: [
-      "Scorki is flexible; it is an excellent climber across rocky cliffs and cavern walls.",
-      "It prefers to stay in dry, stony habitats and can go days without food."
-    ],
-    personality: [
-      "Scorki is smart and calm. It prefers doing things on its own and rarely makes a sound.",
-      "Scorki may not always stay by your side, but if the Trainer is in trouble, it appears immediately.",
-      "Calm and cool-headed even in dangerous moments, it carefully watches and waits before acting."
-    ],
-    attacks: [
-      "Stone Pinch: Uses its strong pincers to pinch enemies sharply. This move is quick and precise.",
-      "Dig Pop: Scorki quickly digs into the ground in another spot. It's a sneaky way to escape."
-    ]
-  },
-  peblaff: {
-    name: 'PEBLAFF',
-    specialLook: [
-      "Peblaff's soft fur hides a strong, rocky body underneath, making it much tougher than it looks.",
-      "Its sturdy body helps it stay balanced and steady, even in bumpy or shaky places."
-    ],
-    personality: [
-      "Peblaff is playful and goofy — it loves to roll around, chase fireflies, and turn anything into a game.",
-      "It's friendly and loves cheering others up, especially when things feel sad or a little scary.",
-      "Peblaff treats its Trainer like a family and loves cuddling up beside them."
-    ],
-    attacks: [
-      "Gem Slam: It stomps with its crystal-covered paws, shaking the ground beneath its feet.",
-      "Moss Shield: Peblaff curls into a ball, and the moss on its body puffs out to block enemy attacks."
-    ]
-  }
-};
+import { X, Zap, Shield, Heart } from 'lucide-react';
+import { getKowaiDetails } from '../data/kowaiData';
 
 interface KowaiModalProps {
   kowaiName: string;
@@ -68,7 +11,7 @@ interface KowaiModalProps {
 export function KowaiModal({ kowaiName, isOpen, onClose }: KowaiModalProps) {
   if (!isOpen) return null;
 
-  const data = kowaiData[kowaiName.toLowerCase()];
+  const data = getKowaiDetails(kowaiName);
   if (!data) return null;
 
   return (
@@ -88,9 +31,35 @@ export function KowaiModal({ kowaiName, isOpen, onClose }: KowaiModalProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent">
-            {data.name}
-          </h2>
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent">
+              {data.displayName}
+            </h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                data.type === 'fire' ? 'bg-red-500/20 text-red-300' :
+                data.type === 'water' ? 'bg-blue-500/20 text-blue-300' :
+                data.type === 'earth' ? 'bg-yellow-500/20 text-yellow-300' :
+                data.type === 'air' ? 'bg-cyan-500/20 text-cyan-300' :
+                data.type === 'ice' ? 'bg-blue-400/20 text-blue-200' :
+                data.type === 'light' ? 'bg-yellow-400/20 text-yellow-200' :
+                'bg-purple-500/20 text-purple-300'
+              }`}>
+                {data.type.toUpperCase()}
+              </span>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                data.rarity === 'basic' ? 'bg-gray-500/20 text-gray-300' :
+                data.rarity === 'common' ? 'bg-gray-500/20 text-gray-300' :
+                data.rarity === 'uncommon' ? 'bg-green-500/20 text-green-300' :
+                data.rarity === 'rare' ? 'bg-blue-500/20 text-blue-300' :
+                data.rarity === 'epic' ? 'bg-purple-500/20 text-purple-300' :
+                data.rarity === 'evolved' ? 'bg-purple-600/20 text-purple-300' :
+                'bg-yellow-500/20 text-yellow-300'
+              }`}>
+                {data.rarity.toUpperCase()}
+              </span>
+            </div>
+          </div>
           <button
             onClick={onClose}
             className="text-white hover:text-gray-300 transition-colors cursor-pointer"
@@ -103,58 +72,110 @@ export function KowaiModal({ kowaiName, isOpen, onClose }: KowaiModalProps) {
         <div className="text-center mb-8">
           <img 
             src={`/kowai/${kowaiName.toLowerCase()}.png`} 
-            alt={data.name}
+            alt={data.displayName}
             className="w-full h-auto max-w-96 mx-auto rounded-xl shadow-lg"
           />
         </div>
 
-        {/* Special Look Section */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-5 w-5 text-purple-400" />
-            <h3 className="text-xl font-bold text-white">Special Look</h3>
-          </div>
-          <div className="space-y-2">
-            {data.specialLook.map((item, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-slate-300 text-sm leading-relaxed">{item}</p>
+        {/* Evolution Information */}
+        {data.evolvesFrom && (
+          <div className="mb-6">
+            <div className="flex items-center gap-3 bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
+              <div className="w-12 h-12 rounded-lg overflow-hidden">
+                <img 
+                  src={`/kowai/${data.evolvesFrom.toLowerCase()}.png`} 
+                  alt={data.evolvesFrom}
+                  className="w-full h-full object-cover"
+                />
               </div>
-            ))}
+              <div>
+                <p className="text-purple-300 text-sm font-medium">Evolves from</p>
+                <p className="text-white font-bold capitalize">{data.evolvesFrom}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* HP Section */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3">
+            <Heart className="h-5 w-5 text-red-400" />
+            <h3 className="text-xl font-bold text-white">HP</h3>
+            <div className="flex items-center gap-2">
+              {Array.from({ length: data.hp }, (_, i) => (
+                <Heart key={i} className="h-6 w-6 text-red-400 fill-current" />
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Personality Section */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Cloud className="h-5 w-5 text-blue-400" />
-            <h3 className="text-xl font-bold text-white">Personality</h3>
-          </div>
-          <div className="space-y-2">
-            {data.personality.map((item, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-slate-300 text-sm leading-relaxed">{item}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Attack Section */}
+        {/* Abilities Section */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="h-5 w-5 text-yellow-400" />
-            <h3 className="text-xl font-bold text-white">Attack</h3>
+            <h3 className="text-xl font-bold text-white">Abilities</h3>
           </div>
-          <div className="space-y-2">
-            {data.attacks.map((item, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-slate-300 text-sm leading-relaxed">{item}</p>
+          <div className="space-y-4">
+            {data.abilities.map((ability, index) => (
+              <div key={index} className="bg-slate-700/30 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  {ability.type === 'damage' ? (
+                    <Zap className="h-5 w-5 text-red-400" />
+                  ) : ability.type === 'defense' ? (
+                    <Shield className="h-5 w-5 text-blue-400" />
+                  ) : (
+                    <Heart className="h-5 w-5 text-green-400" />
+                  )}
+                  <h4 className="text-lg font-bold text-white">{ability.name}</h4>
+                  <span className="text-slate-400">|</span>
+                  <span className="text-slate-400 capitalize">{ability.type}</span>
+                  <div className="ml-auto flex items-center gap-1">
+                    {Array.from({ length: ability.power }, (_, i) => (
+                      ability.type === 'damage' ? (
+                        <Heart key={i} className="h-4 w-4 text-red-400 fill-current" />
+                      ) : (
+                        <Shield key={i} className="h-4 w-4 text-blue-400 fill-current" />
+                      )
+                    ))}
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed">{ability.description}</p>
               </div>
             ))}
           </div>
         </div>
+
+
+        {/* Resistances and Weaknesses Section */}
+        {/* <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Target className="h-5 w-5 text-purple-400" />
+            <h3 className="text-xl font-bold text-white">Resistances & Weaknesses</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+              <h4 className="text-green-400 font-bold text-sm mb-2">RESISTANCE</h4>
+              <div className="flex flex-wrap gap-1">
+                {data.resistances.map((resistance, index) => (
+                  <span key={index} className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
+                    {resistance.toUpperCase()}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+              <h4 className="text-red-400 font-bold text-sm mb-2">WEAKNESS</h4>
+              <div className="flex flex-wrap gap-1">
+                {data.weaknesses.map((weakness, index) => (
+                  <span key={index} className="px-2 py-1 bg-red-500/20 text-red-300 text-xs rounded-full">
+                    {weakness.toUpperCase()}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div> */}
+
       </motion.div>
     </motion.div>
   );

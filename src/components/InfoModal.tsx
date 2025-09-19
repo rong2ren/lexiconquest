@@ -58,31 +58,6 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
 
         {/* Modal Content */}
         <div className="space-y-6 text-slate-300">
-          {/* About Section */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-3">What is Lexicon Quest?</h3>
-            <p className="text-sm leading-relaxed">
-              Lexicon Quest is a magical STEM learning adventure that combines 
-              <strong className="text-yellow-400"> physical workbooks</strong> with 
-              <strong className="text-blue-400"> digital experiences</strong>. 
-              Kids collect and interact with magical Kowai pets, solve puzzles, 
-              and embark on quests that make STEM learning fun and engaging!
-            </p>
-            <div className="mt-3 text-xs text-slate-400">
-              <p>📚 Physical workbooks + 🎮 Digital adventures = Complete learning experience</p>
-            </div>
-          </div>
-
-          {/* Privacy Section */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-3">Privacy & Safety</h3>
-            <p className="text-sm leading-relaxed">
-              We take your child's privacy seriously. All data is encrypted and 
-              stored securely. We never share personal information with third parties 
-              and comply with COPPA regulations for children's online safety.
-            </p>
-          </div>
-
           {/* Contact Section */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-3">Contact Support</h3>
@@ -92,7 +67,6 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
             </p>
             <div className="mt-2 text-sm">
               <p>📧 Email: lexiconquestforkids@gmail.com</p>
-              <p>🌐 Website: <a href="https://lexicon-quest.super.site/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">lexicon-quest.super.site</a></p>
             </div>
           </div>
         </div>
