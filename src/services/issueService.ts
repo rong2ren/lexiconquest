@@ -1,4 +1,4 @@
-import { issues, type Issues, type Quest } from '../data/issueData';
+import { issues, type Issues } from '../data/issueData';
 
 /**
  * Get the current issue by ID, defaults to Issue 1
