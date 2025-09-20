@@ -26,13 +26,11 @@ export function PlayHeader() {
 
   const handleBuyIssue = () => {
     // Navigate to purchase page for current parent account
-    console.log('Buy Issue clicked');
+    window.open('https://buy.stripe.com/bJe28t8MxdW6bbI3YdgMw01', '_blank');
   };
 
   const handleLogout = () => {
-    console.log('PlayHeader handleLogout called');
     logout();
-    console.log('PlayHeader handleLogout completed');
   };
 
   return (
