@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* Welcome Banner Background */
+.welcome-banner-bg {
+  background-image: url('/images/castle.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(168, 85, 247, 0.2);
+}
+
+/* Optimized animation performance */
+.optimized-animation {
+  will-change: opacity;
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b #334155;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #334155;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
