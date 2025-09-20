@@ -127,6 +127,9 @@ export function PlayProfile() {
   // Check if all quests are completed
   const currentIssueProgress = getCurrentIssueProgress();
   const isIssueCompleted = currentIssueProgress && currentIssueProgress.lastCompletedQuest >= MAX_QUESTS_PER_ISSUE;
+  
+  // Check if user has started quests (for button text)
+  const hasStartedQuests = currentIssueProgress && currentIssueProgress.lastCompletedQuest > 0;
 
   // Render quest pages if active
   if (currentQuest === 1) {
@@ -220,13 +223,13 @@ export function PlayProfile() {
                   </>
                 ) : (
                   <>
-                    <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">Your magical journey begins now!</p>
+                    <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">Your magical journey awaits!</p>
                     <div className="relative inline-block">
                       <Button 
                         onClick={handleBeginQuest}
                         className="relative px-8 sm:px-16 py-4 sm:py-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-2xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
                       >
-                        <span className="relative z-10">Start Your Quest</span>
+                        <span className="relative z-10">{hasStartedQuests ? 'Continue Your Quest' : 'Begin Your Quest'}</span>
                       </Button>
                     </div>
                   </>
