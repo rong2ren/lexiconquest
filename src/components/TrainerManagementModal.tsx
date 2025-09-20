@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Trash2, X, AlertTriangle } from 'lucide-react';
-import { Button } from './ui/button';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 
 interface TrainerManagementModalProps {

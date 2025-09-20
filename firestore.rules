@@ -9,6 +9,16 @@ service cloud.firestore {
     // Trainers collection - new customers (no auth required)
     match /trainers/{trainerId} {
       allow read, write: if true; // Allow all access for now
+      
+      // Stats history subcollection
+      match /statsHistory/{statsHistoryId} {
+        allow read, write: if true; // Allow all access for now
+      }
+    }
+    
+    // Attempts collection - quest attempts
+    match /attempts/{attemptId} {
+      allow read, write: if true; // Allow all access for now
     }
   }
 }

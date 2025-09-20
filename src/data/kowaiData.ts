@@ -1,6 +1,6 @@
 export interface KowaiAbility {
   name: string;
-  type: 'damage' | 'defense' | 'support';
+  type: 'damage' | 'defense';
   power: number; // Number of hearts/shields
   description: string;
 }
@@ -16,7 +16,6 @@ export interface KowaiDetails {
   weaknesses: string[]; // Types this Kowai is weak to
   personality: string;
   habitat: string;
-  funFact: string;
   evolvesFrom?: string; // Name of the Kowai this evolves from
 }
 
@@ -44,8 +43,7 @@ export const kowaiDatabase: Record<string, KowaiDetails> = {
     resistances: ['earth', 'air'],
     weaknesses: ['fire', 'dark'],
     personality: 'Gentle and caring, Lumino loves to help others and spread positivity.',
-    habitat: 'Snowy mountains and frozen tundras',
-    funFact: 'Lumino\'s glow changes color based on its mood!'
+    habitat: 'Snowy mountains and frozen tundras'
   },
   
   forcino: {
@@ -72,7 +70,6 @@ export const kowaiDatabase: Record<string, KowaiDetails> = {
     weaknesses: ['fire', 'dark'],
     personality: 'Brave and loyal, Frocino will protect its friends at all costs.',
     habitat: 'Frozen landscapes and aurora-lit skies',
-    funFact: 'Frocino\'s tail glows with aurora-like patterns when it uses its powers!',
     evolvesFrom: 'lumino'
   },
 
@@ -99,8 +96,7 @@ export const kowaiDatabase: Record<string, KowaiDetails> = {
     resistances: ['fire', 'ice'],
     weaknesses: ['electric', 'water'],
     personality: 'Gentle and mystical, Fanelle brings light to dark places.',
-    habitat: 'Crystal caves and rocky mountains',
-    funFact: 'Fanelle\'s antlers glow brighter when it\'s happy!'
+    habitat: 'Crystal caves and rocky mountains'
   },
 
   scorki: {
@@ -126,8 +122,7 @@ export const kowaiDatabase: Record<string, KowaiDetails> = {
     resistances: ['fire', 'ice'],
     weaknesses: ['electric', 'water'],
     personality: 'Clever and resourceful, Scorki loves to dig and explore underground.',
-    habitat: 'Rocky caves and crystal formations',
-    funFact: 'Scorki\'s tail lights up like fairy lights when it\'s excited!'
+    habitat: 'Rocky caves and crystal formations'
   },
 
   peblaff: {
@@ -153,8 +148,47 @@ export const kowaiDatabase: Record<string, KowaiDetails> = {
     resistances: ['fire', 'ice'],
     weaknesses: ['electric', 'water'],
     personality: 'Gentle and protective, Peblaff loves to care for others.',
-    habitat: 'Crystal caves and mossy groves',
-    funFact: 'Peblaff\'s moss grows thicker when it feels safe and happy!'
+    habitat: 'Crystal caves and mossy groves'
+  },
+
+  // Egg variants for Quest1 selection
+  'fanelle egg': {
+    name: 'fanelle egg',
+    displayName: 'Fanelle Egg',
+    type: 'earth',
+    rarity: 'basic',
+    hp: 0,
+    abilities: [],
+    resistances: [],
+    weaknesses: [],
+    personality: 'A mysterious egg containing the gentle Fanelle. It radiates warm, earthy energy.',
+    habitat: 'Your care and attention'
+  },
+
+  'scorki egg': {
+    name: 'scorki egg',
+    displayName: 'Scorki Egg',
+    type: 'fire',
+    rarity: 'basic',
+    hp: 0,
+    abilities: [],
+    resistances: [],
+    weaknesses: [],
+    personality: 'A mysterious egg containing the brave Scorki. It pulses with fiery determination.',
+    habitat: 'Your care and attention'
+  },
+
+  'peblaff egg': {
+    name: 'peblaff egg',
+    displayName: 'Peblaff Egg',
+    type: 'water',
+    rarity: 'basic',
+    hp: 0,
+    abilities: [],
+    resistances: [],
+    weaknesses: [],
+    personality: 'A mysterious egg containing the curious Peblaff. It glows with gentle, watery light.',
+    habitat: 'Your care and attention'
   }
 };
 

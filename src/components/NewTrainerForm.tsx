@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { UserPlus, X } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 
 interface NewTrainerFormProps {

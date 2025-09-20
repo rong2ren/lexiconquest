@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 // Trainer interface for new customers
@@ -17,10 +17,17 @@ export interface Trainer {
   };
   ownedKowai: string[];
   encounteredKowai: string[];
-  questProgress: Record<string, any>;
+  currentIssue: string; // e.g., 'issue1', 'issue2', etc.
+  issueProgress: {
+    [issueId: string]: {
+      lastCompletedQuest: number; // 0-6, 0 if none completed
+      startedAt: string | null;
+      completedAt: string | null;
+    };
+  };
   createdAt: string;
   lastLogin: string;
-  provider: 'local';
+  provider: '/play';
 }
 
 // Trainer session for localStorage
@@ -37,6 +44,42 @@ interface MultiTrainerStorage {
   trainerSessions: TrainerSession[];
 }
 
+// Stats history entry interface for subcollection
+export interface StatsHistoryEntry {
+  prevStats: { bravery: number; wisdom: number; curiosity: number; empathy: number };
+  newStats: { bravery: number; wisdom: number; curiosity: number; empathy: number };
+  issue: string;
+  quest: number;
+  answer: string | string[] | number;
+  updateTime: string;
+}
+
+// Attempt interface for quest answers
+export interface Attempt {
+  id: string; // attemptId: trainerId_issueId_questNumber_YYYYMMDD_HHMMSS
+  trainerId: string;
+  issueId: string;
+  questNumber: number;
+  
+  // The actual answer (flexible type)
+  answer: string | string[] | number;
+  
+  // Answer metadata
+  answerType: string;
+  isCorrect: boolean;
+  
+  // Timing data
+  questStartTime: string;
+  submittedAt: string;
+  timeSpent: number; // milliseconds
+  
+  // Context data
+  statsBefore: { bravery: number; wisdom: number; curiosity: number; empathy: number };
+  statsAfter?: { bravery: number; wisdom: number; curiosity: number; empathy: number };
+  
+  createdAt: string;
+}
+
 // PlayAuth context interface
 interface PlayAuthContextType {
   currentTrainer: Trainer | null;
@@ -51,6 +94,16 @@ interface PlayAuthContextType {
   removeTrainer: (trainerId: string) => void;
   getTrainerDisplayName: (trainer: TrainerSession) => string;
   activateTrainer: (trainerId: string) => Promise<void>;
+  updateTrainerStats: (newStats: { bravery: number; wisdom: number; curiosity: number; empathy: number }) => Promise<void>;
+  updateQuestProgress: (completedQuest: number) => Promise<void>;
+  updateStatsAndQuestProgress: (newStats: { bravery: number; wisdom: number; curiosity: number; empathy: number }, completedQuest: number, answer?: string | string[] | number) => Promise<void>;
+  saveAttempt: (attemptData: Omit<Attempt, 'id' | 'createdAt'>) => Promise<void>;
+  saveStatsHistory: (entry: Omit<StatsHistoryEntry, 'updateTime'>) => Promise<void>;
+  getStatsHistory: (trainerId?: string) => Promise<StatsHistoryEntry[]>;
+  getCurrentIssueProgress: () => { lastCompletedQuest: number; startedAt: string | null; completedAt: string | null } | null;
+  startIssue: () => Promise<void>;
+  switchToIssue: (issueId: string) => Promise<void>;
+  addKowaiToTrainer: (kowaiId: string) => Promise<void>;
 }
 
 // Create the context
@@ -165,10 +218,17 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       stats: { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 },
       ownedKowai: [],
       encounteredKowai: ['lumino', 'forcino'],
-      questProgress: {},
+      currentIssue: 'issue1', // Start with issue1
+      issueProgress: {
+        issue1: {
+          lastCompletedQuest: 0, // No quests completed yet
+          startedAt: null, // Will be set when they first click "Start Your Quest"
+          completedAt: null
+        }
+      },
       createdAt: new Date().toISOString(),
       lastLogin: new Date().toISOString(),
-      provider: 'local'
+      provider: '/play'
     };
 
     // Save to Firebase
@@ -288,6 +348,351 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     await switchTrainer(trainerId);
   };
 
+  // Update trainer stats
+  const updateTrainerStats = async (newStats: { bravery: number; wisdom: number; curiosity: number; empathy: number }): Promise<void> => {
+    if (!currentTrainer) return;
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      await updateDoc(trainerRef, {
+        stats: newStats,
+        lastLogin: new Date().toISOString()
+      });
+
+      // Update local state
+      setCurrentTrainer(prev => prev ? { ...prev, stats: newStats } : null);
+    } catch (error) {
+      console.error('Error updating trainer stats:', error);
+      throw error;
+    }
+  };
+
+  // Optimized function to update both stats and quest progress in a single Firebase call
+  const updateStatsAndQuestProgress = async (newStats: { bravery: number; wisdom: number; curiosity: number; empathy: number }, completedQuest: number, answer?: string | string[] | number): Promise<void> => {
+    if (!currentTrainer) return;
+
+    // Validate quest number
+    if (completedQuest < 1 || completedQuest > 6) {
+      throw new Error('Invalid quest number. Must be between 1 and 6.');
+    }
+
+    const currentIssue = currentTrainer.currentIssue;
+    const currentIssueProgress = currentTrainer.issueProgress[currentIssue];
+    
+    if (!currentIssueProgress) {
+      throw new Error(`No progress found for issue ${currentIssue}`);
+    }
+
+    // Validate quest progression (can't skip quests)
+    const currentLastCompleted = currentIssueProgress.lastCompletedQuest || 0;
+    if (completedQuest !== currentLastCompleted + 1) {
+      throw new Error(`Invalid quest progression. Expected quest ${currentLastCompleted + 1}, got ${completedQuest}.`);
+    }
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      const now = new Date().toISOString();
+      
+      // Update issue progress
+      const updatedIssueProgress = {
+        ...currentTrainer.issueProgress,
+        [currentIssue]: {
+          ...currentIssueProgress,
+          lastCompletedQuest: completedQuest,
+          completedAt: completedQuest === 6 ? now : currentIssueProgress.completedAt
+        }
+      };
+
+      // Single atomic update for both stats and quest progress
+      await updateDoc(trainerRef, {
+        stats: newStats,
+        issueProgress: updatedIssueProgress,
+        lastLogin: now
+      });
+
+      // Save stats history entry if answer is provided
+      if (answer !== undefined) {
+        await saveStatsHistory({
+          prevStats: currentTrainer.stats,
+          newStats: newStats,
+          issue: currentIssue,
+          quest: completedQuest,
+          answer: answer
+        });
+      }
+
+      // Update local state
+      setCurrentTrainer(prev => prev ? { 
+        ...prev, 
+        stats: newStats,
+        issueProgress: updatedIssueProgress
+      } : null);
+    } catch (error) {
+      console.error('Error updating trainer stats and quest progress:', error);
+      throw error;
+    }
+  };
+
+  // Generate attempt ID with hybrid naming convention
+  const generateAttemptId = (trainerId: string, issueId: string, questNumber: number): string => {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+    const timeStr = now.toISOString().slice(11, 19).replace(/:/g, ''); // HHMMSS
+    return `${trainerId}_${issueId}_${questNumber}_${dateStr}_${timeStr}`;
+  };
+
+  // Save attempt to Firestore
+  const saveAttempt = async (attemptData: Omit<Attempt, 'id' | 'createdAt'>): Promise<void> => {
+    if (!currentTrainer) return;
+
+    try {
+      const attemptId = generateAttemptId(
+        attemptData.trainerId,
+        attemptData.issueId,
+        attemptData.questNumber
+      );
+
+      const attempt: Attempt = {
+        id: attemptId,
+        ...attemptData,
+        createdAt: new Date().toISOString()
+      };
+
+      await setDoc(doc(db, 'attempts', attemptId), attempt);
+    } catch (error) {
+      console.error('Error saving attempt:', error);
+      throw error;
+    }
+  };
+
+  // Generate stats history document ID
+  const generateStatsHistoryId = (issueId: string, questNumber: number): string => {
+    return `${issueId}_${questNumber}`;
+  };
+
+  // Save stats history entry to trainer subcollection
+  const saveStatsHistory = async (entry: Omit<StatsHistoryEntry, 'updateTime'>): Promise<void> => {
+    if (!currentTrainer) return;
+
+    try {
+      const statsHistoryEntry: StatsHistoryEntry = {
+        ...entry,
+        updateTime: new Date().toISOString()
+      };
+
+      const documentId = generateStatsHistoryId(entry.issue, entry.quest);
+      const statsHistoryRef = doc(db, 'trainers', currentTrainer.uid, 'statsHistory', documentId);
+
+      await setDoc(statsHistoryRef, statsHistoryEntry);
+    } catch (error) {
+      console.error('Error saving stats history:', error);
+      throw error;
+    }
+  };
+
+  // Get stats history for a trainer
+  const getStatsHistory = async (trainerId?: string): Promise<StatsHistoryEntry[]> => {
+    const targetTrainerId = trainerId || currentTrainer?.uid;
+    if (!targetTrainerId) return [];
+
+    try {
+      const statsHistoryRef = collection(db, 'trainers', targetTrainerId, 'statsHistory');
+      const q = query(statsHistoryRef, orderBy('updateTime', 'asc'));
+      const querySnapshot = await getDocs(q);
+      
+      const statsHistory: StatsHistoryEntry[] = [];
+      querySnapshot.forEach((doc) => {
+        statsHistory.push(doc.data() as StatsHistoryEntry);
+      });
+      
+      return statsHistory;
+    } catch (error) {
+      console.error('Error getting stats history:', error);
+      throw error;
+    }
+  };
+
+  // Update quest progress with validation
+  const updateQuestProgress = async (completedQuest: number): Promise<void> => {
+    if (!currentTrainer) return;
+
+    // Validate quest number
+    if (completedQuest < 1 || completedQuest > 6) {
+      throw new Error('Invalid quest number. Must be between 1 and 6.');
+    }
+
+    const currentIssue = currentTrainer.currentIssue;
+    const currentIssueProgress = currentTrainer.issueProgress[currentIssue];
+    
+    if (!currentIssueProgress) {
+      throw new Error(`No progress found for issue ${currentIssue}`);
+    }
+
+    // Validate quest progression (can't skip quests)
+    const currentLastCompleted = currentIssueProgress.lastCompletedQuest || 0;
+    if (completedQuest !== currentLastCompleted + 1) {
+      throw new Error(`Invalid quest progression. Expected quest ${currentLastCompleted + 1}, got ${completedQuest}.`);
+    }
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      const now = new Date().toISOString();
+      
+      // Update issue progress
+      const updatedIssueProgress = {
+        ...currentTrainer.issueProgress,
+        [currentIssue]: {
+          ...currentIssueProgress,
+          lastCompletedQuest: completedQuest,
+          completedAt: completedQuest === 6 ? now : currentIssueProgress.completedAt
+        }
+      };
+
+      const updateData = {
+        lastLogin: now,
+        issueProgress: updatedIssueProgress
+      };
+      
+      await setDoc(trainerRef, updateData, { merge: true });
+
+      // Update local state
+      setCurrentTrainer(prev => prev ? { 
+        ...prev, 
+        issueProgress: updatedIssueProgress 
+      } : null);
+    } catch (error) {
+      console.error('Error updating quest progress:', error);
+      throw error;
+    }
+  };
+
+  // Get current issue progress
+  const getCurrentIssueProgress = (): { lastCompletedQuest: number; startedAt: string | null; completedAt: string | null } | null => {
+    if (!currentTrainer) return null;
+    return currentTrainer.issueProgress[currentTrainer.currentIssue] || null;
+  };
+
+  // Start an issue (set startedAt when first clicking "Start Your Quest")
+  const startIssue = async (): Promise<void> => {
+    if (!currentTrainer) return;
+
+    const currentIssue = currentTrainer.currentIssue;
+    const currentIssueProgress = currentTrainer.issueProgress[currentIssue];
+    
+    if (!currentIssueProgress) {
+      throw new Error(`No progress found for issue ${currentIssue}`);
+    }
+
+    // Only set startedAt if it's null and lastCompletedQuest is 0
+    if (currentIssueProgress.startedAt === null && currentIssueProgress.lastCompletedQuest === 0) {
+      try {
+        const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+        const now = new Date().toISOString();
+        
+        const updatedIssueProgress = {
+          ...currentTrainer.issueProgress,
+          [currentIssue]: {
+            ...currentIssueProgress,
+            startedAt: now
+          }
+        };
+
+        const updateData = {
+          issueProgress: updatedIssueProgress
+        };
+        
+        await setDoc(trainerRef, updateData, { merge: true });
+
+        // Update local state
+        setCurrentTrainer(prev => prev ? { 
+          ...prev, 
+          issueProgress: updatedIssueProgress 
+        } : null);
+      } catch (error) {
+        console.error('Error starting issue:', error);
+        throw error;
+      }
+    }
+  };
+
+  // Switch to a different issue
+  const switchToIssue = async (issueId: string): Promise<void> => {
+    if (!currentTrainer) return;
+
+    // If trainer hasn't started this issue yet, initialize it
+    if (!currentTrainer.issueProgress[issueId]) {
+      const updatedIssueProgress = {
+        ...currentTrainer.issueProgress,
+        [issueId]: {
+          lastCompletedQuest: 0,
+          startedAt: null, // Will be set when they first click "Start Your Quest"
+          completedAt: null
+        }
+      };
+
+      try {
+        const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+        await setDoc(trainerRef, {
+          currentIssue: issueId,
+          issueProgress: updatedIssueProgress,
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
+
+        setCurrentTrainer(prev => prev ? {
+          ...prev,
+          currentIssue: issueId,
+          issueProgress: updatedIssueProgress
+        } : null);
+      } catch (error) {
+        console.error('Error switching to issue:', error);
+        throw error;
+      }
+    } else {
+      // Just switch current issue
+      try {
+        const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+        await setDoc(trainerRef, {
+          currentIssue: issueId,
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
+
+        setCurrentTrainer(prev => prev ? {
+          ...prev,
+          currentIssue: issueId
+        } : null);
+      } catch (error) {
+        console.error('Error switching to issue:', error);
+        throw error;
+      }
+    }
+  };
+
+  // Add Kowai to trainer
+  const addKowaiToTrainer = async (kowaiId: string): Promise<void> => {
+    if (!currentTrainer) return;
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      const updatedOwnedKowai = [...currentTrainer.ownedKowai];
+      
+      // Only add if not already owned
+      if (!updatedOwnedKowai.includes(kowaiId)) {
+        updatedOwnedKowai.push(kowaiId);
+        
+        await updateDoc(trainerRef, {
+          ownedKowai: updatedOwnedKowai,
+          lastLogin: new Date().toISOString()
+        });
+
+        // Update local state
+        setCurrentTrainer(prev => prev ? { ...prev, ownedKowai: updatedOwnedKowai } : null);
+      }
+    } catch (error) {
+      console.error('Error adding Kowai to trainer:', error);
+      throw error;
+    }
+  };
+
   // Load trainer from storage on mount
   useEffect(() => {
     loadTrainerFromStorage();
@@ -305,7 +710,17 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     addNewTrainer,
     removeTrainer,
     getTrainerDisplayName,
-    activateTrainer
+    activateTrainer,
+    updateTrainerStats,
+    updateQuestProgress,
+    updateStatsAndQuestProgress,
+    saveAttempt,
+    saveStatsHistory,
+    getStatsHistory,
+    getCurrentIssueProgress,
+    startIssue,
+    switchToIssue,
+    addKowaiToTrainer
   };
 
   return (

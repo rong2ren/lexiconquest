@@ -6,19 +6,37 @@ import { KowaiCard } from './KowaiCard';
 import { PlayHeader } from './PlayHeader';
 import { KowaiModal } from './KowaiModal';
 import { EggModal } from './EggModal';
+import { Quest1 } from './Quest1';
+import { Quest2 } from './Quest2';
+import { Quest3 } from './Quest3';
+import { Quest4 } from './Quest4';
+import { Quest5 } from './Quest5';
+import Quest6 from './Quest6';
 import { Footer } from './Footer';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { trackEvent } from '../lib/mixpanel';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 
+// Current issue configuration - hardcoded for now
+const MAX_QUESTS_PER_ISSUE = 6; // Issue1 has 6 quests
+
 export function PlayProfile() {
-  const { currentTrainer } = usePlayAuth();
+  const { currentTrainer, getCurrentIssueProgress, startIssue } = usePlayAuth();
   
   // Get Kowai data from trainer
   const ownedKowai = currentTrainer?.ownedKowai || [];
   const encounteredKowai = currentTrainer?.encounteredKowai || [];
   const [selectedKowai, setSelectedKowai] = useState<string | null>(null);
   const [showEggModal, setShowEggModal] = useState(false);
+  
+  // Quest state
+  const [currentQuest, setCurrentQuest] = useState<number | null>(null);
+
+  // Initialize quest state (never auto-start quests)
+  useEffect(() => {
+    // Always start with no quest active - user must click "Begin Your Quest"
+    setCurrentQuest(null);
+  }, [currentTrainer?.uid]); // Only run when trainer changes
 
   const handleKowaiClick = (kowaiName: string) => {
     if (kowaiName === 'egg') {
@@ -37,15 +55,133 @@ export function PlayProfile() {
   };
 
   // Handle starting a new quest
-  const handleBeginQuest = () => {
-    trackEvent('New Customer Quest Started');
-    // TODO: Navigate to quest pages
-    console.log('Starting quest for new customer');
+  const handleBeginQuest = async () => {
+    // First, determine which quest to start based on current progress
+    const currentIssueProgress = getCurrentIssueProgress();
+    let questToStart = 1; // Default to Quest 1
+    
+    try {
+      if (currentIssueProgress) {
+        if (currentIssueProgress.lastCompletedQuest === 0) {
+          // No quests completed yet, start Quest 1
+          questToStart = 1;
+        } else if (currentIssueProgress.lastCompletedQuest < MAX_QUESTS_PER_ISSUE) {
+          // Continue to next quest
+          questToStart = currentIssueProgress.lastCompletedQuest + 1;
+        } else {
+          // All quests completed - redirect to Issue 2 purchase - hardcoded for now
+          window.open('https://buy.stripe.com/bJe28t8MxdW6bbI3YdgMw01', '_blank');
+          return;
+        }
+      }
+      
+      // Set startedAt timestamp if this is the first time starting (only for Quest 1)
+      if (questToStart === 1) {
+        await startIssue();
+      }
+      
+      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 New Customer Quest Started`, { questNumber: questToStart });
+      setCurrentQuest(questToStart);
+    } catch (error) {
+      console.error('Error starting issue:', error);
+      
+      // Track the error event
+      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue Start Failed`, { 
+        error: (error as any)?.code || 'unknown',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        questNumber: questToStart,
+        trainerId: currentTrainer?.uid,
+        trainerName: `${currentTrainer?.firstName} ${currentTrainer?.lastName}`,
+        trainerBirthday: currentTrainer?.birthday,
+        issueId: currentTrainer?.currentIssue,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Still allow quest to start even if Firebase update fails
+      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 New Customer Quest Started`, { questNumber: 1 });
+      setCurrentQuest(1);
+    }
+  };
+
+  // Handle quest completion
+  const handleQuestComplete = (questNumber: number) => {
+    // Move to next quest (stats and quest progress already handled by the quest)
+    if (questNumber < MAX_QUESTS_PER_ISSUE) {
+      setCurrentQuest(questNumber + 1);
+    } else {
+      setCurrentQuest(null); // All quests completed for current issue
+    }
+    
+    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest Completed`, { questNumber });
+  };
+
+  // Handle quest back
+  const handleQuestBack = () => {
+    setCurrentQuest(null);
   };
 
 
   const displayName = currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : 'Adventurer';
   const stats = currentTrainer?.stats || { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 };
+  
+  // Check if all quests are completed
+  const currentIssueProgress = getCurrentIssueProgress();
+  const isIssueCompleted = currentIssueProgress && currentIssueProgress.lastCompletedQuest >= MAX_QUESTS_PER_ISSUE;
+
+  // Render quest pages if active
+  if (currentQuest === 1) {
+    return (
+      <Quest1 
+        onComplete={() => handleQuestComplete(1)}
+        onBack={handleQuestBack}
+      />
+    );
+  }
+
+  if (currentQuest === 2) {
+    return (
+      <Quest2 
+        onComplete={() => handleQuestComplete(2)}
+        onBack={handleQuestBack}
+      />
+    );
+  }
+
+  if (currentQuest === 3) {
+    return (
+      <Quest3 
+        onComplete={() => handleQuestComplete(3)}
+        onBack={handleQuestBack}
+      />
+    );
+  }
+
+  if (currentQuest === 4) {
+    return (
+      <Quest4 
+        onComplete={() => handleQuestComplete(4)}
+        onBack={handleQuestBack}
+      />
+    );
+  }
+
+  if (currentQuest === 5) {
+    return (
+      <Quest5 
+        onComplete={() => handleQuestComplete(5)}
+        onBack={handleQuestBack}
+      />
+    );
+  }
+
+  if (currentQuest === 6) {
+    return (
+      <Quest6 
+        onComplete={() => handleQuestComplete(6)}
+        onBack={handleQuestBack}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 relative pt-20">
@@ -70,15 +206,31 @@ export function PlayProfile() {
                   </h1>
                   <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-blue-400 mx-auto rounded-full"></div>
                 </div>
-                <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">Your magical journey begins now!</p>
-                <div className="relative inline-block">
-                  <Button 
-                    onClick={handleBeginQuest}
-                    className="relative px-8 sm:px-16 py-4 sm:py-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-2xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
-                  >
-                    <span className="relative z-10">Start Your Quest</span>
-                  </Button>
-                </div>
+                {isIssueCompleted ? (
+                  <>
+                    <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">🎉 Congratulations! You've completed Issue 1! 🎉</p>
+                    <div className="relative inline-block">
+                      <Button 
+                        onClick={handleBeginQuest}
+                        className="relative px-8 sm:px-16 py-4 sm:py-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-2xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
+                      >
+                        <span className="relative z-10">Get Issue 2</span>
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">Your magical journey begins now!</p>
+                    <div className="relative inline-block">
+                      <Button 
+                        onClick={handleBeginQuest}
+                        className="relative px-8 sm:px-16 py-4 sm:py-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-2xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
+                      >
+                        <span className="relative z-10">Start Your Quest</span>
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
