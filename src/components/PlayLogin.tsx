@@ -81,7 +81,7 @@ export function PlayLogin() {
           }}>
             Lexicon Quest
           </h1>
-          <p className="text-lg sm:text-xl text-slate-200 font-medium drop-shadow-lg">Begin your magical adventure</p>
+          <p className="text-lg sm:text-xl text-slate-200 font-medium drop-shadow-lg">Nurturing Thoughtful Readers</p>
         </div>
 
         {/* Login Card */}

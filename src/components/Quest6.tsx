@@ -27,13 +27,26 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     });
   }, []);
 
+  const getResultPicture = (choiceId: number) => {
+    switch (choiceId) {
+      case 1:
+        return '/issues/issue1/yezu-walking.gif';
+      case 2:
+        return '/issues/issue1/avalanche.gif';
+      case 3:
+        return '/issues/issue1/yezu-grab.gif';
+      default:
+        return null;
+    }
+  };
+
   const choices = [
     {
       id: 1,
       text: "Shout loudly at the Yezu to distract it from Lumino.",
       result: {
         title: "The Power of Voice",
-        message: "You shout as loudly as you could: \"HEY! YOU! OVER HERE!\"\n\nThe Yezu skids to a halt, eyes snapping toward you. For a second, it stares in confusion. Then it turns and begins sprinting straight at you.\n\nYou wave your arms and ran. Your heart is pounding. Your mind is only thinking one thing: get it as far from the lumino as possible.\n\nUp ahead, you spot a cave. You dive inside just as the Yezu leaps forward to grab you. Your last shout echoed through the cliffs. Then comes the avalanche — a crashing wall of snow that falls over the cave mouth. You hear the Yezu's furious roar from the other side, muffled beneath the snow wall.\n\nThen silence.",
+        message: "You shout as loudly as you could: \"HEY! YOU! OVER HERE!\"\n\nThe Yezu skids to a halt, eyes snapping toward you. For a second, it stares in confusion. Then it turns and begins sprinting straight at you.\n\nYou wave your arms and ran. Your heart is pounding. Your mind is only thinking one thing: get it as far from the lumino as possible.\n\nUp ahead, you spot a cave. You dive inside just as the Yezu leaps forward to grab you. Your last shout echoed through the cliffs. Then comes the avalanche — a crashing wall of snow that falls over the cave mouth.\n\nYou hear the Yezu's furious roar from the other side, muffled beneath the snow wall.\n\nThen silence.",
         stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     },
@@ -42,7 +55,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       text: "Throw snowballs at the Yezu to get its attention.",
       result: {
         title: "A Clever Distraction",
-        message: "You quickly scoop up snow and hurl snowballs at the Yezu!\n\nThe first one hits its shoulder with a wet splat. The Yezu stops mid-charge, its massive head turning toward you with a look of pure confusion. The second snowball hits its face, and for a moment, you think you've made it even angrier.\n\nBut then something incredible happens. The Yezu's expression changes completely. Its eyes narrow, and suddenly it starts... laughing? It's a deep, rumbling sound that shakes the ground beneath your feet.\n\nThe Yezu seems genuinely amused by your playful approach! It stops its attack and instead starts making snowballs of its own, using its massive claws to pack the snow. It tosses one playfully in your direction.\n\nYou've turned a life-or-death situation into an unexpected snowball fight! The Yezu's laughter echoes across the frozen landscape as you both engage in this strange, magical moment of friendship.",
+        message: "You quickly scoop up handfuls of snow and pack them into snowballs. With your full strength, you throw the first snowball at the massive Yezu.\n\nThe tiny snowball hits the Yezu's thick fur and crumbles into powder. The giant beast doesn't even notice - it's like throwing a pebble at a mountain.\n\nIn panic, you grab a bigger handful of snow and hurl it as hard as you can. This time, your aim goes wild - the snowball sails over the Yezu and smacks into an overhanging ledge of snow high up on the cliff face.\n\nThen you hear a soft cracking sound. Next, before you can react, an avalanche begins with a thunderous rumble! Snow pours down the cliff face like a white waterfall, crashing between you and the Yezu.\n\nFrom your snowy hiding spot, you can hear the Yezu's confused roars echoing in the distance.\n\nThen silence.",
         stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     },
@@ -51,7 +64,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       text: "Rush to Lumino and try to scoop it up in your arms to carry it to safety.",
       result: {
         title: "A Hero's Rescue",
-        message: "You sprint toward Lumino with all your might, your heart pounding in your chest!\n\nThe Yezu sees you coming and roars in fury, its massive body tensing for the final strike. But you don't stop. Every muscle in your body screams with effort as you race across the icy ground.\n\nYou reach Lumino just as the Yezu's massive claw comes crashing down. Time seems to slow as you dive forward, your arms outstretched. With a desperate leap, you scoop up the little creature and roll to safety.\n\nThe Yezu's claw crashes into the ground where Lumino was just standing, sending chunks of ice and snow flying in all directions. The impact shakes the earth beneath you.\n\nYou hold Lumino close as you both catch your breath, the little creature trembling against your chest. The Yezu glares at you for a long moment, its red eyes burning with intensity. But then something changes in its expression.\n\nIt seems to respect your courage. The Yezu takes a step back, then another, before finally turning and walking away into the shadows, leaving you and Lumino safe in the frozen silence.",
+        message: "Without thinking, you sprint toward Lumino as fast as you can. Your heart pounds as you run across the slippery snow, determined to reach the little creature before the Yezu does.\n\nBut the Yezu is much faster than you expected. As you're still several steps away from Lumino, the massive beast reaches it first. In your desperation to help, you leap forward anyway, throwing yourself between them.\n\nThe Yezu's massive paw swipes at you, sending you flying through the air like a rag doll. You crash hard into the rocky mountainside. The impact knocks the wind out of your lungs, and snow showers down on you from above.\n\nYour crash has disturbed loose snow on the mountain. Suddenly, a loud cracking sound fills the air. With a thunderous rumble, an avalanche begins! A massive wall of white powder cascades down the mountainside, rushing between you and the Yezu.\n\nThe beast roars and scrambles away from the falling snow. When the rumbling finally stops, you find yourself half-buried in fresh powder, bruised but alive.\n\nFrom somewhere beyond the snow wall, you can hear the Yezu's angry roars in the distance.\n\nThen silence.",
         stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     }
@@ -167,19 +180,30 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
           >
             <div className="text-center">
               <h2 className="text-3xl font-bold text-slate-800 mb-6">{choice.result.title}</h2>
-              <p className="text-slate-200 text-xl leading-relaxed mb-6 whitespace-pre-line">
+              <p className="text-slate-700 text-lg leading-relaxed mb-6 whitespace-pre-line">
                 {choice.result.message}
               </p>
               
+              {/* Result Picture */}
+              {getResultPicture(selectedChoice) && (
+                <div className="mb-6">
+                  <img 
+                    src={getResultPicture(selectedChoice)!} 
+                    alt="Quest result" 
+                    className="mx-auto rounded-2xl shadow-lg max-w-md w-full h-auto"
+                  />
+                </div>
+              )}
+              
               {/* Congratulations Message */}
-              <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl p-6 mb-6 border border-purple-500/30">
-                <h4 className="text-2xl font-bold text-purple-100 mb-4">🎉 Incredible courage, young trainer!</h4>
-                <p className="text-purple-100 font-bold text-2xl mb-4">You have proven your <span className="text-blue-400 font-bold text-2xl">BRAVERY</span>.</p>
-                <p className="text-purple-100 text-lg leading-relaxed">
+              <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
+                <h4 className="text-2xl font-bold text-slate-800 mb-4">🎉 Incredible courage, young trainer!</h4>
+                <p className="text-slate-800 font-bold text-2xl mb-4">You have proven your <span className="text-blue-600 font-bold text-2xl">Bravery</span>.</p>
+                <p className="text-slate-700 text-lg leading-relaxed">
                   In that moment of danger, when the mighty Yezu threatened helpless Lumino, you didn't hesitate to put yourself at risk to help. Whether your quick thinking saved Lumino or not, your heart showed the true spirit of a Kowai Trainer. You chose to act with courage.
                 </p>
-                <p className="text-purple-100 text-lg leading-relaxed mt-3">
-                  Now you shall keep reading and found out if your action actually saves the Lumino.
+                <p className="text-slate-700 text-lg leading-relaxed mt-3">
+                  Now you should keep reading to find out if your action actually saved Lumino.
                 </p>
               </div>
               
@@ -212,10 +236,10 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
               </div>
 
               {/* Reading Instruction */}
-              <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-6 mb-6 border border-blue-500/30">
+              <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
                 <div className="flex items-center justify-center gap-3">
                   <span className="text-2xl">📘</span>
-                  <p className="text-blue-100 text-lg font-semibold">
+                  <p className="text-slate-800 text-lg font-semibold">
                     Go back and keep reading until you reach the next quest!
                   </p>
                 </div>
