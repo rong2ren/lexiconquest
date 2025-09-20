@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCcw, Plus, X } from 'lucide-react';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { trackEvent } from '../lib/mixpanel';
 
@@ -24,6 +25,8 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
   const [questStartTime] = useState(Date.now());
   const [routeStartTime, setRouteStartTime] = useState<number | null>(null);
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
+  const [inputCoordinate, setInputCoordinate] = useState<string>('');
+  const [inputError, setInputError] = useState<string>('');
 
   // Define the grid with terrain types
   const createGrid = (): GridCell[] => {
@@ -104,7 +107,17 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
     const cell = grid.find(c => c.coordinate === coordinate);
     if (!cell) return;
 
-    // Show warning popups for dangerous/blocked areas
+    const lastCoordinate = route[route.length - 1];
+    
+    // If clicking the last coordinate, remove it (undo) - no warnings needed
+    if (coordinate === lastCoordinate && route.length > 1) {
+      const newRoute = route.slice(0, -1);
+      setRoute(newRoute);
+      updateGridRoute(newRoute);
+      return;
+    }
+
+    // Show warning popups for dangerous/blocked areas only when adding new cells
     if (cell.value === 2) {
       alert('⚠️ Warning! This area contains dangerous monsters or storms. You can still pass through, but be extra careful!');
       // Continue to add to route (dangerous but passable)
@@ -115,16 +128,6 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
     }
     if (cell.value === 1) {
       return; // Ocean - can't click, no popup needed (impassable)
-    }
-
-    const lastCoordinate = route[route.length - 1];
-    
-    // If clicking the last coordinate, remove it (undo)
-    if (coordinate === lastCoordinate && route.length > 1) {
-      const newRoute = route.slice(0, -1);
-      setRoute(newRoute);
-      updateGridRoute(newRoute);
-      return;
     }
 
     // If clicking an adjacent cell, add it to route
@@ -211,19 +214,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
     // Only apply stats and update quest progress if route is valid
     if (validation.isValid) {
       // Calculate stats based on route quality
-      let newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 };
-      
-      const routeLength = route.length;
-      if (routeLength <= 8) {
-        // Excellent route
-        newStatChanges = { bravery: 3, wisdom: 5, curiosity: 4, empathy: 2 };
-      } else if (routeLength <= 12) {
-        // Good route
-        newStatChanges = { bravery: 2, wisdom: 3, curiosity: 3, empathy: 1 };
-      } else {
-        // Acceptable route
-        newStatChanges = { bravery: 1, wisdom: 2, curiosity: 2, empathy: 1 };
-      }
+      let newStatChanges = { bravery: 0, wisdom: 5, curiosity: 0, empathy: 0 };
       
       setStatChanges(newStatChanges);
 
@@ -327,121 +318,277 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
     setShowResult(false);
     setIsValidRoute(false);
     setRouteStartTime(null);
+    setInputCoordinate('');
+    setInputError('');
+  };
+
+  // Mobile input functions
+  const handleInputChange = (value: string) => {
+    const upperValue = value.toUpperCase();
+    setInputCoordinate(upperValue);
+    setInputError(''); // Clear any previous errors
+  };
+
+  const addCoordinateToRoute = () => {
+    if (inputCoordinate.length !== 2) {
+      setInputError('Coordinate must be 2 characters (e.g., D5)');
+      return;
+    }
+
+    const col = inputCoordinate[0];
+    const row = inputCoordinate[1];
+    
+    if (!['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].includes(col)) {
+      setInputError('Invalid column. Use A-J');
+      return;
+    }
+    
+    if (!['1', '2', '3', '4', '5', '6', '7'].includes(row)) {
+      setInputError('Invalid row. Use 1-7');
+      return;
+    }
+
+    // Check if coordinate is already in route
+    if (route.includes(inputCoordinate)) {
+      setInputError('This coordinate is already in your route');
+      return;
+    }
+
+    // Check if coordinate is adjacent to the last coordinate
+    const lastCoordinate = route[route.length - 1];
+    if (!areAdjacent(lastCoordinate, inputCoordinate)) {
+      setInputError('Coordinate must be adjacent to the last coordinate');
+      return;
+    }
+
+    // Check if it's an ocean cell (impassable)
+    const cell = grid.find(c => c.coordinate === inputCoordinate);
+    if (cell && cell.value === 1) {
+      setInputError('Cannot go through ocean areas');
+      return;
+    }
+
+    // Check if it's Mount Vinson (blocked)
+    if (cell && cell.value === 5) {
+      setInputError('Mount Vinson is too steep to climb. Go around it!');
+      return;
+    }
+
+    // Valid coordinate - add to route
+    handleCellClick(inputCoordinate);
+    setInputCoordinate('');
+    setInputError('');
+  };
+
+  const removeLastCoordinate = () => {
+    if (route.length > 1) {
+      const newRoute = route.slice(0, -1);
+      setRoute(newRoute);
+      updateGridRoute(newRoute);
+    }
   };
 
   // Get cell styling based on terrain and route status
   const getCellStyle = () => {
-    return 'w-12 h-12 rounded-lg';
+    return 'w-16 h-16 rounded-lg';
   };
 
   const getCellInlineStyle = (cell: GridCell) => {
     // Check route first (highest priority) - same as starting point
     if (cell.isInRoute) {
       return { 
-        '--border-color': 'rgba(22, 163, 74, 0.9)',
+        '--border-color': 'rgba(168, 85, 247, 0.9)',
         '--border-width': '3px',
         borderColor: 'var(--border-color)',
         borderWidth: 'var(--border-width)',
-        backgroundColor: 'rgba(22, 163, 74, 0.3)',
-        boxShadow: '0 0 8px rgba(22, 163, 74, 0.5)'
-      }; // Route - Same as starting point
+        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4))',
+        boxShadow: '0 0 8px rgba(168, 85, 247, 0.5)'
+      }; // Route - Purple gradient
     }
     // Then check starting point
     else if (cell.value === 3) {
       return { 
-        '--border-color': 'rgba(22, 163, 74, 0.9)',
+        '--border-color': 'rgba(168, 85, 247, 0.9)',
         '--border-width': '3px',
         borderColor: 'var(--border-color)',
         borderWidth: 'var(--border-width)',
-        backgroundColor: 'rgba(22, 163, 74, 0.3)',
-        boxShadow: '0 0 8px rgba(22, 163, 74, 0.5)'
-      }; // Start point - Green background with border and glow
+        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4))',
+        boxShadow: '0 0 8px rgba(168, 85, 247, 0.5)'
+      }; // Start point - Purple gradient
     } 
-    // All other cells - no background, no border
+    // All other cells - minimal border for visibility
     else {
       return { 
         backgroundColor: 'transparent',
-        border: 'none',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         cursor: cell.value === 1 ? 'not-allowed' : 'pointer'
-      }; // All other cells - clean, no borders
+      }; // All other cells - minimal border for visibility
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-slate-900 p-4">
       <style>{`
-        .grid-cell:hover {
-          --border-color: rgba(255, 255, 255, 0.8) !important;
-          --border-width: 4px !important;
+        .grid-cell {
+          transition: all 0.2s ease-in-out;
+          position: relative;
         }
+        
+        .grid-cell:hover:not([disabled]) {
+          transform: scale(1.1) !important;
+          z-index: 10 !important;
+          box-shadow: 0 0 15px rgba(168, 85, 247, 0.8) !important;
+          border: 2px solid rgba(168, 85, 247, 0.9) !important;
+          background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2)) !important;
+        }
+        
         .grid-cell[disabled]:hover {
-          --border-color: rgba(255, 255, 255, 0.2) !important;
-          --border-width: 1px !important;
+          transform: scale(1.05) !important;
+          box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+          border: 1px solid rgba(255, 255, 255, 0.4) !important;
+          background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        /* Special hover effects for different cell types */
+        .grid-cell.dangerous:hover:not([disabled]) {
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.8) !important;
+          border: 2px solid rgba(239, 68, 68, 0.9) !important;
+          background-color: rgba(239, 68, 68, 0.2) !important;
+        }
+        
+        .grid-cell.blocked:hover:not([disabled]) {
+          box-shadow: 0 0 15px rgba(156, 163, 175, 0.8) !important;
+          border: 2px solid rgba(156, 163, 175, 0.9) !important;
+          background-color: rgba(156, 163, 175, 0.2) !important;
         }
       `}</style>
+      {/* Back Button */}
+      <div className="max-w-6xl mx-auto mb-6 mt-4">
+        <Button 
+          onClick={onBack}
+          variant="ghost"
+          className="text-white hover:bg-slate-800"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Back</span>
+        </Button>
+      </div>
+
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button 
-            onClick={onBack}
-            variant="ghost"
-            className="text-white hover:bg-slate-800"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Quest 5: Plan the Route</h1>
-            <p className="text-slate-300">Find the shortest path to save Lumino</p>
-          </div>
-        </div>
 
         {/* Quest Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700"
+          className="bg-gradient-to-br from-sky-200/90 via-blue-100/80 to-cyan-100/70 rounded-3xl p-8 shadow-2xl border-2 border-blue-200/40"
         >
           {!showResult ? (
             <>
-              {/* Instructions */}
+              {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="text-xl font-bold text-white mb-6">Route Planning Challenge</h2>
-                <div className="bg-slate-700 rounded-lg p-6 mb-6">
-                  <p className="text-slate-300 text-lg leading-relaxed mb-4">
+                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                  Quest 5: Path to the South Pole
+                </h2>
+              </div>
+
+              {/* Instructions */}
+              <div className="text-center mb-12">
+                <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                  <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
                     Plan the shortest possible route to get Lumino to the South Pole before it's too late.
-                  </p>
-                  <div className="text-slate-300 text-sm space-y-2">
+                  </h2>
+                  <div className="text-slate-700 text-lg space-y-3">
                     <p>• You must follow the grid lines - you cannot cut across the wilderness between grid points.</p>
                     <p>• You and Lumino are too weak to climb over Mount Vinson, so you must go around it.</p>
                     <p>• You cannot leave Antarctica and travel over the ocean.</p>
                     <p>• There are dangerous monsters along some paths. You can still use those routes, just be extra careful and quiet.</p>
+                    <p className="text-yellow-600 font-semibold">• You start at coordinate C5 and must reach the South Pole at E4.</p>
+                    <p className="text-blue-600 mt-4">💡 <strong>Tip:</strong> Hover over cells to see which ones are clickable!</p>
                   </div>
                 </div>
               </div>
 
-              {/* Legend */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Map Legend:</h3>
-                <div className="bg-slate-700/50 backdrop-blur-sm rounded-lg p-4">
-                  <div className="grid grid-cols-1 gap-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-500/80 border border-green-300 rounded-lg shadow-lg shadow-green-500/50"></div>
-                      <span className="text-white">Start (C5)</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 p-3 bg-slate-600/50 rounded-lg">
-                    <p className="text-white text-sm">
-                      <strong>Instructions:</strong> Click on cells to mark your route from Start to South Pole. 
-                      Click the last cell to undo. Avoid ocean areas and dangerous terrain shown on the map.
+
+              {/* Mobile: Input Interface */}
+              <div className="md:hidden mb-8">
+                <div className="bg-slate-700 rounded-lg p-6">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-4">Plan Your Route</h3>
+                    <p className="text-slate-300 text-sm mb-4">
+                      Add coordinates to your route step by step
                     </p>
+                    
+                    {/* Current Route Display */}
+                    <div className="mb-6">
+                      <p className="text-slate-700 text-sm mb-2">Current Route:</p>
+                      <div className="bg-slate-600 rounded-lg p-3 min-h-[3rem] flex items-center justify-center">
+                        {route.length > 1 ? (
+                          <span className="text-white font-mono text-sm">
+                            {route.join(' → ')}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-sm">Start at C5</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Input Controls */}
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <Input
+                          type="text"
+                          value={inputCoordinate}
+                          onChange={(e) => handleInputChange(e.target.value)}
+                          placeholder="input next cell"
+                          maxLength={2}
+                          className={`text-center text-lg font-mono uppercase tracking-wider flex-1 bg-slate-600 text-white border-2 transition-all duration-200 ${
+                            inputError 
+                              ? 'border-red-500 focus:border-red-400' 
+                              : 'border-slate-500 focus:border-purple-400'
+                          } hover:bg-slate-500 focus:bg-slate-500`}
+                        />
+                        <Button
+                          onClick={addCoordinateToRoute}
+                          disabled={inputCoordinate.length !== 2}
+                          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-slate-800 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      {inputError && (
+                        <p className="text-red-400 text-sm text-center">
+                          {inputError}
+                        </p>
+                      )}
+                      
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={removeLastCoordinate}
+                          disabled={route.length <= 1}
+                          variant="outline"
+                          className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Remove Last
+                        </Button>
+                        <Button
+                          onClick={handleReset}
+                          variant="outline"
+                          className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700"
+                        >
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          Reset
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Interactive Map with Grid Overlay */}
               <div className="mb-8">
-                <div className="relative bg-slate-700 rounded-lg p-3 md:p-6 overflow-hidden">
+                <div className="relative rounded-lg p-4 md:p-8 overflow-hidden">
                   {/* Map Background - Hidden on mobile, shown on desktop */}
                   <div
                     className="hidden md:block absolute inset-0 bg-cover bg-no-repeat opacity-85"
@@ -454,8 +601,8 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                   
                   {/* Grid Overlay */}
                   <div className="relative z-10">
-                    {/* Mobile: Smaller cells with more spacing */}
-                    <div className="md:hidden grid grid-cols-10 gap-2 max-w-fit mx-auto">
+                    {/* Mobile: Hidden - using input interface instead */}
+                    <div className="md:hidden hidden">
                       {[1, 2, 3, 4, 5, 6, 7].map((row) => (
                         <div key={row} className="contents">
                           {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map((col) => {
@@ -468,7 +615,10 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                                 key={coordinate}
                                 whileTap={{ scale: (cell.value === 1 || cell.value === 2) ? 1 : 0.95 }}
                                 onClick={() => handleCellClick(coordinate)}
-                                className={`${getCellStyle().replace('w-12 h-12', 'w-8 h-8')} grid-cell`}
+                                className={`${getCellStyle().replace('w-12 h-12', 'w-8 h-8')} grid-cell ${
+                                  cell.value === 2 ? 'dangerous' : 
+                                  cell.value === 5 ? 'blocked' : ''
+                                }`}
                                 style={getCellInlineStyle(cell)}
                                 disabled={cell.value === 1}
                               />
@@ -478,8 +628,8 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                       ))}
                     </div>
                     
-                    {/* Desktop: Original grid with map background */}
-                    <div className="hidden md:grid grid-cols-10 gap-1 max-w-fit mx-auto">
+                    {/* Desktop: Larger grid with map background */}
+                    <div className="hidden md:grid grid-cols-10 gap-2 max-w-fit mx-auto">
                       {[1, 2, 3, 4, 5, 6, 7].map((row) => (
                         <div key={row} className="contents">
                           {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map((col) => {
@@ -492,7 +642,10 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                                 key={coordinate}
                                 whileTap={{ scale: (cell.value === 1 || cell.value === 2) ? 1 : 0.95 }}
                                 onClick={() => handleCellClick(coordinate)}
-                                className={`${getCellStyle()} grid-cell`}
+                                className={`${getCellStyle()} grid-cell ${
+                                  cell.value === 2 ? 'dangerous' : 
+                                  cell.value === 5 ? 'blocked' : ''
+                                }`}
                                 style={getCellInlineStyle(cell)}
                                 disabled={cell.value === 1}
                               />
@@ -508,10 +661,10 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
 
               {/* Route Info */}
               <div className="mb-6 text-center">
-                <p className="text-slate-300 mb-2">
-                  Current Route: <span className="text-white font-semibold">{route.join(' → ')}</span>
+                <p className="text-slate-700 mb-2">
+                  Current Route: <span className="text-slate-800 font-semibold">{route.join(' → ')}</span>
                 </p>
-                <p className="text-slate-400 text-sm">
+                <p className="text-slate-700 text-sm">
                   Route Length: {route.length} steps
                 </p>
               </div>
@@ -521,7 +674,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                 <Button
                   onClick={handleReset}
                   variant="outline"
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  className="border-slate-600 text-slate-700 hover:bg-slate-700"
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Reset Route
@@ -529,7 +682,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                 <Button
                   onClick={handleSubmit}
                   disabled={route.length < 2}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold disabled:opacity-50"
+                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 disabled:opacity-50 cursor-pointer"
                 >
                   Submit Route
                 </Button>
@@ -540,37 +693,35 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
             <div className="text-center">
               {isValidRoute ? (
                 <>
-                  <div className="mb-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500 flex items-center justify-center">
-                      <span className="text-white text-2xl">🎉</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Excellent Navigation!</h3>
-                    <p className="text-slate-300 text-lg mb-6">
-                      Perfect! You've successfully planned a route to get Lumino to the South Pole safely. 
-                      Your strategic thinking and careful planning have saved the day!
+                  <div className="mb-8">
+                    <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Perfect navigation, young explorer!</h3>
+                    <p className="text-slate-700 text-lg mb-6">
+                      You have proven your <span className="text-yellow-600 font-bold text-xl">WISDOM</span>.
                     </p>
-                    <div className="bg-slate-700 rounded-lg p-4 mb-6">
-                      <p className="text-slate-300">
-                        <span className="text-white font-semibold">Your Route:</span> {route.join(' → ')}
+                    <p className="text-slate-700 text-lg mb-6">
+                      Lumino looks at you with new respect. You have shown your ability to think clearly and solve problems even under pressure.
+                    </p>
+                    <p className="text-slate-700 text-lg mb-6">
+                      One last challenge lies ahead on your path to becoming a true Kowai Trainer. You are very close.
+                    </p>
+                    <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                      <p className="text-slate-700 text-lg mb-2">
+                        <span className="text-slate-800 font-semibold">Your Route:</span> {route.join(' → ')}
                       </p>
-                      <p className="text-slate-300">
-                        <span className="text-white font-semibold">Route Length:</span> {route.length} steps
+                      <p className="text-slate-700 text-lg">
+                        <span className="text-slate-800 font-semibold">Route Length:</span> {route.length} steps
                       </p>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-slate-400 mb-6">
-                      <span className="text-xl">📘</span>
-                      <span>Go back and keep reading until you reach the next quest!</span>
                     </div>
                   </div>
 
                   {/* Stats Gained */}
-                  <div className="bg-slate-700 rounded-lg p-6 mb-6">
-                    <h4 className="text-lg font-semibold text-white mb-3">Stats Gained:</h4>
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                    <h4 className="text-xl font-semibold text-slate-800 mb-4">Stats Gained:</h4>
+                    <div className="grid grid-cols-2 sm:flex sm:justify-center sm:gap-6 gap-3">
                       {Object.entries(statChanges).map(([stat, value]) => {
                         const numValue = value as number;
                         return numValue > 0 && (
-                          <div key={stat} className="flex items-center justify-center gap-2 bg-slate-600 rounded-lg p-3">
+                          <div key={stat} className="flex items-center justify-center gap-2">
                             <span className={
                               stat === 'bravery' ? 'text-blue-400' :
                               stat === 'wisdom' ? 'text-yellow-400' :
@@ -582,7 +733,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                                stat === 'curiosity' ? '🔍' :
                                '❤️'}
                             </span>
-                            <span className="text-white">
+                            <span className="text-slate-700 font-medium">
                               {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{numValue}
                             </span>
                           </div>
@@ -591,10 +742,20 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                     </div>
                   </div>
 
-                  {/* Next Button */}
+                  {/* Reading Instruction */}
+                  <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-6 mb-6 border border-blue-500/30">
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="text-2xl">📘</span>
+                      <p className="text-blue-100 text-lg font-semibold">
+                        Go back and keep reading until you reach the next quest!
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Continue Button */}
                   <Button 
                     onClick={handleNext}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold"
+                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                   >
                     Continue to the next quest
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -602,20 +763,29 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                 </>
               ) : (
                 <>
-                  <div className="mb-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-500 flex items-center justify-center">
-                      <span className="text-white text-2xl">❌</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Route Needs Adjustment</h3>
-                    <p className="text-slate-300 text-lg mb-6">
-                      Your route has some issues that need to be fixed. Check the constraints and try again!
+                  <div className="mb-8">
+                    <h3 className="text-3xl font-bold text-slate-800 mb-6">Uh-oh… the path you chose took a strange turn.</h3>
+                    <p className="text-slate-700 text-lg mb-6">
+                      You bravely followed the direction you picked, but suddenly, a swirling black wind rose from the ground like a tornado. Before you could react, it pulled you in… a spinning, twisting black hole!
                     </p>
-                    <div className="bg-slate-700 rounded-lg p-4 mb-6">
-                      <p className="text-slate-300">
-                        <span className="text-white font-semibold">Your Route:</span> {route.join(' → ')}
+                    <p className="text-slate-700 text-lg mb-6">
+                      Just when it felt like all hope was lost, a majestic dragon-shaped Kowai burst through the storm. With a roar that shook the sky, it swooped in and caught you on its back.
+                    </p>
+                    <p className="text-slate-700 text-lg mb-6">
+                      As it flew you safely back toward land, your eyes grew heavy… the world blurred… and you slowly drifted off.
+                    </p>
+                    <p className="text-slate-700 text-lg mb-6">
+                      But before sleep took over, one thought stayed clear in your mind: 
+                    </p>
+                    <p className="text-slate-700 text-lg mb-6">
+                      You made the wrong choice — and you'll need to try again.
+                    </p>
+                    <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                      <p className="text-slate-700 text-lg mb-2">
+                        <span className="text-slate-800 font-semibold">Your Route:</span> {route.join(' → ')}
                       </p>
-                      <p className="text-slate-300">
-                        <span className="text-white font-semibold">Route Length:</span> {route.length} steps
+                      <p className="text-slate-700 text-lg">
+                        <span className="text-slate-800 font-semibold">Route Length:</span> {route.length} steps
                       </p>
                     </div>
                   </div>
@@ -623,7 +793,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                   {/* Try Again Button */}
                   <Button 
                     onClick={handleReset}
-                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-8 py-3 text-lg font-semibold"
+                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 cursor-pointer"
                   >
                     Try Again
                   </Button>

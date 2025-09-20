@@ -54,11 +54,11 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
     let newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 };
     
     if (selectedChoice === 'approach') {
-      newStatChanges = { bravery: 3, wisdom: 2, curiosity: 1, empathy: 2 };
+      newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 5 };
     } else if (selectedChoice === 'wait') {
-      newStatChanges = { bravery: 1, wisdom: 4, curiosity: 2, empathy: 3 };
+      newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 5 };
     } else if (selectedChoice === 'cookies') {
-      newStatChanges = { bravery: 2, wisdom: 1, curiosity: 3, empathy: 4 };
+      newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 5 };
     }
     
     setStatChanges(newStatChanges);
@@ -128,76 +128,107 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
   const getResultText = (choice: string) => {
     switch (choice) {
       case 'approach': 
-        return 'The Lumino looks at you with curious eyes. It takes a step forward, then another. Your gentle approach has shown it that you mean no harm. The creature\'s trust begins to grow as it realizes you are a friend.';
+        return 'You slowly walk toward Lumino with your hands held open, showing that you\'re not carrying anything dangerous.\n\nAt first, Lumino seems curious about your gentle approach. It tilts its head and watches you carefully, not running away like you expected.\n\nBut as you get closer, Lumino suddenly sees your shadow stretching across the snow toward it. In the wild, shadows often mean danger - predators swooping down from above.\n\nLumino panics! It leaps backward with a frightened yelp, stumbles in the deep snow, and tumbles tail-over-head into a small snowbank.\n\nYou stop immediately and step back, feeling terrible. But slowly, as Lumino brushes the snow off its fur, it seems to realize that you didn\'t mean to hurt it.\n\nYou were trying to be gentle. Even if it didn\'t work out perfectly, Lumino understands you.';
       case 'wait': 
-        return 'You sit quietly in the snow, showing patience and respect for the Lumino\'s space. After a few moments, the creature slowly approaches you. Your wisdom in letting it choose has earned its trust.';
+        return 'You decide that the best approach is to be patient. You sit down gently in the snow, cross your legs, and stay very still.\n\nAt first, your plan seems to work perfectly. Lumino tilts its head curiously and begins walking in a slow circle around you, keeping a safe distance but clearly studying you.\n\nBut as the minutes pass, sitting in the freezing snow becomes really uncomfortable. The cold snow soaks through your pants, making your legs numb and stiff.\n\nYou can\'t take it anymore, so you start to extend one leg very slowly and carefully. But the sudden movement startles Lumino!\n\nIn its panic, Lumino slips on a patch of smooth ice and goes sliding, until it crashes into a pile of soft snow with a surprised squeak.\n\nWell, the good thing is that it doesn\'t seem scared of you anymore. Your patience showed kindness.';
       case 'cookies': 
-        return 'The Lumino\'s eyes light up at the sight of cookies! It eagerly comes closer, accepting your gift of friendship. Your kindness and generosity have won its heart completely.';
+        return 'You slowly pull out some cookies from your backpack and hold them out toward Lumino.\n\nThe little creature tilts its head curiously, watching you with those big, sparkling eyes.\n\nLumino takes a few careful steps closer, sniffing the air. It looks at the cookies, then at you, then back at the cookies.\n\nFinally, Lumino darts forward quickly, grabs one cookie in its mouth, and runs back to a safe distance.\n\nBut then Lumino starts coughing and spits out the cookie! It shakes its head and makes a disgusted face. Clearly, magical creatures can\'t eat the same food as humans.\n\nYou feel a little disappointed that your gift didn\'t work. But at least Lumino isn\'t running away, and its eyes look softer now, less afraid.\n\nYou\'ve made your first small step toward friendship.';
       default: return '';
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button 
-            onClick={onBack}
-            variant="ghost"
-            className="text-white hover:bg-slate-800"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Quest 3: Gaining Trust</h1>
-            <p className="text-slate-300">Help the lost Lumino by earning its trust</p>
-          </div>
-        </div>
+  const getResultPicture = (choice: string) => {
+    switch (choice) {
+      case 'approach': 
+        return '/issues/issue1/lumino shakes snow off.gif';
+      case 'wait': 
+        return '/issues/issue1/lumino-sliding.gif';
+      case 'cookies': 
+        return '/issues/issue1/lumino coughs cookie.gif';
+      default: return '/kowai/lumino.png';
+    }
+  };
 
+  return (
+    <div className="min-h-screen bg-slate-900 p-4">
+      {/* Back Button */}
+      <div className="max-w-4xl mx-auto mb-6 mt-4">
+        <Button 
+          onClick={onBack}
+          variant="ghost"
+          className="text-white hover:bg-slate-800"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Back</span>
+        </Button>
+      </div>
+
+      <div className="max-w-4xl mx-auto">
         {/* Quest Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700"
+          className="bg-gradient-to-br from-sky-200/90 via-blue-100/80 to-cyan-100/70 rounded-3xl p-8 shadow-2xl border-2 border-blue-200/40"
         >
           {!showResult ? (
             <>
-              {/* Question */}
+              {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="text-xl font-bold text-white mb-6">The Lost Lumino</h2>
-                <div className="bg-slate-700 rounded-lg p-6 mb-6">
-                  <img 
-                    src="/kowai/lumino.png" 
-                    alt="Lumino"
-                    className="w-32 h-32 mx-auto mb-4 rounded-lg object-contain"
-                  />
-                  <p className="text-slate-300 text-lg leading-relaxed">
+                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                  Quest 3: Build Trust with Lumino
+                </h2>
+              </div>
+
+              {/* Question */}
+              <div className="text-center mb-12">
+                <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                  <h2 className="text-slate-800 text-2xl font-semibold">
                     You want to help the lost and helpless young Lumino. But first, you need to gain its trust. What would you do?
-                  </p>
+                  </h2>
                 </div>
               </div>
 
               {/* Choice Options */}
-              <div className="space-y-4 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 {[
-                  { id: 'approach', text: 'Slowly approach the Lumino with your hands open to show you\'re friendly.' },
-                  { id: 'wait', text: 'Sit in the snow and let Lumino decide if it wants to come closer.' },
-                  { id: 'cookies', text: 'Take out cookies from your backpack to share as a friendship gift.' }
-                ].map((option) => (
+                  { 
+                    id: 'approach', 
+                    text: 'Slowly approach the Lumino with your hands open to show you\'re friendly.',
+                    image: '/issues/issue1/mittens.png'
+                  },
+                  { 
+                    id: 'wait', 
+                    text: 'Sit in the snow and let Lumino decide if it wants to come closer.',
+                    image: '/issues/issue1/sitting.png'
+                  },
+                  { 
+                    id: 'cookies', 
+                    text: 'Take out cookies from your backpack to share as a friendship gift.',
+                    image: '/issues/issue1/cookies.png'
+                  }
+                ].map((option, index) => (
                   <motion.button
                     key={option.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleChoiceSelect(option.id)}
-                    className={`w-full p-4 rounded-lg text-left transition-all duration-200 ${
+                    className={`p-6 rounded-xl text-center transition-all duration-200 cursor-pointer ${
                       selectedChoice === option.id
-                        ? 'bg-green-600 border-2 border-green-500'
-                        : 'bg-slate-700 border-2 border-slate-600 hover:border-slate-500'
+                        ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-400 shadow-lg shadow-purple-500/25'
+                        : 'bg-white/60 border-2 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
                     }`}
                   >
-                    <p className="text-white font-medium">{option.text}</p>
+                    <div className="mb-4">
+                      <img 
+                        src={option.image} 
+                        alt={option.text}
+                        className="w-64 h-64 mx-auto rounded-lg object-cover"
+                      />
+                    </div>
+                    <p className="text-slate-800 font-semibold text-lg leading-tight">{option.text}</p>
                   </motion.button>
                 ))}
               </div>
@@ -207,7 +238,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
                 <Button
                   onClick={handleSubmit}
                   disabled={!selectedChoice}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold disabled:opacity-50"
+                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 disabled:opacity-50 cursor-pointer"
                 >
                   Submit
                 </Button>
@@ -216,35 +247,40 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
           ) : (
             /* Results */
             <div className="text-center">
-              <div className="mb-6">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500 flex items-center justify-center">
-                  <span className="text-white text-2xl">🎉</span>
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Trust Gained!</h3>
+              <div className="mb-8">
                 <div className="mb-6">
                   <img 
-                    src="/kowai/lumino.png" 
+                    src={getResultPicture(selectedChoice!)}
                     alt="Lumino"
-                    className="w-20 h-20 mx-auto mb-3 rounded-lg object-contain"
+                    className="h-96 mx-auto mb-3 rounded-lg object-cover"
                   />
-                  <p className="text-slate-300 text-lg mb-6">
+                  <p className="text-slate-700 text-lg mb-4 whitespace-pre-line">
                     {getResultText(selectedChoice!)}
                   </p>
-                </div>
-                <div className="flex items-center justify-center gap-2 text-slate-400 mb-6">
-                  <span className="text-xl">📘</span>
-                  <span>Go back and keep reading until you reach the next quest!</span>
+                  
                 </div>
               </div>
 
+              {/* Congratulations Message */}
+              <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
+                <h4 className="text-2xl font-bold text-slate-800 mb-4">🎉 Congratulations, Explorer!</h4>
+                <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
+                <p className="text-slate-700 text-lg mb-4">
+                  Though it wasn't fully successful, your kindness towards Lumino was clear. You have proven that your heart is big enough to care for magical creatures.
+                </p>
+                <p className="text-slate-700 text-lg">
+                  Three more challenges await you. Continue forward, and show us what else you can accomplish.
+                </p>
+              </div>
+
               {/* Stats Gained */}
-              <div className="bg-slate-700 rounded-lg p-6 mb-6">
-                <h4 className="text-lg font-semibold text-white mb-3">Stats Gained:</h4>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white/60 rounded-lg p-4 mb-6 border border-blue-300/50">
+                <h4 className="text-lg font-semibold text-slate-800 mb-3 text-center">Stats Gained:</h4>
+                <div className="grid grid-cols-2 gap-3 text-slate-700 sm:flex sm:items-center sm:justify-center sm:gap-6">
                   {Object.entries(statChanges).map(([stat, value]) => {
                     const numValue = value as number;
                     return numValue > 0 && (
-                      <div key={stat} className="flex items-center justify-center gap-2 bg-slate-600 rounded-lg p-3">
+                      <span key={stat} className="flex items-center justify-center gap-1">
                         <span className={
                           stat === 'bravery' ? 'text-blue-400' :
                           stat === 'wisdom' ? 'text-yellow-400' :
@@ -256,19 +292,29 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
                            stat === 'curiosity' ? '🔍' :
                            '❤️'}
                         </span>
-                        <span className="text-white">
-                          {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{numValue}
+                        <span>
+                          {stat.charAt(0).toUpperCase() + stat.slice(1)} +{numValue}
                         </span>
-                      </div>
+                      </span>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Next Button */}
+              {/* Reading Instruction - Last before button */}
+              <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-2xl">📘</span>
+                  <span className="text-slate-800 text-lg font-semibold">
+                    Go back and keep reading until you reach the next quest!
+                  </span>
+                </div>
+              </div>
+
+              {/* Continue Button */}
               <Button 
                 onClick={handleNext}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold"
+                className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
               >
                 Continue to the next quest
                 <ArrowRight className="h-4 w-4 ml-2" />

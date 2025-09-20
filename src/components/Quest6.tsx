@@ -33,8 +33,8 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       text: "Shout loudly at the Yezu to distract it from Lumino.",
       result: {
         title: "The Power of Voice",
-        message: "Your loud shout echoes across the icy landscape! The Yezu stops mid-charge and turns its massive head toward you. Its glowing red eyes lock onto yours, and for a moment, you feel the weight of its ancient power. But then something unexpected happens - the Yezu's expression changes. It seems almost... curious about your boldness. It takes a step back, then another, before finally retreating into the shadows. Your courage and quick thinking saved Lumino!",
-        stats: { bravery: 4, wisdom: 2, curiosity: 1, empathy: 3 }
+        message: "You shout as loudly as you could: \"HEY! YOU! OVER HERE!\"\n\nThe Yezu skids to a halt, eyes snapping toward you. For a second, it stares in confusion. Then it turns and begins sprinting straight at you.\n\nYou wave your arms and ran. Your heart is pounding. Your mind is only thinking one thing: get it as far from the lumino as possible.\n\nUp ahead, you spot a cave. You dive inside just as the Yezu leaps forward to grab you. Your last shout echoed through the cliffs. Then comes the avalanche — a crashing wall of snow that falls over the cave mouth. You hear the Yezu's furious roar from the other side, muffled beneath the snow wall.\n\nThen silence.",
+        stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     },
     {
@@ -42,17 +42,17 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       text: "Throw snowballs at the Yezu to get its attention.",
       result: {
         title: "A Clever Distraction",
-        message: "You quickly scoop up snow and hurl snowballs at the Yezu! The first one hits its shoulder, and the creature roars in surprise. The second snowball hits its face, and suddenly the Yezu starts... laughing? It's a deep, rumbling sound that shakes the ground. The Yezu seems amused by your playful approach! It stops its attack and instead starts making snowballs of its own, tossing them playfully. Your creative thinking turned a dangerous situation into a moment of unexpected friendship!",
-        stats: { bravery: 2, wisdom: 3, curiosity: 4, empathy: 2 }
+        message: "You quickly scoop up snow and hurl snowballs at the Yezu!\n\nThe first one hits its shoulder with a wet splat. The Yezu stops mid-charge, its massive head turning toward you with a look of pure confusion. The second snowball hits its face, and for a moment, you think you've made it even angrier.\n\nBut then something incredible happens. The Yezu's expression changes completely. Its eyes narrow, and suddenly it starts... laughing? It's a deep, rumbling sound that shakes the ground beneath your feet.\n\nThe Yezu seems genuinely amused by your playful approach! It stops its attack and instead starts making snowballs of its own, using its massive claws to pack the snow. It tosses one playfully in your direction.\n\nYou've turned a life-or-death situation into an unexpected snowball fight! The Yezu's laughter echoes across the frozen landscape as you both engage in this strange, magical moment of friendship.",
+        stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     },
     {
       id: 3,
       text: "Rush to Lumino and try to scoop it up in your arms to carry it to safety.",
       result: {
-        title: "Protective Instinct",
-        message: "You sprint toward Lumino without hesitation! As you reach down to scoop up the little creature, the Yezu's massive paw comes crashing down right where Lumino was standing. But you're faster - you've already gathered Lumino safely in your arms! The Yezu looks surprised by your speed and determination. Lumino nuzzles against your chest, and you can feel its tiny heart beating rapidly. Your protective instincts and quick reflexes saved the day!",
-        stats: { bravery: 3, wisdom: 1, curiosity: 2, empathy: 4 }
+        title: "A Hero's Rescue",
+        message: "You sprint toward Lumino with all your might, your heart pounding in your chest!\n\nThe Yezu sees you coming and roars in fury, its massive body tensing for the final strike. But you don't stop. Every muscle in your body screams with effort as you race across the icy ground.\n\nYou reach Lumino just as the Yezu's massive claw comes crashing down. Time seems to slow as you dive forward, your arms outstretched. With a desperate leap, you scoop up the little creature and roll to safety.\n\nThe Yezu's claw crashes into the ground where Lumino was just standing, sending chunks of ice and snow flying in all directions. The impact shakes the earth beneath you.\n\nYou hold Lumino close as you both catch your breath, the little creature trembling against your chest. The Yezu glares at you for a long moment, its red eyes burning with intensity. But then something changes in its expression.\n\nIt seems to respect your courage. The Yezu takes a step back, then another, before finally turning and walking away into the shadows, leaving you and Lumino safe in the frozen silence.",
+        stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     }
   ];
@@ -144,52 +144,86 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     const statChanges = choice.result.stats;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 p-4">
+      <div className="min-h-screen bg-slate-900 p-4">
+        {/* Back Button */}
+        <div className="max-w-4xl mx-auto mb-6 mt-4">
+          <Button 
+            onClick={onBack}
+            variant="ghost"
+            className="text-white hover:bg-slate-800"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Back</span>
+          </Button>
+        </div>
+
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
-            <Button 
-              onClick={onBack}
-              variant="ghost"
-              className="text-white hover:bg-slate-800"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Quest 6: The Yezu Encounter</h1>
-              <p className="text-slate-300">Your choice has consequences...</p>
-            </div>
-          </div>
 
           {/* Result */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700"
+            className="bg-gradient-to-br from-sky-200/90 via-blue-100/80 to-cyan-100/70 rounded-3xl p-8 shadow-2xl border-2 border-blue-200/40"
           >
-            <h2 className="text-xl font-bold text-green-400 mb-4">{choice.result.title}</h2>
-            <p className="text-white text-lg leading-relaxed mb-6">
-              {choice.result.message}
-            </p>
-            
-            {/* Stats Gained */}
-            <div className="bg-slate-700 rounded-lg p-6 mb-6">
-              <h4 className="text-lg font-semibold text-white mb-3">Stats Gained:</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(statChanges).map(([stat, value]) => (
-                  <div key={stat} className="text-center">
-                    <div className="text-2xl font-bold text-green-400">+{value}</div>
-                    <div className="text-sm text-slate-300 capitalize">{stat}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             <div className="text-center">
+              <h2 className="text-3xl font-bold text-slate-800 mb-6">{choice.result.title}</h2>
+              <p className="text-slate-200 text-xl leading-relaxed mb-6 whitespace-pre-line">
+                {choice.result.message}
+              </p>
+              
+              {/* Congratulations Message */}
+              <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl p-6 mb-6 border border-purple-500/30">
+                <h4 className="text-2xl font-bold text-purple-100 mb-4">🎉 Incredible courage, young trainer!</h4>
+                <p className="text-purple-100 font-bold text-2xl mb-4">You have proven your <span className="text-blue-400 font-bold text-2xl">BRAVERY</span>.</p>
+                <p className="text-purple-100 text-lg leading-relaxed">
+                  In that moment of danger, when the mighty Yezu threatened helpless Lumino, you didn't hesitate to put yourself at risk to help. Whether your quick thinking saved Lumino or not, your heart showed the true spirit of a Kowai Trainer. You chose to act with courage.
+                </p>
+                <p className="text-purple-100 text-lg leading-relaxed mt-3">
+                  Now you shall keep reading and found out if your action actually saves the Lumino.
+                </p>
+              </div>
+              
+              {/* Stats Gained */}
+              <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                <h4 className="text-xl font-semibold text-slate-800 mb-4">Stats Gained:</h4>
+                <div className="grid grid-cols-2 sm:flex sm:justify-center sm:gap-6 gap-3">
+                  {Object.entries(statChanges).map(([stat, value]) => {
+                    const numValue = value as number;
+                    return numValue > 0 && (
+                      <div key={stat} className="flex items-center justify-center gap-2">
+                        <span className={
+                          stat === 'bravery' ? 'text-blue-400' :
+                          stat === 'wisdom' ? 'text-yellow-400' :
+                          stat === 'curiosity' ? 'text-green-400' :
+                          'text-pink-400'
+                        }>
+                          {stat === 'bravery' ? '🛡️' :
+                           stat === 'wisdom' ? '⭐' :
+                           stat === 'curiosity' ? '🔍' :
+                           '❤️'}
+                        </span>
+                        <span className="text-slate-700 font-medium">
+                          {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{numValue}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Reading Instruction */}
+              <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-6 mb-6 border border-blue-500/30">
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-2xl">📘</span>
+                  <p className="text-blue-100 text-lg font-semibold">
+                    Go back and keep reading until you reach the next quest!
+                  </p>
+                </div>
+              </div>
+
               <Button 
                 onClick={handleContinue}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold"
+                className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
               >
                 Continue to the next quest
               </Button>
@@ -201,36 +235,39 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button 
-            onClick={onBack}
-            variant="ghost"
-            className="text-white hover:bg-slate-800"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Quest 6: The Yezu Encounter</h1>
-            <p className="text-slate-300">A dangerous moment requires quick thinking</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-900 p-4">
+      {/* Back Button */}
+      <div className="max-w-4xl mx-auto mb-6 mt-4">
+        <Button 
+          onClick={onBack}
+          variant="ghost"
+          className="text-white hover:bg-slate-800"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Back</span>
+        </Button>
+      </div>
 
+      <div className="max-w-4xl mx-auto">
         {/* Quest Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700"
+          className="bg-gradient-to-br from-sky-200/90 via-blue-100/80 to-cyan-100/70 rounded-3xl p-8 shadow-2xl border-2 border-blue-200/40"
         >
+          {/* Quest Header */}
           <div className="text-center mb-8">
-            <div className="text-6xl mb-4">🐉</div>
-            <h2 className="text-2xl font-bold text-white mb-4">The Yezu Roars!</h2>
-            <p className="text-lg text-slate-300 leading-relaxed">
-              The Yezu roared again and charged at the Lumino, claws raised. Your heart pounds — you have to act fast! What would you do?
-            </p>
+            <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+              Quest 6: Save Lumino
+            </h2>
+          </div>
+
+          <div className="text-center mb-12">
+            <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+              <h2 className="text-slate-800 text-2xl font-semibold">
+                Yezu is about to hurt Lumino! What would you do?
+              </h2>
+            </div>
           </div>
 
           {/* Choices */}
@@ -241,23 +278,14 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleChoiceSelect(choice.id)}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all duration-200 ${
+                className={`w-full p-6 rounded-2xl border-2 text-left transition-all duration-200 cursor-pointer ${
                   selectedChoice === choice.id
-                    ? 'bg-blue-600 border-2 border-blue-500'
-                    : 'bg-slate-700 border-2 border-slate-600 hover:border-slate-500'
+                    ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-400 shadow-lg shadow-purple-500/25'
+                    : 'bg-white/60 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    selectedChoice === choice.id
-                      ? 'border-white bg-white'
-                      : 'border-slate-400'
-                  }`}>
-                    {selectedChoice === choice.id && (
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    )}
-                  </div>
-                  <span className="text-white font-medium">{choice.text}</span>
+                  <span className="text-slate-800 font-medium">{choice.text}</span>
                 </div>
               </motion.button>
             ))}
@@ -268,7 +296,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
             <Button
               onClick={handleSubmit}
               disabled={selectedChoice === null}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold disabled:opacity-50"
+              className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 disabled:opacity-50 cursor-pointer"
             >
               Make Your Choice
             </Button>

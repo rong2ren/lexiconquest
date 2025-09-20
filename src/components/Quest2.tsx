@@ -187,46 +187,61 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button 
-            onClick={onBack}
-            variant="ghost"
-            className="text-white hover:bg-slate-800"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Quest 2: Find the Continent</h1>
-            <p className="text-slate-300">Solve the riddle to discover your destination</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-900 p-4">
+      {/* Back Button */}
+      <div className="max-w-4xl mx-auto mb-6 mt-4">
+        <Button 
+          onClick={onBack}
+          variant="ghost"
+          className="text-white hover:bg-slate-800"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Back</span>
+        </Button>
+      </div>
 
+      <div className="max-w-4xl mx-auto">
         {/* Quest Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700"
+          className="bg-gradient-to-br from-sky-200/90 via-blue-100/80 to-cyan-100/70 rounded-3xl p-8 shadow-2xl border-2 border-blue-200/40"
         >
           {!showResult ? (
             <>
-              {/* Riddle */}
+              {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="text-xl font-bold text-white mb-6">The Riddle</h2>
-                <div className="bg-slate-700 rounded-lg p-6 mb-6">
-                  <p className="text-slate-300 text-lg leading-relaxed whitespace-pre-line">
-                    {"At the bottom of the world so wide, where snowy silence grows.\n" +
-                     "Mountains sleep beneath the ice, where hidden fire glows.\n" +
-                     "The sun may shine for weeks on end, then vanish from the sky.\n" +
-                     "And glowing lights in purple-green will swirl and flicker by."}
-                  </p>
+                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                  Quest 2: Find the Continent
+                </h2>
+              </div>
+
+              {/* Riddle */}
+              <div className="text-center mb-12">
+                
+                <div className="relative rounded-2xl p-8 overflow-hidden mb-8 shadow-lg shadow-blue-500/20" style={{
+                  backgroundImage: 'url(/kowai/riddle_i1q2.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}>
+                  {/* Overlay for better text readability */}
+                  <div className="absolute inset-0 bg-slate-900/70 rounded-2xl"></div>
+                  <div className="relative z-10">
+                    <p className="text-slate-200 text-xl leading-relaxed whitespace-pre-line drop-shadow-md">
+                      {"At the bottom of the world so wide, where snowy silence grows.\n" +
+                       "Mountains sleep beneath the ice, where hidden fire glows.\n" +
+                       "The sun may shine for weeks on end, then vanish from the sky.\n" +
+                       "And glowing lights in purple-green will swirl and flicker by."}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-slate-300 text-lg">
-                  Question: Which continent the magic has brought you to?
-                </p>
+                
+                <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                  <h2 className="text-slate-800 text-2xl font-semibold">
+                    Which continent the magic has brought you to?
+                  </h2>
+                </div>
               </div>
 
               {/* Continent Choices */}
@@ -245,13 +260,13 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleContinentSelect(continent.toLowerCase().replace(' ', '_'))}
-                    className={`p-4 rounded-lg text-center transition-all duration-200 ${
+                    className={`p-4 rounded-lg text-center transition-all duration-200 cursor-pointer ${
                       selectedContinent === continent.toLowerCase().replace(' ', '_')
-                        ? 'bg-blue-600 border-2 border-blue-500'
-                        : 'bg-slate-700 border-2 border-slate-600 hover:border-slate-500'
+                        ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-400 shadow-lg shadow-purple-500/25'
+                        : 'bg-white/60 border-2 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
                     }`}
                   >
-                    <p className="text-white font-medium">{continent}</p>
+                    <p className="text-slate-800 font-medium">{continent}</p>
                   </motion.button>
                 ))}
               </div>
@@ -261,7 +276,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                 <Button
                   onClick={handleSubmit}
                   disabled={!selectedContinent}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold disabled:opacity-50"
+                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 disabled:opacity-50 cursor-pointer"
                 >
                   Submit
                 </Button>
@@ -272,43 +287,59 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
             <div className="text-center">
               {isCorrect ? (
                 <>
-                  <div className="mb-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500 flex items-center justify-center">
-                      <span className="text-white text-2xl">🎉</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Congratulations, Explorer!</h3>
-                    <p className="text-slate-300 text-lg mb-6">
-                      You have proven your <span className="text-green-400 font-semibold">CURIOSITY</span>.
-                    </p>
-                    <p className="text-slate-300 mb-6">
-                      You looked at the clues, studied the world, and found the answers hidden in the frozen land of Antarctica. 
-                      This is exactly the kind of thinking that separates true Kowai Trainers from ordinary people.
-                    </p>
-                    <p className="text-slate-300 mb-6">
-                      But do not celebrate too long, for your trials have only just begun. 
-                      Three greater challenges still lie ahead of you, each one designed to test a different part of your character.
-                    </p>
-                    <div className="flex items-center justify-center gap-2 text-slate-400 mb-6">
-                      <span className="text-xl">📘</span>
-                      <span>Go back and keep reading until you reach the next quest!</span>
+                  <div className="mb-8">
+                      <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Congratulations, Explorer!</h3>
+                      <div className="mb-6">
+                        <img 
+                          src="/issues/issue1/antartica_map.gif" 
+                          alt="Antarctica Map" 
+                          className="mx-auto max-w-md w-full"
+                        />
+                      </div>
+                    
+                    <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
+                      <h4 className="text-2xl font-bold text-slate-800 mb-4">🎉 Congratulations, Explorer!</h4>
+                      <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-green-600 font-bold text-xl">CURIOSITY</span>.</p>
+                      <p className="text-slate-700 text-lg mb-4">
+                        You looked at the clues, studied the world, and found the answers hidden in the frozen land of Antarctica. 
+                        This is exactly the kind of thinking that separates true Kowai Trainers from ordinary people.
+                      </p>
+                      <p className="text-slate-700 text-lg mb-4">
+                        Your ability to observe, analyze, and connect the dots shows that you have the mind of a true explorer. 
+                        You didn't just guess - you used your intelligence to piece together the puzzle and discover the truth.
+                      </p>
+                      <p className="text-slate-700 text-lg">
+                        But do not celebrate too long, for your trials have only just begun. 
+                        Three greater challenges still lie ahead of you, each one designed to test a different part of your character.
+                      </p>
                     </div>
                   </div>
 
                   {/* Stats Gained */}
-                  <div className="bg-slate-700 rounded-lg p-6 mb-6">
-                    <h4 className="text-lg font-semibold text-white mb-3">Stats Gained:</h4>
+                  <div className="bg-white/60 rounded-lg p-4 mb-6 border border-blue-300/50">
+                    <h4 className="text-lg font-semibold text-slate-800 mb-3 text-center">Stats Gained:</h4>
                     <div className="flex justify-center">
-                      <div className="flex items-center justify-center gap-2 bg-slate-600 rounded-lg p-3">
+                      <span className="flex items-center justify-center gap-2 text-slate-700">
                         <span className="text-green-400">🔍</span>
-                        <span className="text-white">Curiosity: +3</span>
-                      </div>
+                        <span>Curiosity +3</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Reading Instruction - Last before button */}
+                  <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl p-4 mb-6 border-2 border-blue-500/30">
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="text-2xl">📘</span>
+                      <span className="text-slate-200 text-lg font-semibold">
+                        Go back and keep reading until you reach the next quest!
+                      </span>
                     </div>
                   </div>
 
                   {/* Next Button */}
                   <Button 
                     onClick={handleNext}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold"
+                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                   >
                     Continue to the next quest
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -316,20 +347,47 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                 </>
               ) : (
                 <>
-                  <div className="mb-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-500 flex items-center justify-center">
-                      <span className="text-white text-2xl">❌</span>
+                  <div className="mb-8">
+                    <h3 className="text-3xl font-bold text-slate-800 mb-6">Uh-oh… Not quite.</h3>
+                    
+                    <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                      <p className="text-slate-700 text-lg mb-4">
+                        Your answer shows promise, but you have not yet solved the riddle completely. Do not worry - even the greatest explorers sometimes need help.
+                      </p>
+                      <p className="text-slate-700 text-lg mb-6">
+                        Let me give you with a little more light to help you see the path:
+                      </p>
+                      
+                      <div className="bg-slate-600/50 rounded-xl p-4 mb-4">
+                        <p className="text-slate-200 text-lg leading-relaxed whitespace-pre-line">
+                          {"🗺️ At the bottom of the world so wide, where snowy silence grows.\n" +
+                           "🏔️ Mountains sleep beneath the ice, where hidden fire glows.\n" +
+                           "☀️ The sun may shine for weeks on end, then vanish from the sky.\n" +
+                           "🌌 And glowing lights in purple-green will swirl and flicker by."}
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <p className="text-slate-700 text-base">
+                          <span className="text-xl">🗺️</span> - Think about which continent sits at the very bottom of our planet, the farthest south you can go.
+                        </p>
+                        <p className="text-slate-700 text-base">
+                          <span className="text-xl">🏔️</span> - This speaks of volcanoes buried under thick snow and ice. Which frozen land has volcanoes sleeping under its white blanket?
+                        </p>
+                        <p className="text-slate-700 text-base">
+                          <span className="text-xl">☀️</span> - This describes the strange way day and night work at the bottom of the world: sometimes all light, sometimes all darkness for months at a time.
+                        </p>
+                        <p className="text-slate-700 text-base">
+                          <span className="text-xl">🌌</span> - These are the magical dancing lights called aurora that paint the dark polar sky in beautiful colors.
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Uh-oh… Not quite.</h3>
-                    <p className="text-slate-300 text-lg mb-6">
-                      Check your map, read the riddle again, and give it another try!
-                    </p>
                   </div>
 
                   {/* Try Again Button */}
                   <Button 
                     onClick={handleTryAgain}
-                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-8 py-3 text-lg font-semibold"
+                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-orange-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                   >
                     Try Again
                   </Button>
