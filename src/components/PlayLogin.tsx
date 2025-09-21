@@ -15,7 +15,7 @@ export function PlayLogin() {
   const [loginData, setLoginData] = useState({
     firstName: '',
     lastName: '',
-    birthday: ''
+    age: ''
   });
   const [loginError, setLoginError] = useState('');
 
@@ -36,15 +36,20 @@ export function PlayLogin() {
     setLoginError('');
 
     try {
+      const age = parseInt(loginData.age);
+      if (isNaN(age) || age < 1 || age > 18) {
+        throw new Error('Please enter a valid age between 1 and 18');
+      }
+
       // Try to find existing trainer first
-      const trainerId = `${loginData.firstName.toLowerCase()}_${loginData.lastName.toLowerCase()}_${loginData.birthday}`;
+      const trainerId = `${loginData.firstName.toLowerCase()}_${loginData.lastName.toLowerCase()}_${age}`;
       const existingTrainer = availableTrainers.find(t => t.trainerId === trainerId);
       
       if (existingTrainer) {
         await switchTrainer(trainerId);
       } else {
         // Create new trainer
-        await signup(loginData.firstName, loginData.lastName, loginData.birthday);
+        await signup(loginData.firstName, loginData.lastName, age);
       }
     } catch (error) {
       setLoginError(error instanceof Error ? error.message : 'Failed to login');
@@ -52,8 +57,31 @@ export function PlayLogin() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setLoginData(prev => ({ ...prev, [field]: value }));
+    // For age field, only allow numeric characters
+    if (field === 'age') {
+      // Remove any non-numeric characters except empty string
+      const numericValue = value.replace(/[^0-9]/g, '');
+      setLoginData(prev => ({ ...prev, [field]: numericValue }));
+    } else {
+      setLoginData(prev => ({ ...prev, [field]: value }));
+    }
     if (loginError) setLoginError('');
+  };
+
+  const handleAgeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
+    if ([8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (e.keyCode === 65 && e.ctrlKey === true) ||
+        (e.keyCode === 67 && e.ctrlKey === true) ||
+        (e.keyCode === 86 && e.ctrlKey === true) ||
+        (e.keyCode === 88 && e.ctrlKey === true)) {
+      return;
+    }
+    // Ensure that it is a number and stop the keypress
+    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+      e.preventDefault();
+    }
   };
 
   return (
@@ -172,12 +200,16 @@ export function PlayLogin() {
 
             <div className="mb-8">
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Birthday:
+                Age:
               </label>
               <input
-                type="date"
-                value={loginData.birthday}
-                onChange={(e) => handleInputChange('birthday', e.target.value)}
+                type="number"
+                min="1"
+                max="18"
+                value={loginData.age}
+                onChange={(e) => handleInputChange('age', e.target.value)}
+                onKeyDown={handleAgeKeyDown}
+                placeholder="Enter your age"
                 required
                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />

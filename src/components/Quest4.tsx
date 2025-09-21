@@ -27,11 +27,16 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
     trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 4 Started`, {
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
   }, []);
+
+  // Scroll to top when component mounts or re-renders
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [showResult]);
 
   const handleCoordinateSelect = (coordinate: string) => {
     setSelectedCoordinate(coordinate);
@@ -44,7 +49,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
       selectionTime: selectionTime - questStartTime, // Time to decide in ms
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
@@ -129,7 +134,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
           decisionTime: decisionTime,
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-          trainerBirthday: currentTrainer.birthday,
+          trainerAge: currentTrainer.age,
           trainerStatsBefore: currentTrainer.stats,
           trainerStatsAfter: newStats,
           questStartTime: questStartTime,
@@ -162,7 +167,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
         coordinate: selectedCoordinate,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-        trainerBirthday: currentTrainer.birthday,
+        trainerAge: currentTrainer.age,
         trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
         submissionTime: Date.now()
@@ -222,7 +227,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
               </div>
 
               {/* Question */}
-              <div className="text-center mb-12">
+              <div className="text-left mb-12">
                 <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                   <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
                     The Lumino is lost in the vast, snowy wilderness of Antarctica. To help it reach the South Pole safely, you need to figure out your exact starting point on the map.
@@ -239,7 +244,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                   <div className="text-center">
                     <h3 className="text-xl font-semibold text-slate-800 mb-4">Enter Your Coordinate</h3>
                     <p className="text-slate-200 text-sm mb-6">
-                      Type the coordinate where you're standing (e.g., C5)
+                      Type the coordinate where you're standing (e.g., A1)
                     </p>
                     <div className="max-w-xs mx-auto">
                       <Input
@@ -324,11 +329,11 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
             </>
           ) : (
             /* Results */
-            <div className="text-center">
+            <div className="text-left">
               {isCorrect ? (
                 <>
                   <div className="mb-8">
-                    <h3 className="text-3xl font-bold text-slate-800 mb-6">Awesome work!</h3>
+                    <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Awesome work!</h3>
                     <p className="text-slate-700 text-lg mb-6">
                       You've successfully found your exact position in Antarctica. Now that you know where you are, it's time for your next challenge.
                     </p>
@@ -336,7 +341,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
 
                   {/* Stats Gained */}
                   <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
-                    <h4 className="text-xl font-semibold text-slate-800 mb-4">Stats Gained:</h4>
+                    <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
                     <div className="grid grid-cols-2 sm:flex sm:justify-center sm:gap-6 gap-3">
                       {Object.entries(statChanges).map(([stat, value]) => {
                         const numValue = value as number;
@@ -373,13 +378,15 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                   </div>
 
                   {/* Continue Button */}
-                  <Button 
-                    onClick={handleNext}
-                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
-                  >
-                    Continue to the next quest
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      onClick={handleNext}
+                      className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
+                    >
+                      Continue to the next quest
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
                 </>
               ) : (
                 <>
@@ -420,12 +427,14 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                   </div>
 
                   {/* Try Again Button */}
-                  <Button 
-                    onClick={handleTryAgain}
-                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 cursor-pointer"
-                  >
-                    Try Again
-                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      onClick={handleTryAgain}
+                      className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 cursor-pointer"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
                 </>
               )}
             </div>

@@ -22,11 +22,16 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
     trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 1 Started`, {
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
   }, []);
+
+  // Scroll to top when component mounts or re-renders
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [showResult]);
 
   const handleKowaiSelect = (kowai: string) => {
     setSelectedKowai(kowai);
@@ -39,7 +44,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
       selectionTime: selectionTime - questStartTime, // Time to decide in ms
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
@@ -95,7 +100,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
         decisionTime: decisionTime,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-        trainerBirthday: currentTrainer.birthday,
+        trainerAge: currentTrainer.age,
         trainerStatsBefore: currentTrainer.stats,
         trainerStatsAfter: newStats,
         questStartTime: questStartTime,
@@ -150,15 +155,15 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-10">
-                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="mb-8 text-4xl font-bold text-slate-800 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 1: Where Adventure Starts
                 </h2>
                 
-                {/* Question Container */}
-                <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
-                  <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
-                    Which kowai do you want your egg to hatch into?
-                  </h2>
+                  {/* Question Container */}
+                  <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50 text-left">
+                    <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
+                      Which kowai do you want your egg to hatch into?
+                    </h2>
                   <div className="flex items-center justify-center gap-2 text-slate-700">
                     <p className="text-lg">
                       Before you choose, make sure you have read the pages to learn about each one's personality and its power.
@@ -210,9 +215,9 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
             </>
           ) : (
             /* Results */
-            <div className="text-center">
+            <div className="text-left">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-slate-800 mb-4">Kowai Chosen!</h3>
+                <h3 className="text-2xl font-bold text-slate-800 mb-6"> 🎉 Kowai Chosen!</h3>
                 <div className="mb-6">
                   <img 
                     src={`/kowai/${selectedKowai}.png`} 
@@ -238,8 +243,8 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
               </div>
 
               {/* Stats Gained */}
-              <div className="bg-white/60 rounded-lg p-4 mb-6 border border-blue-300/50">
-                <h4 className="text-lg font-semibold text-slate-800 mb-3 text-center">Stats Gained:</h4>
+              <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
                 <div className="grid grid-cols-2 gap-3 text-slate-700 sm:flex sm:items-center sm:justify-center sm:gap-6">
                   <span className="flex items-center justify-center gap-1">
                     <span className="text-blue-400">🛡️</span>
@@ -271,13 +276,15 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
               </div>
 
               {/* Next Button */}
-              <Button 
-                onClick={handleNext}
-                className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
-              >
-                Continue to the next quest
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+              <div className="text-center">
+                <Button 
+                  onClick={handleNext}
+                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
+                >
+                  Continue to the next quest
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </div>
           )}
         </motion.div>

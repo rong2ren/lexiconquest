@@ -15,7 +15,7 @@ export function NewTrainerForm({ isOpen = true, onClose, onSuccess }: NewTrainer
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    birthday: ''
+    age: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +26,12 @@ export function NewTrainerForm({ isOpen = true, onClose, onSuccess }: NewTrainer
     setError('');
 
     try {
-      await addNewTrainer(formData.firstName, formData.lastName, formData.birthday);
+      const age = parseInt(formData.age);
+      if (isNaN(age) || age < 1 || age > 18) {
+        throw new Error('Please enter a valid age between 1 and 18');
+      }
+
+      await addNewTrainer(formData.firstName, formData.lastName, age);
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -37,8 +42,31 @@ export function NewTrainerForm({ isOpen = true, onClose, onSuccess }: NewTrainer
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // For age field, only allow numeric characters
+    if (field === 'age') {
+      // Remove any non-numeric characters except empty string
+      const numericValue = value.replace(/[^0-9]/g, '');
+      setFormData(prev => ({ ...prev, [field]: numericValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
     if (error) setError(''); // Clear error when user starts typing
+  };
+
+  const handleAgeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
+    if ([8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (e.keyCode === 65 && e.ctrlKey === true) ||
+        (e.keyCode === 67 && e.ctrlKey === true) ||
+        (e.keyCode === 86 && e.ctrlKey === true) ||
+        (e.keyCode === 88 && e.ctrlKey === true)) {
+      return;
+    }
+    // Ensure that it is a number and stop the keypress
+    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+      e.preventDefault();
+    }
   };
 
   if (!isOpen) return null;
@@ -107,14 +135,18 @@ export function NewTrainerForm({ isOpen = true, onClose, onSuccess }: NewTrainer
           </div>
 
           <div>
-            <label htmlFor="birthday" className="block text-sm font-medium text-slate-300 mb-2">
-              Birthday
+            <label htmlFor="age" className="block text-sm font-medium text-slate-300 mb-2">
+              Age
             </label>
             <input
-              id="birthday"
-              type="date"
-              value={formData.birthday}
-              onChange={(e) => handleInputChange('birthday', e.target.value)}
+              id="age"
+              type="number"
+              min="1"
+              max="18"
+              value={formData.age}
+              onChange={(e) => handleInputChange('age', e.target.value)}
+              onKeyDown={handleAgeKeyDown}
+              placeholder="Enter your age"
               required
               className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />

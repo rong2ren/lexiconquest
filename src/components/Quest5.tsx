@@ -13,7 +13,7 @@ interface Quest5Props {
 
 interface GridCell {
   coordinate: string;
-  value: number; // 0 = normal, 1 = ocean, 2 = monster/storm, 3 = start, 4 = end
+  value: number; // 0 = normal, 1 = ocean, 2 = dangerous, 3 = blocked
   isInRoute: boolean;
 }
 
@@ -25,6 +25,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
   const [questStartTime] = useState(Date.now());
   const [routeStartTime, setRouteStartTime] = useState<number | null>(null);
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
+  const [clickedCellInfo, setClickedCellInfo] = useState<{coordinate: string, info: string, position: {x: number, y: number}} | null>(null);
   const [inputCoordinate, setInputCoordinate] = useState<string>('');
   const [inputError, setInputError] = useState<string>('');
 
@@ -40,17 +41,15 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         let value = 0; // Default: normal
 
         // Define grid values
-        if (coordinate === 'C5') {
-          value = 3; // Start point
-        } else if (coordinate === 'E4') {
-          value = 4; // End point (South Pole)
-        } else if (coordinate === 'C4') {
-          value = 5; // Mount Vinson (blocked)
+        if (coordinate === 'C4') {
+          value = 3; // Blocked (Mount Vinson)
+        } else if (coordinate === 'E5') {
+          value = 3; // Blocked (Special ocean area)
         } else if (
-          // Monster/Storm areas (dangerous but passable)
+          // Dangerous areas (passable but risky)
           coordinate === 'D4' || coordinate === 'E3' || coordinate === 'H4'
         ) {
-          value = 2; // Monster/Storm
+          value = 2; // Dangerous
         } else if (
           // Ocean areas (not accessible)
           (col === 'A' && coordinate !== 'A2') || // Column A except A2
@@ -60,7 +59,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
           coordinate === 'D1' || coordinate === 'D7' ||
           coordinate === 'E6' || coordinate === 'E7' ||
           coordinate === 'H1' ||
-          coordinate === 'I2' || coordinate === 'I7' ||
+          coordinate === 'I2' || coordinate === 'I3' || coordinate === 'I7' ||
           coordinate === 'J1' || coordinate === 'J2' || coordinate === 'J3'
         ) {
           value = 1; // Ocean
@@ -84,11 +83,16 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
     trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 5 Started`, {
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
   }, []);
+
+  // Scroll to top when component mounts or re-renders
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [showResult]);
 
   // Check if two coordinates are adjacent
   const areAdjacent = (coord1: string, coord2: string): boolean => {
@@ -103,35 +107,75 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
   };
 
   // Handle cell click for route building
-  const handleCellClick = (coordinate: string) => {
+  const handleCellClick = (coordinate: string, event: React.MouseEvent) => {
     const cell = grid.find(c => c.coordinate === coordinate);
     if (!cell) return;
 
+    // Show terrain info for blocked areas only
+    if (cell.value === 3) {
+      const terrainInfo = getTerrainInfo(cell);
+      const rect = event.currentTarget.getBoundingClientRect();
+      setClickedCellInfo({
+        coordinate,
+        info: terrainInfo,
+        position: {
+          x: rect.left + rect.width / 2,
+          y: rect.top - 10
+        }
+      });
+
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        setClickedCellInfo(null);
+      }, 3000);
+      return; // Don't add blocked areas to route
+    }
+
     const lastCoordinate = route[route.length - 1];
     
-    // If clicking the last coordinate, remove it (undo) - no warnings needed
-    if (coordinate === lastCoordinate && route.length > 1) {
+    // If clicking the last coordinate, remove it (undo) - but never remove C5
+    if (coordinate === lastCoordinate && coordinate !== 'C5') {
       const newRoute = route.slice(0, -1);
       setRoute(newRoute);
       updateGridRoute(newRoute);
       return;
     }
 
-    // Show warning popups for dangerous/blocked areas only when adding new cells
-    if (cell.value === 2) {
-      alert('⚠️ Warning! This area contains dangerous monsters or storms. You can still pass through, but be extra careful!');
-      // Continue to add to route (dangerous but passable)
-    }
-    if (cell.value === 5) {
-      alert('⚠️ Warning! Mount Vinson is too steep to climb. You must go around it!');
-      return; // Don't add to route (impassable)
-    }
+    // Don't add ocean areas to route
     if (cell.value === 1) {
-      return; // Ocean - can't click, no popup needed (impassable)
+      return; // Ocean - impassable
+    }
+
+    // If route is empty, allow starting with C5
+    if (route.length === 0 && coordinate === 'C5') {
+      const newRoute = [coordinate];
+      setRoute(newRoute);
+      updateGridRoute(newRoute);
+      
+      // Track route building
+      if (!routeStartTime) {
+        setRouteStartTime(Date.now());
+      }
+      
+      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 5 Route Cell Added`, {
+        coordinate: coordinate,
+        routeLength: newRoute.length,
+        trainerId: currentTrainer?.uid,
+        trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+        trainerAge: currentTrainer?.age,
+        trainerStats: currentTrainer?.stats,
+        questStartTime: questStartTime
+      });
+      return;
     }
 
     // If clicking an adjacent cell, add it to route
-    if (areAdjacent(lastCoordinate, coordinate)) {
+    if (lastCoordinate && areAdjacent(lastCoordinate, coordinate)) {
+      // Prevent backtracking - don't add cells that are already in the route
+      if (route.includes(coordinate)) {
+        return; // Cell already in route, don't add it again
+      }
+      
       const newRoute = [...route, coordinate];
       setRoute(newRoute);
       updateGridRoute(newRoute);
@@ -146,7 +190,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         routeLength: newRoute.length,
         trainerId: currentTrainer?.uid,
         trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-        trainerBirthday: currentTrainer?.birthday,
+        trainerAge: currentTrainer?.age,
         trainerStats: currentTrainer?.stats,
         questStartTime: questStartTime
       });
@@ -167,41 +211,15 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
   const validateRoute = (routeToValidate: string[]): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
     
-    // Check if route starts at C5
-    if (routeToValidate[0] !== 'C5') {
-      errors.push('Route must start at C5');
+    // Check if route is exactly the correct path: C5 → D5 → D4 → E4
+    const correctRoute = ['C5', 'D5', 'D4', 'E4'];
+    if (JSON.stringify(routeToValidate) !== JSON.stringify(correctRoute)) {
+      errors.push('Route must be exactly: C5 → D5 → D4 → E4');
+      return { isValid: false, errors };
     }
     
-    // Check if route ends at South Pole (E4)
-    if (routeToValidate[routeToValidate.length - 1] !== 'E4') {
-      errors.push('Route must end at the South Pole (E4)');
-    }
-    
-    // Check if all moves are adjacent
-    for (let i = 1; i < routeToValidate.length; i++) {
-      if (!areAdjacent(routeToValidate[i - 1], routeToValidate[i])) {
-        errors.push('Route must follow grid lines (no diagonal moves)');
-        break;
-      }
-    }
-    
-    // Check if route goes through inaccessible areas (ocean or monster/storm)
-    for (const coordinate of routeToValidate) {
-      const cell = grid.find(c => c.coordinate === coordinate);
-      if (cell && (cell.value === 1 || cell.value === 2)) {
-        if (cell.value === 1) {
-          errors.push('Route cannot go through ocean areas');
-        } else if (cell.value === 2) {
-          errors.push('Route cannot go through monster/storm areas');
-        }
-        break;
-      }
-    }
-    
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
+    // If we reach here, the route is exactly correct
+    return { isValid: true, errors: [] };
   };
 
   // Handle route submission
@@ -261,7 +279,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
           executionTime: executionTime,
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-          trainerBirthday: currentTrainer.birthday,
+          trainerAge: currentTrainer.age,
           trainerStatsBefore: currentTrainer.stats,
           trainerStatsAfter: newStats,
           questStartTime: questStartTime,
@@ -296,7 +314,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         errors: validation.errors,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-        trainerBirthday: currentTrainer.birthday,
+        trainerAge: currentTrainer.age,
         trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
         submissionTime: Date.now()
@@ -361,27 +379,30 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
       return;
     }
 
-    // Check if it's an ocean cell (impassable)
+    // Check if it's an impassable cell (ocean or blocked)
     const cell = grid.find(c => c.coordinate === inputCoordinate);
-    if (cell && cell.value === 1) {
-      setInputError('Cannot go through ocean areas');
-      return;
-    }
-
-    // Check if it's Mount Vinson (blocked)
-    if (cell && cell.value === 5) {
-      setInputError('Mount Vinson is too steep to climb. Go around it!');
+    if (cell && (cell.value === 1 || cell.value === 3)) {
+      if (cell.value === 1) {
+        setInputError('You cannot leave Antarctica and travel over the ocean');
+      } else if (cell.value === 3) {
+        if (inputCoordinate === 'C4') {
+          setInputError('You and Lumino are too weak to climb over Mount Vinson');
+        } else if (inputCoordinate === 'E5') {
+          setInputError('You cannot leave Antarctica and travel over the ocean');
+        } else {
+        }
+      }
       return;
     }
 
     // Valid coordinate - add to route
-    handleCellClick(inputCoordinate);
+    handleCellClick(inputCoordinate, {} as React.MouseEvent);
     setInputCoordinate('');
     setInputError('');
   };
 
   const removeLastCoordinate = () => {
-    if (route.length > 1) {
+    if (route.length > 1 && route[route.length - 1] !== 'C5') {
       const newRoute = route.slice(0, -1);
       setRoute(newRoute);
       updateGridRoute(newRoute);
@@ -393,8 +414,18 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
     return 'w-16 h-16 rounded-lg';
   };
 
+  const getTerrainInfo = (cell: GridCell) => {
+    // Show info for blocked areas (C4 and E5)
+    if (cell.coordinate === 'C4') {
+      return 'You and Lumino are too weak to climb over Mount Vinson';
+    } else if (cell.coordinate === 'E5') {
+      return 'You cannot leave Antarctica and travel over the ocean';
+    }
+    return 'Click on a cell to see terrain information';
+  };
+
   const getCellInlineStyle = (cell: GridCell) => {
-    // Check route first (highest priority) - same as starting point
+    // Check route first (highest priority)
     if (cell.isInRoute) {
       return { 
         '--border-color': 'rgba(168, 85, 247, 0.9)',
@@ -405,17 +436,6 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         boxShadow: '0 0 8px rgba(168, 85, 247, 0.5)'
       }; // Route - Purple gradient
     }
-    // Then check starting point
-    else if (cell.value === 3) {
-      return { 
-        '--border-color': 'rgba(168, 85, 247, 0.9)',
-        '--border-width': '3px',
-        borderColor: 'var(--border-color)',
-        borderWidth: 'var(--border-width)',
-        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4))',
-        boxShadow: '0 0 8px rgba(168, 85, 247, 0.5)'
-      }; // Start point - Purple gradient
-    } 
     // All other cells - minimal border for visibility
     else {
       return { 
@@ -492,7 +512,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
               </div>
 
               {/* Instructions */}
-              <div className="text-center mb-12">
+              <div className="text-left mb-8">
                 <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                   <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
                     Plan the shortest possible route to get Lumino to the South Pole before it's too late.
@@ -501,9 +521,8 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                     <p>• You must follow the grid lines - you cannot cut across the wilderness between grid points.</p>
                     <p>• You and Lumino are too weak to climb over Mount Vinson, so you must go around it.</p>
                     <p>• You cannot leave Antarctica and travel over the ocean.</p>
-                    <p>• There are dangerous monsters along some paths. You can still use those routes, just be extra careful and quiet.</p>
                     <p className="text-yellow-600 font-semibold">• You start at coordinate C5 and must reach the South Pole at E4.</p>
-                    <p className="text-blue-600 mt-4">💡 <strong>Tip:</strong> Hover over cells to see which ones are clickable!</p>
+                    <p className="text-blue-600 mt-4 hidden md:block">💡 <strong>Tip:</strong> Hover over cells to see which ones are clickable!</p>
                   </div>
                 </div>
               </div>
@@ -513,46 +532,51 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
               <div className="md:hidden mb-8">
                 <div className="bg-slate-700 rounded-lg p-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-slate-800 mb-4">Plan Your Route</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">Plan Your Route</h3>
                     <p className="text-slate-300 text-sm mb-4">
                       Add coordinates to your route step by step
                     </p>
                     
                     {/* Current Route Display */}
                     <div className="mb-6">
-                      <p className="text-slate-700 text-sm mb-2">Current Route:</p>
-                      <div className="bg-slate-600 rounded-lg p-3 min-h-[3rem] flex items-center justify-center">
-                        {route.length > 1 ? (
+                      <p className="text-slate-200 text-sm mb-2 font-semibold">📍 Your Route So Far:</p>
+                      {route.length > 1 ? (
+                        <div className="bg-slate-600 rounded-lg p-3 min-h-[3rem] flex items-center justify-center">
                           <span className="text-white font-mono text-sm">
                             {route.join(' → ')}
                           </span>
-                        ) : (
-                          <span className="text-slate-400 text-sm">Start at C5</span>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <p className="text-slate-200 text-sm font-semibold text-center">🏁 Start at C5</p>
+                      )}
                     </div>
 
                     {/* Input Controls */}
                     <div className="space-y-3">
+                      <p className="text-slate-200 text-sm font-semibold">🎯 Add Next Step:</p>
                       <div className="flex gap-3">
-                        <Input
-                          type="text"
-                          value={inputCoordinate}
-                          onChange={(e) => handleInputChange(e.target.value)}
-                          placeholder="input next cell"
-                          maxLength={2}
-                          className={`text-center text-lg font-mono uppercase tracking-wider flex-1 bg-slate-600 text-white border-2 transition-all duration-200 ${
-                            inputError 
-                              ? 'border-red-500 focus:border-red-400' 
-                              : 'border-slate-500 focus:border-purple-400'
-                          } hover:bg-slate-500 focus:bg-slate-500`}
-                        />
+                        <div className="flex-1">
+                          <Input
+                            type="text"
+                            value={inputCoordinate}
+                            onChange={(e) => handleInputChange(e.target.value)}
+                            placeholder="Type next step"
+                            maxLength={2}
+                            className={`text-center text-lg font-mono uppercase tracking-wider w-full bg-white text-slate-800 border-3 transition-all duration-200 shadow-lg ${
+                              inputError 
+                                ? 'border-red-500 focus:border-red-400 focus:ring-2 focus:ring-red-200' 
+                                : 'border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                            } hover:bg-blue-50 focus:bg-blue-50`}
+                          />
+                          <p className="text-slate-400 text-xs mt-1 text-center">Example: D5, E5, E4</p>
+                        </div>
                         <Button
                           onClick={addCoordinateToRoute}
                           disabled={inputCoordinate.length !== 2}
-                          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-slate-800 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Add this step to your route"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-5 w-5" />
                         </Button>
                       </div>
                       
@@ -587,7 +611,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
               </div>
 
               {/* Interactive Map with Grid Overlay */}
-              <div className="mb-8">
+              <div className="mb-4">
                 <div className="relative rounded-lg p-4 md:p-8 overflow-hidden">
                   {/* Map Background - Hidden on mobile, shown on desktop */}
                   <div
@@ -614,10 +638,10 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                               <motion.button
                                 key={coordinate}
                                 whileTap={{ scale: (cell.value === 1 || cell.value === 2) ? 1 : 0.95 }}
-                                onClick={() => handleCellClick(coordinate)}
+                                onClick={(e) => handleCellClick(coordinate, e)}
                                 className={`${getCellStyle().replace('w-12 h-12', 'w-8 h-8')} grid-cell ${
                                   cell.value === 2 ? 'dangerous' : 
-                                  cell.value === 5 ? 'blocked' : ''
+                                  cell.value === 3 ? 'blocked' : ''
                                 }`}
                                 style={getCellInlineStyle(cell)}
                                 disabled={cell.value === 1}
@@ -641,10 +665,10 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                               <motion.button
                                 key={coordinate}
                                 whileTap={{ scale: (cell.value === 1 || cell.value === 2) ? 1 : 0.95 }}
-                                onClick={() => handleCellClick(coordinate)}
+                                onClick={(e) => handleCellClick(coordinate, e)}
                                 className={`${getCellStyle()} grid-cell ${
                                   cell.value === 2 ? 'dangerous' : 
-                                  cell.value === 5 ? 'blocked' : ''
+                                  cell.value === 3 ? 'blocked' : ''
                                 }`}
                                 style={getCellInlineStyle(cell)}
                                 disabled={cell.value === 1}
@@ -659,26 +683,43 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                 </div>
               </div>
 
-              {/* Route Info */}
-              <div className="mb-6 text-center">
-                <p className="text-slate-700 mb-2">
-                  Current Route: <span className="text-slate-800 font-semibold">{route.join(' → ')}</span>
-                </p>
-                <p className="text-slate-700 text-sm">
-                  Route Length: {route.length} steps
-                </p>
+
+              {/* Route Info and Controls - Desktop Only */}
+              <div className="mb-6 hidden md:flex items-center justify-between bg-white/60 rounded-lg p-4 border border-blue-300/50">
+                {/* Left: Route Info */}
+                <div className="flex-1">
+                  <p className="text-slate-700 mb-1">
+                    Current Route: <span className="text-slate-800 font-semibold">{route.join(' → ')}</span>
+                  </p>
+                  <p className="text-slate-700 text-sm">
+                    Route Length: {route.length} steps
+                  </p>
+                </div>
+                
+                {/* Right: Control Buttons */}
+                <div className="flex-shrink-0 flex gap-2">
+                  <Button
+                    onClick={removeLastCoordinate}
+                    variant="outline"
+                    className="border-slate-600 text-slate-700 hover:bg-slate-300"
+                    disabled={route.length <= 1 || route[route.length - 1] === 'C5'}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Remove Last
+                  </Button>
+                  <Button
+                    onClick={handleReset}
+                    variant="outline"
+                    className="border-slate-600 text-slate-700 hover:bg-slate-300"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset Route
+                  </Button>
+                </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-center gap-4">
-                <Button
-                  onClick={handleReset}
-                  variant="outline"
-                  className="border-slate-600 text-slate-700 hover:bg-slate-700"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Reset Route
-                </Button>
+              {/* Submit Button - Both Mobile and Desktop */}
+              <div className="flex justify-center">
                 <Button
                   onClick={handleSubmit}
                   disabled={route.length < 2}
@@ -690,33 +731,32 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
             </>
           ) : (
             /* Results */
-            <div className="text-center">
+            <div className="text-left">
               {isValidRoute ? (
                 <>
-                  <div className="mb-8">
+                  <div className="mb-6">
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Perfect navigation, young explorer!</h3>
-                    <p className="text-slate-700 text-lg mb-6">
-                      You have proven your <span className="text-yellow-600 font-bold text-xl">WISDOM</span>.
-                    </p>
-                    <p className="text-slate-700 text-lg mb-6">
-                      Lumino looks at you with new respect. You have shown your ability to think clearly and solve problems even under pressure.
-                    </p>
-                    <p className="text-slate-700 text-lg mb-6">
-                      One last challenge lies ahead on your path to becoming a true Kowai Trainer. You are very close.
-                    </p>
-                    <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                    
+                    <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
                       <p className="text-slate-700 text-lg mb-2">
                         <span className="text-slate-800 font-semibold">Your Route:</span> {route.join(' → ')}
                       </p>
-                      <p className="text-slate-700 text-lg">
+                      <p className="text-slate-700 text-lg mb-4">
                         <span className="text-slate-800 font-semibold">Route Length:</span> {route.length} steps
+                      </p>
+                      <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-yellow-600 font-bold text-xl">WISDOM</span>.</p>
+                      <p className="text-slate-700 text-lg mb-4">
+                        Lumino looks at you with new respect. You have shown your ability to think clearly and solve problems even under pressure.
+                      </p>
+                      <p className="text-slate-700 text-lg">
+                        One last challenge lies ahead on your path to becoming a true Kowai Trainer. You are very close.
                       </p>
                     </div>
                   </div>
 
                   {/* Stats Gained */}
                   <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
-                    <h4 className="text-xl font-semibold text-slate-800 mb-4">Stats Gained:</h4>
+                    <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
                     <div className="grid grid-cols-2 sm:flex sm:justify-center sm:gap-6 gap-3">
                       {Object.entries(statChanges).map(([stat, value]) => {
                         const numValue = value as number;
@@ -753,13 +793,15 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                   </div>
 
                   {/* Continue Button */}
-                  <Button 
-                    onClick={handleNext}
-                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
-                  >
-                    Continue to the next quest
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      onClick={handleNext}
+                      className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
+                    >
+                      Continue to the next quest
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
                 </>
               ) : (
                 <>
@@ -791,18 +833,37 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                   </div>
 
                   {/* Try Again Button */}
-                  <Button 
-                    onClick={handleReset}
-                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 cursor-pointer"
-                  >
-                    Try Again
-                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      onClick={handleReset}
+                      className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 cursor-pointer"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
                 </>
               )}
             </div>
           )}
         </motion.div>
       </div>
+
+      {/* Floating Terrain Info */}
+      {clickedCellInfo && (
+        <div 
+          className="fixed z-50 bg-slate-800 text-white px-3 py-2 rounded-lg shadow-lg border border-slate-600 pointer-events-none"
+          style={{
+            left: `${clickedCellInfo.position.x}px`,
+            top: `${clickedCellInfo.position.y}px`,
+            transform: 'translateX(-50%)'
+          }}
+        >
+          <div className="text-sm font-medium text-center">
+            {clickedCellInfo.coordinate}: {clickedCellInfo.info}
+          </div>
+          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-800 border-r border-b border-slate-600 rotate-45"></div>
+        </div>
+      )}
     </div>
   );
 }

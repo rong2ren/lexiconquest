@@ -23,11 +23,16 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
     trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 3 Started`, {
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
   }, []);
+
+  // Scroll to top when component mounts or re-renders
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [showResult]);
 
   const handleChoiceSelect = (choice: string) => {
     setSelectedChoice(choice);
@@ -40,7 +45,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
       selectionTime: selectionTime - questStartTime, // Time to decide in ms
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
@@ -103,7 +108,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
         decisionTime: decisionTime,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-        trainerBirthday: currentTrainer.birthday,
+        trainerAge: currentTrainer.age,
         trainerStatsBefore: currentTrainer.stats,
         trainerStatsAfter: newStats,
         questStartTime: questStartTime,
@@ -180,7 +185,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
               </div>
 
               {/* Question */}
-              <div className="text-center mb-12">
+              <div className="text-left mb-12">
                 <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                   <h2 className="text-slate-800 text-2xl font-semibold">
                     You want to help the lost and helpless young Lumino. But first, you need to gain its trust. What would you do?
@@ -246,8 +251,9 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
             </>
           ) : (
             /* Results */
-            <div className="text-center">
-              <div className="mb-8">
+            <div className="text-left">
+              <div className="mb-6">
+                <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Congratulations, Explorer!</h3>
                 <div className="mb-6">
                   <img 
                     src={getResultPicture(selectedChoice!)}
@@ -257,25 +263,22 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
                   <p className="text-slate-700 text-lg mb-4 whitespace-pre-line">
                     {getResultText(selectedChoice!)}
                   </p>
-                  
+                </div>
+                
+                <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
+                  <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
+                  <p className="text-slate-700 text-lg mb-4">
+                    Though it wasn't fully successful, your kindness towards Lumino was clear. You have proven that your heart is big enough to care for magical creatures.
+                  </p>
+                  <p className="text-slate-700 text-lg">
+                    Three more challenges await you. Continue forward, and show us what else you can accomplish.
+                  </p>
                 </div>
               </div>
 
-              {/* Congratulations Message */}
-              <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                <h4 className="text-2xl font-bold text-slate-800 mb-4">🎉 Congratulations, Explorer!</h4>
-                <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
-                <p className="text-slate-700 text-lg mb-4">
-                  Though it wasn't fully successful, your kindness towards Lumino was clear. You have proven that your heart is big enough to care for magical creatures.
-                </p>
-                <p className="text-slate-700 text-lg">
-                  Three more challenges await you. Continue forward, and show us what else you can accomplish.
-                </p>
-              </div>
-
               {/* Stats Gained */}
-              <div className="bg-white/60 rounded-lg p-4 mb-6 border border-blue-300/50">
-                <h4 className="text-lg font-semibold text-slate-800 mb-3 text-center">Stats Gained:</h4>
+              <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
                 <div className="grid grid-cols-2 gap-3 text-slate-700 sm:flex sm:items-center sm:justify-center sm:gap-6">
                   {Object.entries(statChanges).map(([stat, value]) => {
                     const numValue = value as number;
@@ -312,13 +315,15 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
               </div>
 
               {/* Continue Button */}
-              <Button 
-                onClick={handleNext}
-                className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
-              >
-                Continue to the next quest
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+              <div className="text-center">
+                <Button 
+                  onClick={handleNext}
+                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
+                >
+                  Continue to the next quest
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </div>
           )}
         </motion.div>

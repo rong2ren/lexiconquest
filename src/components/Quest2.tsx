@@ -25,11 +25,16 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
     trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 2 Started`, {
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
   }, []);
+
+  // Scroll to top when component mounts or re-renders
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [showResult]);
 
   const handleContinentSelect = (continent: string) => {
     setSelectedContinent(continent);
@@ -43,7 +48,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
       attemptNumber: attemptCount + 1,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
@@ -112,7 +117,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
           decisionTime: decisionTime,
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-          trainerBirthday: currentTrainer.birthday,
+          trainerAge: currentTrainer.age,
           trainerStatsBefore: currentTrainer.stats,
           trainerStatsAfter: newStats,
           questStartTime: questStartTime,
@@ -151,7 +156,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
         allAnswers: newAllAnswers,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-        trainerBirthday: currentTrainer.birthday,
+        trainerAge: currentTrainer.age,
         trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
         submissionTime: Date.now()
@@ -175,7 +180,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
       allAnswersSoFar: allAnswers,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
-      trainerBirthday: currentTrainer?.birthday,
+      trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime
     });
@@ -217,7 +222,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
               </div>
 
               {/* Riddle */}
-              <div className="text-center mb-12">
+              <div className="text-left mb-12">
                 
                 <div className="relative rounded-2xl p-8 overflow-hidden mb-8 shadow-lg shadow-blue-500/20" style={{
                   backgroundImage: 'url(/kowai/riddle_i1q2.png)',
@@ -227,7 +232,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                 }}>
                   {/* Overlay for better text readability */}
                   <div className="absolute inset-0 bg-slate-900/70 rounded-2xl"></div>
-                  <div className="relative z-10">
+                  <div className="relative z-10 text-center">
                     <p className="text-slate-200 text-xl leading-relaxed whitespace-pre-line drop-shadow-md">
                       {"At the bottom of the world so wide, where snowy silence grows.\n" +
                        "Mountains sleep beneath the ice, where hidden fire glows.\n" +
@@ -284,10 +289,10 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
             </>
           ) : (
             /* Results */
-            <div className="text-center">
+            <div className="text-left">
               {isCorrect ? (
                 <>
-                  <div className="mb-8">
+                  <div className="mb-6">
                       <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Congratulations, Explorer!</h3>
                       <div className="mb-6">
                         <img 
@@ -298,7 +303,6 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                       </div>
                     
                     <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                      <h4 className="text-2xl font-bold text-slate-800 mb-4">🎉 Congratulations, Explorer!</h4>
                       <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-green-600 font-bold text-xl">CURIOSITY</span>.</p>
                       <p className="text-slate-700 text-lg mb-4">
                         You looked at the clues, studied the world, and found the answers hidden in the frozen land of Antarctica. 
@@ -316,8 +320,8 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                   </div>
 
                   {/* Stats Gained */}
-                  <div className="bg-white/60 rounded-lg p-4 mb-6 border border-blue-300/50">
-                    <h4 className="text-lg font-semibold text-slate-800 mb-3 text-center">Stats Gained:</h4>
+                  <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                    <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
                     <div className="flex justify-center">
                       <span className="flex items-center justify-center gap-2 text-slate-700">
                         <span className="text-green-400">🔍</span>
@@ -337,13 +341,15 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                   </div>
 
                   {/* Next Button */}
-                  <Button 
-                    onClick={handleNext}
-                    className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
-                  >
-                    Continue to the next quest
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      onClick={handleNext}
+                      className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
+                    >
+                      Continue to the next quest
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
                 </>
               ) : (
                 <>
@@ -385,12 +391,14 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                   </div>
 
                   {/* Try Again Button */}
-                  <Button 
-                    onClick={handleTryAgain}
-                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-orange-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
-                  >
-                    Try Again
-                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      onClick={handleTryAgain}
+                      className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-orange-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
                 </>
               )}
             </div>

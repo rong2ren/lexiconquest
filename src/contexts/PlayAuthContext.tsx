@@ -8,7 +8,7 @@ export interface Trainer {
   uid: string;
   firstName: string;
   lastName: string;
-  birthday: string;
+  age: number;
   stats: {
     bravery: number;
     wisdom: number;
@@ -85,12 +85,12 @@ interface PlayAuthContextType {
   currentTrainer: Trainer | null;
   availableTrainers: TrainerSession[];
   loading: boolean;
-  signup: (firstName: string, lastName: string, birthday: string) => Promise<void>;
-  login: (firstName: string, lastName: string, birthday: string) => Promise<void>;
+  signup: (firstName: string, lastName: string, age: number) => Promise<void>;
+  login: (firstName: string, lastName: string, age: number) => Promise<void>;
   logout: () => void;
   loadTrainerFromStorage: () => Promise<void>;
   switchTrainer: (trainerId: string) => Promise<void>;
-  addNewTrainer: (firstName: string, lastName: string, birthday: string) => Promise<void>;
+  addNewTrainer: (firstName: string, lastName: string, age: number) => Promise<void>;
   removeTrainer: (trainerId: string) => void;
   getTrainerDisplayName: (trainer: TrainerSession) => string;
   activateTrainer: (trainerId: string) => Promise<void>;
@@ -120,8 +120,8 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
   const [loading, setLoading] = useState(true);
 
   // Generate trainerId from user input
-  const generateTrainerId = (firstName: string, lastName: string, birthday: string): string => {
-    return `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${birthday}`;
+  const generateTrainerId = (firstName: string, lastName: string, age: number): string => {
+    return `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${age}`;
   };
 
   // localStorage helper functions
@@ -198,14 +198,14 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
   };
 
   // Signup new trainer
-  const signup = async (firstName: string, lastName: string, birthday: string): Promise<void> => {
-    const trainerId = generateTrainerId(firstName, lastName, birthday);
+  const signup = async (firstName: string, lastName: string, age: number): Promise<void> => {
+    const trainerId = generateTrainerId(firstName, lastName, age);
     
     // Check if trainer already exists
     const trainerDoc = await getDoc(doc(db, 'trainers', trainerId));
     if (trainerDoc.exists()) {
       // Trainer exists in Firebase, log them in instead
-      await login(firstName, lastName, birthday);
+      await login(firstName, lastName, age);
       return;
     }
 
@@ -214,7 +214,7 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       uid: trainerId,
       firstName,
       lastName,
-      birthday,
+      age,
       stats: { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 },
       ownedKowai: [],
       encounteredKowai: ['lumino', 'forcino'],
@@ -244,8 +244,8 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
   };
 
   // Login existing trainer
-  const login = async (firstName: string, lastName: string, birthday: string): Promise<void> => {
-    const trainerId = generateTrainerId(firstName, lastName, birthday);
+  const login = async (firstName: string, lastName: string, age: number): Promise<void> => {
+    const trainerId = generateTrainerId(firstName, lastName, age);
     
     const trainerDoc = await getDoc(doc(db, 'trainers', trainerId));
     if (!trainerDoc.exists()) {
@@ -322,8 +322,8 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
   };
 
   // Add new trainer (alias for signup for clarity)
-  const addNewTrainer = async (firstName: string, lastName: string, birthday: string): Promise<void> => {
-    await signup(firstName, lastName, birthday);
+  const addNewTrainer = async (firstName: string, lastName: string, age: number): Promise<void> => {
+    await signup(firstName, lastName, age);
   };
 
   // Remove trainer from available trainers

@@ -92,7 +92,7 @@ export function PlayProfile() {
         questNumber: questToStart,
         trainerId: currentTrainer?.uid,
         trainerName: `${currentTrainer?.firstName} ${currentTrainer?.lastName}`,
-        trainerBirthday: currentTrainer?.birthday,
+        trainerAge: currentTrainer?.age,
         issueId: currentTrainer?.currentIssue,
         timestamp: new Date().toISOString()
       });
