@@ -15,16 +15,18 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
   const [selectedKowai, setSelectedKowai] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [questStartTime] = useState(Date.now());
-  const [kowaiSelectionTime, setKowaiSelectionTime] = useState<number | null>(null);
 
   // Track quest start when component mounts
   useEffect(() => {
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 1 Started`, {
+    trackEvent('Quest Started', {
+      issueNumber: 1,
+      questNumber: 1,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now()
     });
   }, []);
 
@@ -35,18 +37,19 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
 
   const handleKowaiSelect = (kowai: string) => {
     setSelectedKowai(kowai);
-    const selectionTime = Date.now();
-    setKowaiSelectionTime(selectionTime);
     
     // Track Kowai selection with detailed context
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 1 Kowai Selected`, {
-      kowai: kowai,
-      selectionTime: selectionTime - questStartTime, // Time to decide in ms
+    trackEvent('Quest Answer Selected', {
+      issueNumber: 1,
+      questNumber: 1,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now(),
+      optionType: 'kowai',
+      selectedAnswer: kowai
     });
   };
 
@@ -73,8 +76,6 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
       
       const completionTime = Date.now();
       const totalQuestTime = completionTime - questStartTime;
-      const readingTime = kowaiSelectionTime ? kowaiSelectionTime - questStartTime : null;
-      const decisionTime = kowaiSelectionTime ? completionTime - kowaiSelectionTime : null;
       
       // Save attempt to Firestore
       await saveAttempt({
@@ -92,19 +93,18 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
       });
 
       // Track quest completion
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 1 Completed`, { 
-        kowai: selectedKowai,
-        statsGained: statChanges,
-        totalQuestTime: totalQuestTime,
-        readingTime: readingTime,
-        decisionTime: decisionTime,
+      trackEvent('Quest Completed', { 
+        issueNumber: 1,
+        questNumber: 1,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
         trainerAge: currentTrainer.age,
-        trainerStatsBefore: currentTrainer.stats,
-        trainerStatsAfter: newStats,
+        trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
-        completionTime: completionTime
+        eventTime: Date.now(),
+        selectedAnswer: selectedKowai,
+        statsGained: statChanges,
+        totalQuestTime: totalQuestTime
       });
 
       // Show result

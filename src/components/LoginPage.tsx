@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, HelpCircle } from 'lucide-react';
 import { useAuthWithAnalytics } from '../hooks/useAuthWithAnalytics';
 import { InfoModal } from './InfoModal';
+import { trackEvent } from '../lib/mixpanel';
 
 type LoginMode = 'login' | 'signup' | 'forgot-password';
 
@@ -333,7 +334,21 @@ export function LoginPage() {
           {/* Help Button */}
           <div className="text-center mt-6 pt-4 border-t border-slate-700">
             <button
-              onClick={() => setShowInfoModal(true)}
+              onClick={() => {
+                // Track about button clicked
+                trackEvent('About Button Clicked', {
+                  issueNumber: 1,
+                  trainerId: null,
+                  trainerName: null,
+                  trainerAge: null,
+                  trainerStats: null,
+                  questStartTime: Date.now(),
+                  eventTime: Date.now(),
+                  aboutType: 'help',
+                  location: 'login_page'
+                });
+                setShowInfoModal(true);
+              }}
               className="text-slate-400 hover:text-white text-sm transition-colors flex items-center justify-center gap-2 mx-auto"
             >
               <HelpCircle className="h-4 w-4" />

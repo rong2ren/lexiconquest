@@ -5,8 +5,11 @@ export function ProfilePage() {
 
   // Handle opening the Tally survey
   const handleBeginQuest = () => {
-    // Track the survey click with Mixpanel
-    trackEvent('Issue 2 Survey Clicked');
+    // Track the Tally form link click with Mixpanel
+    trackEvent('Tally Form Link Clicked', {
+      issueNumber: 2,
+      surveyUrl: 'https://tally.so/r/3yQ4q4'
+    });
     // Open the Tally form in the same tab
     window.location.href = 'https://tally.so/r/3yQ4q4';
   };

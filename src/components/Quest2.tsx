@@ -18,16 +18,18 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
   const [questStartTime] = useState(Date.now());
   const [attemptCount, setAttemptCount] = useState(0);
   const [allAnswers, setAllAnswers] = useState<string[]>([]);
-  const [answerSelectionTime, setAnswerSelectionTime] = useState<number | null>(null);
 
   // Track quest start when component mounts
   useEffect(() => {
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 2 Started`, {
+    trackEvent('Quest Started', {
+      issueNumber: 1,
+      questNumber: 2,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now()
     });
   }, []);
 
@@ -38,19 +40,19 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
 
   const handleContinentSelect = (continent: string) => {
     setSelectedContinent(continent);
-    const selectionTime = Date.now();
-    setAnswerSelectionTime(selectionTime);
     
     // Track answer selection with detailed context
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 2 Answer Selected`, {
-      continent: continent,
-      selectionTime: selectionTime - questStartTime, // Time to decide in ms
-      attemptNumber: attemptCount + 1,
+    trackEvent('Quest Answer Selected', {
+      issueNumber: 1,
+      questNumber: 2,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now(),
+      optionType: 'continent',
+      selectedAnswer: continent
     });
   };
 
@@ -83,8 +85,6 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
         
         const completionTime = Date.now();
         const totalQuestTime = completionTime - questStartTime;
-        const readingTime = answerSelectionTime ? answerSelectionTime - questStartTime : null;
-        const decisionTime = answerSelectionTime ? completionTime - answerSelectionTime : null;
         
         // Save attempt to Firestore
         try {
@@ -106,22 +106,18 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
         }
 
         // Track quest completion
-        trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 2 Completed`, { 
-          continent: selectedContinent, 
-          correct: correct,
-          attemptNumber: newAttemptCount,
-          allAnswers: newAllAnswers,
-          statsGained: statChanges,
-          totalQuestTime: totalQuestTime,
-          readingTime: readingTime,
-          decisionTime: decisionTime,
+        trackEvent('Quest Completed', { 
+          issueNumber: 1,
+          questNumber: 2,
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
           trainerAge: currentTrainer.age,
-          trainerStatsBefore: currentTrainer.stats,
-          trainerStatsAfter: newStats,
+          trainerStats: currentTrainer.stats,
           questStartTime: questStartTime,
-          completionTime: completionTime
+          eventTime: Date.now(),
+          selectedAnswer: selectedContinent,
+          statsGained: statChanges,
+          totalQuestTime: totalQuestTime
         });
       } catch (error) {
         console.error('Failed to update trainer stats or quest progress:', error);
@@ -150,16 +146,17 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
       }
 
       // Track wrong answer (no stats or quest progress)
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 2 Wrong Answer`, { 
-        continent: selectedContinent, 
-        attemptNumber: newAttemptCount,
-        allAnswers: newAllAnswers,
+      trackEvent('Quest Failed', { 
+        issueNumber: 1,
+        questNumber: 2,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
         trainerAge: currentTrainer.age,
         trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
-        submissionTime: Date.now()
+        eventTime: Date.now(),
+        selectedAnswer: selectedContinent,
+        totalQuestTime: totalQuestTime
       });
     }
 
@@ -174,21 +171,20 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
 
   const handleTryAgain = () => {
     // Track retry attempt
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 2 Retry`, {
-      wrongAnswer: selectedContinent,
-      attemptNumber: attemptCount,
-      allAnswersSoFar: allAnswers,
+    trackEvent('Quest Retry', {
+      issueNumber: 1,
+      questNumber: 2,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now()
     });
     
     setShowResult(false);
     setSelectedContinent(null);
     setIsCorrect(false);
-    setAnswerSelectionTime(null);
   };
 
   return (

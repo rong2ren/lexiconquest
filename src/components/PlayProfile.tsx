@@ -42,11 +42,39 @@ export function PlayProfile() {
     if (kowaiName === 'egg') {
       setShowEggModal(true);
     } else {
+      // Track Kowai picture clicked
+      trackEvent('Kowai Picture Clicked', {
+        issueNumber: 1,
+        trainerId: currentTrainer?.uid,
+        trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+        trainerAge: currentTrainer?.age,
+        trainerStats: currentTrainer?.stats,
+        questStartTime: Date.now(),
+        eventTime: Date.now(),
+        kowaiName: kowaiName,
+        kowaiType: ownedKowai.includes(kowaiName) ? 'owned' : 'encountered'
+      });
+      
       setSelectedKowai(kowaiName);
     }
   };
 
   const handleCloseModal = () => {
+    // Track Kowai modal closed
+    if (selectedKowai) {
+      trackEvent('Kowai Modal Closed', {
+        issueNumber: 1,
+        trainerId: currentTrainer?.uid,
+        trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+        trainerAge: currentTrainer?.age,
+        trainerStats: currentTrainer?.stats,
+        questStartTime: Date.now(),
+        eventTime: Date.now(),
+        kowaiName: selectedKowai,
+        kowaiType: ownedKowai.includes(selectedKowai) ? 'owned' : 'encountered'
+      });
+    }
+    
     setSelectedKowai(null);
   };
 
@@ -70,6 +98,20 @@ export function PlayProfile() {
           questToStart = currentIssueProgress.lastCompletedQuest + 1;
         } else {
           // All quests completed - redirect to Issue 2 purchase - hardcoded for now
+          // Track purchase link clicked
+          trackEvent('Purchase Link Clicked', {
+            issueNumber: 1,
+            trainerId: currentTrainer?.uid,
+            trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+            trainerAge: currentTrainer?.age,
+            trainerStats: currentTrainer?.stats,
+            questStartTime: Date.now(),
+            eventTime: Date.now(),
+            purchaseType: 'issue',
+            purchaseIssueNumber: 2,
+            purchaseUrl: 'https://buy.stripe.com/bJe28t8MxdW6bbI3YdgMw01'
+          });
+          
           window.open('https://buy.stripe.com/bJe28t8MxdW6bbI3YdgMw01', '_blank');
           return;
         }
@@ -80,25 +122,27 @@ export function PlayProfile() {
         await startIssue();
       }
       
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 New Customer Quest Started`, { questNumber: questToStart });
+      // Quest Started event is now handled by individual quest components
       setCurrentQuest(questToStart);
     } catch (error) {
       console.error('Error starting issue:', error);
       
       // Track the error event
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue Start Failed`, { 
-        error: (error as any)?.code || 'unknown',
-        errorMessage: (error as any)?.message || 'Unknown error',
+      trackEvent('Quests Start Failed', { 
+        issueNumber: 1,
         questNumber: questToStart,
         trainerId: currentTrainer?.uid,
         trainerName: `${currentTrainer?.firstName} ${currentTrainer?.lastName}`,
         trainerAge: currentTrainer?.age,
-        issueId: currentTrainer?.currentIssue,
-        timestamp: new Date().toISOString()
+        trainerStats: currentTrainer?.stats,
+        questStartTime: Date.now(),
+        eventTime: Date.now(),
+        error: (error as any)?.code || 'unknown',
+        errorMessage: (error as any)?.message || 'Unknown error'
       });
       
       // Still allow quest to start even if Firebase update fails
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 New Customer Quest Started`, { questNumber: 1 });
+      // Quest Started event is now handled by individual quest components
       setCurrentQuest(1);
     }
   };
@@ -112,11 +156,25 @@ export function PlayProfile() {
       setCurrentQuest(null); // All quests completed for current issue
     }
     
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest Completed`, { questNumber });
+    // Quest Completed event is now handled by individual quest components
   };
 
   // Handle quest back
   const handleQuestBack = () => {
+    // Track quest back clicked
+    trackEvent('Quest Back Clicked', {
+      issueNumber: 1,
+      questNumber: currentQuest || 1,
+      trainerId: currentTrainer?.uid,
+      trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+      trainerAge: currentTrainer?.age,
+      trainerStats: currentTrainer?.stats,
+      questStartTime: Date.now(),
+      eventTime: Date.now(),
+      fromQuest: currentQuest || 1,
+      toLocation: 'profile'
+    });
+    
     setCurrentQuest(null);
   };
 

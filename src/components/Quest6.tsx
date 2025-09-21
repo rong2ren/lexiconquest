@@ -18,12 +18,15 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
 
   // Track quest start when component mounts
   useEffect(() => {
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 6 Started`, {
+    trackEvent('Quest Started', {
+      issueNumber: 1,
+      questNumber: 6,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now()
     });
   }, []);
 
@@ -76,14 +79,17 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     setSelectedChoice(choiceId);
     
     // Track choice selection
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 6 Choice Selected`, {
-      choiceId: choiceId,
-      choiceText: choices[choiceId - 1].text,
+    trackEvent('Quest Answer Selected', {
+      issueNumber: 1,
+      questNumber: 6,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      timeToDecision: Date.now() - questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now(),
+      optionType: 'final_choice',
+      selectedAnswer: choiceId.toString()
     });
   };
 
@@ -125,18 +131,18 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       });
       
       // Track quest completion
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 6 Completed`, {
-        choiceId: selectedChoice,
-        choiceText: choice.text,
-        statsGained: statChanges,
-        totalQuestTime: totalQuestTime,
+      trackEvent('Quest Completed', {
+        issueNumber: 1,
+        questNumber: 6,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
         trainerAge: currentTrainer.age,
-        trainerStatsBefore: currentTrainer.stats,
-        trainerStatsAfter: newStats,
+        trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
-        completionTime: completionTime
+        eventTime: Date.now(),
+        selectedAnswer: selectedChoice.toString(),
+        statsGained: statChanges,
+        totalQuestTime: totalQuestTime
       });
       
       // Show result

@@ -80,12 +80,15 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
 
   // Track quest start when component mounts
   useEffect(() => {
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 5 Started`, {
+    trackEvent('Quest Started', {
+      issueNumber: 1,
+      questNumber: 5,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now()
     });
   }, []);
 
@@ -157,14 +160,17 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         setRouteStartTime(Date.now());
       }
       
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 5 Route Cell Added`, {
-        coordinate: coordinate,
-        routeLength: newRoute.length,
+      trackEvent('Quest Answer Selected', {
+        issueNumber: 1,
+        questNumber: 5,
         trainerId: currentTrainer?.uid,
         trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
         trainerAge: currentTrainer?.age,
         trainerStats: currentTrainer?.stats,
-        questStartTime: questStartTime
+        questStartTime: questStartTime,
+        eventTime: Date.now(),
+        optionType: 'route_cell',
+        selectedAnswer: coordinate
       });
       return;
     }
@@ -185,14 +191,17 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         setRouteStartTime(Date.now());
       }
       
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 5 Route Cell Added`, {
-        coordinate: coordinate,
-        routeLength: newRoute.length,
+      trackEvent('Quest Answer Selected', {
+        issueNumber: 1,
+        questNumber: 5,
         trainerId: currentTrainer?.uid,
         trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
         trainerAge: currentTrainer?.age,
         trainerStats: currentTrainer?.stats,
-        questStartTime: questStartTime
+        questStartTime: questStartTime,
+        eventTime: Date.now(),
+        optionType: 'route_cell',
+        selectedAnswer: coordinate
       });
     }
   };
@@ -249,8 +258,6 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         
         const completionTime = Date.now();
         const totalQuestTime = completionTime - questStartTime;
-        const planningTime = routeStartTime ? routeStartTime - questStartTime : null;
-        const executionTime = routeStartTime ? completionTime - routeStartTime : null;
         
         // Save attempt to Firestore
         await saveAttempt({
@@ -268,22 +275,18 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
         });
         
         // Track quest completion
-        trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 5 Completed`, { 
-          route: route,
-          routeLength: route.length,
-          isValid: validation.isValid,
-          errors: validation.errors,
-          statsGained: newStatChanges,
-          totalQuestTime: totalQuestTime,
-          planningTime: planningTime,
-          executionTime: executionTime,
+        trackEvent('Quest Completed', { 
+          issueNumber: 1,
+          questNumber: 5,
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
           trainerAge: currentTrainer.age,
-          trainerStatsBefore: currentTrainer.stats,
-          trainerStatsAfter: newStats,
+          trainerStats: currentTrainer.stats,
           questStartTime: questStartTime,
-          completionTime: completionTime
+          eventTime: Date.now(),
+          selectedAnswer: route.join(','),
+          statsGained: newStatChanges,
+          totalQuestTime: totalQuestTime
         });
       } catch (error) {
         console.error('Failed to update trainer stats or quest progress:', error);
@@ -308,16 +311,17 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
       });
 
       // Track invalid route (no stats or quest progress)
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 5 Invalid Route`, { 
-        route: route,
-        routeLength: route.length,
-        errors: validation.errors,
+      trackEvent('Quest Failed', { 
+        issueNumber: 1,
+        questNumber: 5,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
         trainerAge: currentTrainer.age,
         trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
-        submissionTime: Date.now()
+        eventTime: Date.now(),
+        selectedAnswer: route.join(','),
+        totalQuestTime: totalQuestTime
       });
     }
 
@@ -331,6 +335,18 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
   };
 
   const handleReset = () => {
+    // Track retry attempt
+    trackEvent('Quest Retry', {
+      issueNumber: 1,
+      questNumber: 5,
+      trainerId: currentTrainer?.uid,
+      trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+      trainerAge: currentTrainer?.age,
+      trainerStats: currentTrainer?.stats,
+      questStartTime: questStartTime,
+      eventTime: Date.now()
+    });
+    
     setRoute(['C5']);
     updateGridRoute(['C5']);
     setShowResult(false);

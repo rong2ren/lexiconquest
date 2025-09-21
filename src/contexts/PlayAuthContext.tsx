@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { trackEvent } from '../lib/mixpanel';
 
 // Trainer interface for new customers
 export interface Trainer {
@@ -92,6 +93,7 @@ interface PlayAuthContextType {
   switchTrainer: (trainerId: string) => Promise<void>;
   addNewTrainer: (firstName: string, lastName: string, age: number) => Promise<void>;
   removeTrainer: (trainerId: string) => void;
+  cleanupMissingTrainers: () => Promise<void>;
   getTrainerDisplayName: (trainer: TrainerSession) => string;
   activateTrainer: (trainerId: string) => Promise<void>;
   updateTrainerStats: (newStats: { bravery: number; wisdom: number; curiosity: number; empathy: number }) => Promise<void>;
@@ -104,6 +106,7 @@ interface PlayAuthContextType {
   startIssue: () => Promise<void>;
   switchToIssue: (issueId: string) => Promise<void>;
   addKowaiToTrainer: (kowaiId: string) => Promise<void>;
+  addEncounteredKowai: (kowaiId: string) => Promise<void>;
 }
 
 // Create the context
@@ -174,17 +177,20 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
   // Load trainer from localStorage on app start
   const loadTrainerFromStorage = async (): Promise<void> => {
     try {
+      // Clean up invalid trainers
+      await cleanupMissingTrainers();
+      
       const storage = getMultiTrainerStorage();
       setAvailableTrainers(storage.trainerSessions);
 
+      // Load active trainer if it exists
       if (storage.activeTrainerId) {
         const trainerDoc = await getDoc(doc(db, 'trainers', storage.activeTrainerId));
         if (trainerDoc.exists()) {
           const trainerData = trainerDoc.data() as Trainer;
           setCurrentTrainer(trainerData);
         } else {
-          // Trainer not found in Firebase, remove from storage
-          removeTrainerSession(storage.activeTrainerId);
+          // This shouldn't happen after cleanup, but handle it gracefully
           setCurrentTrainer(null);
         }
       } else {
@@ -249,7 +255,7 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     
     const trainerDoc = await getDoc(doc(db, 'trainers', trainerId));
     if (!trainerDoc.exists()) {
-      throw new Error('No trainer found with this information. Please check your details or sign up.');
+      throw new Error('No trainer found with this information. Please check your details or create a new trainer.');
     }
 
     const trainerData = trainerDoc.data() as Trainer;
@@ -287,7 +293,11 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     try {
       const trainerDoc = await getDoc(doc(db, 'trainers', trainerId));
       if (!trainerDoc.exists()) {
-        throw new Error('Trainer not found');
+        // Trainer not found in Firebase, remove from localStorage and throw helpful error
+        removeTrainerSession(trainerId);
+        const storage = getMultiTrainerStorage();
+        setAvailableTrainers(storage.trainerSessions);
+        throw new Error('This trainer account seems to be missing. Please create a new one.');
       }
 
       const trainerData = trainerDoc.data() as Trainer;
@@ -335,6 +345,41 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     // If we removed the current trainer, clear it
     if (currentTrainer?.uid === trainerId) {
       setCurrentTrainer(null);
+    }
+  };
+
+  // Clean up trainers that don't exist in Firebase
+  const cleanupMissingTrainers = async (): Promise<void> => {
+    try {
+      const storage = getMultiTrainerStorage();
+      const validTrainers: TrainerSession[] = [];
+      let activeTrainerStillValid = false;
+      
+      // Check each trainer in localStorage against Firebase
+      for (const trainer of storage.trainerSessions) {
+        const trainerDoc = await getDoc(doc(db, 'trainers', trainer.trainerId));
+        if (trainerDoc.exists()) {
+          validTrainers.push(trainer);
+          // Check if this is the active trainer
+          if (storage.activeTrainerId === trainer.trainerId) {
+            activeTrainerStillValid = true;
+          }
+        } else {
+          console.log(`Removing missing trainer from localStorage: ${trainer.trainerId}`);
+        }
+      }
+      
+      // Update storage with only valid trainers
+      if (validTrainers.length !== storage.trainerSessions.length) {
+        const updatedStorage = {
+          ...storage,
+          trainerSessions: validTrainers,
+          activeTrainerId: activeTrainerStillValid ? storage.activeTrainerId : null
+        };
+        setMultiTrainerStorage(updatedStorage);
+      }
+    } catch (error) {
+      console.error('Error cleaning up missing trainers:', error);
     }
   };
 
@@ -686,9 +731,60 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
 
         // Update local state
         setCurrentTrainer(prev => prev ? { ...prev, ownedKowai: updatedOwnedKowai } : null);
+        
+        // Track Kowai owned
+        trackEvent('Kowai Owned', {
+          issueNumber: 1,
+          trainerId: currentTrainer.uid,
+          trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+          trainerAge: currentTrainer.age,
+          trainerStats: currentTrainer.stats,
+          questStartTime: Date.now(),
+          eventTime: Date.now(),
+          kowaiName: kowaiId,
+          kowaiType: 'owned'
+        });
       }
     } catch (error) {
       console.error('Error adding Kowai to trainer:', error);
+      throw error;
+    }
+  };
+
+  const addEncounteredKowai = async (kowaiId: string): Promise<void> => {
+    if (!currentTrainer) return;
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      const updatedEncounteredKowai = [...currentTrainer.encounteredKowai];
+      
+      // Only add if not already encountered
+      if (!updatedEncounteredKowai.includes(kowaiId)) {
+        updatedEncounteredKowai.push(kowaiId);
+        
+        await updateDoc(trainerRef, {
+          encounteredKowai: updatedEncounteredKowai,
+          lastLogin: new Date().toISOString()
+        });
+
+        // Update local state
+        setCurrentTrainer(prev => prev ? { ...prev, encounteredKowai: updatedEncounteredKowai } : null);
+        
+        // Track Kowai encountered
+        trackEvent('Kowai Encountered', {
+          issueNumber: 1,
+          trainerId: currentTrainer.uid,
+          trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+          trainerAge: currentTrainer.age,
+          trainerStats: currentTrainer.stats,
+          questStartTime: Date.now(),
+          eventTime: Date.now(),
+          kowaiName: kowaiId,
+          kowaiType: 'encountered'
+        });
+      }
+    } catch (error) {
+      console.error('Error adding encountered Kowai to trainer:', error);
       throw error;
     }
   };
@@ -709,6 +805,7 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     switchTrainer,
     addNewTrainer,
     removeTrainer,
+    cleanupMissingTrainers,
     getTrainerDisplayName,
     activateTrainer,
     updateTrainerStats,
@@ -720,7 +817,8 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     getCurrentIssueProgress,
     startIssue,
     switchToIssue,
-    addKowaiToTrainer
+    addKowaiToTrainer,
+    addEncounteredKowai
   };
 
   return (

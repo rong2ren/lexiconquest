@@ -19,11 +19,13 @@ export function PlayLogin() {
   });
   const [loginError, setLoginError] = useState('');
 
+
   const handleActivateTrainer = async (trainerId: string) => {
     try {
       await switchTrainer(trainerId);
     } catch (error) {
       console.error('Error activating trainer:', error);
+      setLoginError(error instanceof Error ? error.message : 'Failed to activate trainer');
     }
   };
 
@@ -220,6 +222,7 @@ export function PlayLogin() {
                 {loginError}
               </div>
             )}
+
 
             <button
               type="submit"

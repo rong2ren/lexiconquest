@@ -5,18 +5,44 @@ import { Button } from './ui/button';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { TrainerManagementModal } from './TrainerManagementModal';
 import { NewTrainerForm } from './NewTrainerForm';
+import { trackEvent } from '../lib/mixpanel';
 
 export function PlayHeader() {
-  const { logout, availableTrainers } = usePlayAuth();
+  const { logout, availableTrainers, currentTrainer } = usePlayAuth();
   const [showTrainerManagement, setShowTrainerManagement] = useState(false);
   const [showNewTrainerForm, setShowNewTrainerForm] = useState(false);
 
   // Action handlers
   const handleAddProfile = () => {
+    // Track add profile clicked
+    trackEvent('Add Profile Clicked', {
+      issueNumber: 1,
+      trainerId: currentTrainer?.uid,
+      trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+      trainerAge: currentTrainer?.age,
+      trainerStats: currentTrainer?.stats,
+      questStartTime: Date.now(),
+      eventTime: Date.now(),
+      currentTrainersCount: availableTrainers.length
+    });
+    
     setShowNewTrainerForm(true);
   };
 
   const handleSwitchProfile = () => {
+    // Track switch profile clicked
+    trackEvent('Switch Profile Clicked', {
+      issueNumber: 1,
+      trainerId: currentTrainer?.uid,
+      trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+      trainerAge: currentTrainer?.age,
+      trainerStats: currentTrainer?.stats,
+      questStartTime: Date.now(),
+      eventTime: Date.now(),
+      currentTrainerId: currentTrainer?.uid || '',
+      availableTrainersCount: availableTrainers.length
+    });
+    
     setShowTrainerManagement(true);
   };
 
@@ -25,6 +51,20 @@ export function PlayHeader() {
   };
 
   const handleBuyIssue = () => {
+    // Track purchase link clicked
+    trackEvent('Purchase Link Clicked', {
+      issueNumber: 1,
+      trainerId: currentTrainer?.uid,
+      trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+      trainerAge: currentTrainer?.age,
+      trainerStats: currentTrainer?.stats,
+      questStartTime: Date.now(),
+      eventTime: Date.now(),
+      purchaseType: 'issue',
+      purchaseIssueNumber: 2,
+      purchaseUrl: 'https://buy.stripe.com/bJe28t8MxdW6bbI3YdgMw01'
+    });
+    
     // Navigate to purchase page for current parent account
     window.open('https://buy.stripe.com/bJe28t8MxdW6bbI3YdgMw01', '_blank');
   };

@@ -15,17 +15,19 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [questStartTime] = useState(Date.now());
-  const [choiceSelectionTime, setChoiceSelectionTime] = useState<number | null>(null);
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
 
   // Track quest start when component mounts
   useEffect(() => {
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 3 Started`, {
+    trackEvent('Quest Started', {
+      issueNumber: 1,
+      questNumber: 3,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now()
     });
   }, []);
 
@@ -36,18 +38,19 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
 
   const handleChoiceSelect = (choice: string) => {
     setSelectedChoice(choice);
-    const selectionTime = Date.now();
-    setChoiceSelectionTime(selectionTime);
     
     // Track choice selection with detailed context
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 3 Choice Selected`, {
-      choice: choice,
-      selectionTime: selectionTime - questStartTime, // Time to decide in ms
+    trackEvent('Quest Answer Selected', {
+      issueNumber: 1,
+      questNumber: 3,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now(),
+      optionType: 'choice',
+      selectedAnswer: choice
     });
   };
 
@@ -81,8 +84,6 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
       
       const completionTime = Date.now();
       const totalQuestTime = completionTime - questStartTime;
-      const readingTime = choiceSelectionTime ? choiceSelectionTime - questStartTime : null;
-      const decisionTime = choiceSelectionTime ? completionTime - choiceSelectionTime : null;
       
       // Save attempt to Firestore
       await saveAttempt({
@@ -100,19 +101,18 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
       });
       
       // Track quest completion
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 3 Completed`, { 
-        choice: selectedChoice,
-        statsGained: newStatChanges,
-        totalQuestTime: totalQuestTime,
-        readingTime: readingTime,
-        decisionTime: decisionTime,
+      trackEvent('Quest Completed', { 
+        issueNumber: 1,
+        questNumber: 3,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
         trainerAge: currentTrainer.age,
-        trainerStatsBefore: currentTrainer.stats,
-        trainerStatsAfter: newStats,
+        trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
-        completionTime: completionTime
+        eventTime: Date.now(),
+        selectedAnswer: selectedChoice,
+        statsGained: newStatChanges,
+        totalQuestTime: totalQuestTime
       });
 
       // Show result

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { InfoModal } from './InfoModal';
+import { trackEvent } from '../lib/mixpanel';
 
 export const Footer: React.FC = () => {
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -10,7 +11,21 @@ export const Footer: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div className="mb-2">
             <button 
-              onClick={() => setShowInfoModal(true)}
+              onClick={() => {
+                // Track about button clicked
+                trackEvent('About Button Clicked', {
+                  issueNumber: 1,
+                  trainerId: null,
+                  trainerName: null,
+                  trainerAge: null,
+                  trainerStats: null,
+                  questStartTime: Date.now(),
+                  eventTime: Date.now(),
+                  aboutType: 'info',
+                  location: 'footer'
+                });
+                setShowInfoModal(true);
+              }}
               className="text-slate-400 hover:text-white transition-colors text-sm font-medium cursor-pointer"
             >
               About

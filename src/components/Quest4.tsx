@@ -19,17 +19,19 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [questStartTime] = useState(Date.now());
-  const [coordinateSelectionTime, setCoordinateSelectionTime] = useState<number | null>(null);
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
 
   // Track quest start when component mounts
   useEffect(() => {
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 4 Started`, {
+    trackEvent('Quest Started', {
+      issueNumber: 1,
+      questNumber: 4,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now()
     });
   }, []);
 
@@ -40,18 +42,19 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
 
   const handleCoordinateSelect = (coordinate: string) => {
     setSelectedCoordinate(coordinate);
-    const selectionTime = Date.now();
-    setCoordinateSelectionTime(selectionTime);
     
     // Track coordinate selection with detailed context
-    trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 4 Coordinate Selected`, {
-      coordinate: coordinate,
-      selectionTime: selectionTime - questStartTime, // Time to decide in ms
+    trackEvent('Quest Answer Selected', {
+      issueNumber: 1,
+      questNumber: 4,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
-      questStartTime: questStartTime
+      questStartTime: questStartTime,
+      eventTime: Date.now(),
+      optionType: 'coordinate',
+      selectedAnswer: coordinate
     });
   };
 
@@ -106,8 +109,6 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
         
         const completionTime = Date.now();
         const totalQuestTime = completionTime - questStartTime;
-        const readingTime = coordinateSelectionTime ? coordinateSelectionTime - questStartTime : null;
-        const decisionTime = coordinateSelectionTime ? completionTime - coordinateSelectionTime : null;
         
         // Save attempt to Firestore
         await saveAttempt({
@@ -125,20 +126,18 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
         });
         
         // Track quest completion
-        trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 4 Completed`, { 
-          coordinate: selectedCoordinate,
-          correct: correct,
-          statsGained: newStatChanges,
-          totalQuestTime: totalQuestTime,
-          readingTime: readingTime,
-          decisionTime: decisionTime,
+        trackEvent('Quest Completed', { 
+          issueNumber: 1,
+          questNumber: 4,
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
           trainerAge: currentTrainer.age,
-          trainerStatsBefore: currentTrainer.stats,
-          trainerStatsAfter: newStats,
+          trainerStats: currentTrainer.stats,
           questStartTime: questStartTime,
-          completionTime: completionTime
+          eventTime: Date.now(),
+          selectedAnswer: selectedCoordinate,
+          statsGained: newStatChanges,
+          totalQuestTime: totalQuestTime
         });
       } catch (error) {
         console.error('Failed to update trainer stats or quest progress:', error);
@@ -163,14 +162,17 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
       });
 
       // Track wrong answer (no stats or quest progress)
-      trackEvent(`${currentTrainer?.firstName} ${currentTrainer?.lastName} Issue 1 Quest 4 Wrong Answer`, { 
-        coordinate: selectedCoordinate,
+      trackEvent('Quest Failed', { 
+        issueNumber: 1,
+        questNumber: 4,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
         trainerAge: currentTrainer.age,
         trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
-        submissionTime: Date.now()
+        eventTime: Date.now(),
+        selectedAnswer: selectedCoordinate,
+        totalQuestTime: totalQuestTime
       });
     }
 
@@ -184,12 +186,23 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
   };
 
   const handleTryAgain = () => {
+    // Track retry attempt
+    trackEvent('Quest Retry', {
+      issueNumber: 1,
+      questNumber: 4,
+      trainerId: currentTrainer?.uid,
+      trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
+      trainerAge: currentTrainer?.age,
+      trainerStats: currentTrainer?.stats,
+      questStartTime: questStartTime,
+      eventTime: Date.now()
+    });
+    
     setShowResult(false);
     setSelectedCoordinate(null);
     setInputCoordinate('');
     setInputError('');
     setIsCorrect(false);
-    setCoordinateSelectionTime(null);
   };
 
   // Generate grid coordinates
