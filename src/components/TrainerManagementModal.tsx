@@ -18,12 +18,16 @@ export function TrainerManagementModal({ isOpen, onClose }: TrainerManagementMod
     getTrainerDisplayName 
   } = usePlayAuth();
   const [trainerToDelete, setTrainerToDelete] = useState<string | null>(null);
+  const [switchingTrainerId, setSwitchingTrainerId] = useState<string | null>(null);
 
   const handleSwitchTrainer = async (trainerId: string) => {
+    setSwitchingTrainerId(trainerId);
     try {
       await switchTrainer(trainerId);
     } catch (error) {
       console.error('Error switching trainer:', error);
+    } finally {
+      setSwitchingTrainerId(null);
     }
   };
 
@@ -110,9 +114,17 @@ export function TrainerManagementModal({ isOpen, onClose }: TrainerManagementMod
                         {currentTrainer?.uid !== trainer.trainerId && (
                           <button
                             onClick={() => handleSwitchTrainer(trainer.trainerId)}
-                            className="px-3 py-1.5 text-sm bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-semibold transition-all duration-200 cursor-pointer"
+                            disabled={switchingTrainerId === trainer.trainerId}
+                            className="px-3 py-1.5 text-sm bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-purple-400 disabled:to-blue-400 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1"
                           >
-                            Switch
+                            {switchingTrainerId === trainer.trainerId ? (
+                              <>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                                Switching...
+                              </>
+                            ) : (
+                              'Switch'
+                            )}
                           </button>
                         )}
                         {currentTrainer?.uid === trainer.trainerId && (

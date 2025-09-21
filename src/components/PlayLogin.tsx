@@ -18,14 +18,19 @@ export function PlayLogin() {
     age: ''
   });
   const [loginError, setLoginError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [activatingTrainerId, setActivatingTrainerId] = useState<string | null>(null);
 
 
   const handleActivateTrainer = async (trainerId: string) => {
+    setActivatingTrainerId(trainerId);
     try {
       await switchTrainer(trainerId);
     } catch (error) {
       console.error('Error activating trainer:', error);
       setLoginError(error instanceof Error ? error.message : 'Failed to activate trainer');
+    } finally {
+      setActivatingTrainerId(null);
     }
   };
 
@@ -36,6 +41,7 @@ export function PlayLogin() {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
+    setIsLoading(true);
 
     try {
       const age = parseInt(loginData.age);
@@ -55,6 +61,8 @@ export function PlayLogin() {
       }
     } catch (error) {
       setLoginError(error instanceof Error ? error.message : 'Failed to login');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -141,9 +149,17 @@ export function PlayLogin() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleActivateTrainer(trainer.trainerId)}
-                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm transition-all duration-200 cursor-pointer"
+                        disabled={activatingTrainerId === trainer.trainerId}
+                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-purple-400 disabled:to-blue-400 disabled:cursor-not-allowed text-white font-semibold py-1.5 px-3 rounded-md text-sm transition-all duration-200 cursor-pointer flex items-center gap-1"
                       >
-                        Login
+                        {activatingTrainerId === trainer.trainerId ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                            Loading...
+                          </>
+                        ) : (
+                          'Login'
+                        )}
                       </button>
                         <button
                           onClick={() => handleDeleteTrainer(trainer.trainerId)}
@@ -226,9 +242,17 @@ export function PlayLogin() {
 
             <button
               type="submit"
-              className="mt-4 w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className="mt-4 w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-purple-400 disabled:to-blue-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
             >
-              Start Your Adventure!
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Loading...
+                </>
+              ) : (
+                'Start Your Adventure!'
+              )}
             </button>
           </form>
 
