@@ -215,7 +215,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 2: Find the Continent
                 </h2>
               </div>
@@ -302,16 +302,16 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                       </div>
                     
                     <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                      <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-green-600 font-bold text-xl">CURIOSITY</span>.</p>
-                      <p className="text-slate-700 text-lg mb-4">
+                      <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-green-600 font-bold text-xl">CURIOSITY</span>.</p>
+                      <p className="quest-result-text text-slate-700 text-lg mb-4">
                         You looked at the clues, studied the world, and found the answers hidden in the frozen land of Antarctica. 
                         This is exactly the kind of thinking that separates true Kowai Trainers from ordinary people.
                       </p>
-                      <p className="text-slate-700 text-lg mb-4">
+                      <p className="quest-result-text text-slate-700 text-lg mb-4">
                         Your ability to observe, analyze, and connect the dots shows that you have the mind of a true explorer. 
                         You didn't just guess - you used your intelligence to piece together the puzzle and discover the truth.
                       </p>
-                      <p className="text-slate-700 text-lg">
+                      <p className="quest-result-text text-slate-700 text-lg">
                         But do not celebrate too long, for your trials have only just begun. 
                         Three greater challenges still lie ahead of you, each one designed to test a different part of your character.
                       </p>
@@ -376,15 +376,15 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">Uh-oh… Not quite.</h3>
                     
                     <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
-                      <p className="text-slate-700 text-lg mb-4">
+                      <p className="quest-result-text text-slate-700 text-lg mb-4">
                         Your answer shows promise, but you have not yet solved the riddle completely. Do not worry - even the greatest explorers sometimes need help.
                       </p>
-                      <p className="text-slate-700 text-lg mb-6">
+                      <p className="quest-result-text text-slate-700 text-lg mb-6">
                         Let me give you with a little more light to help you see the path:
                       </p>
                       
                       <div className="bg-slate-600/50 rounded-xl p-4 mb-4">
-                        <p className="text-slate-200 text-lg leading-relaxed whitespace-pre-line">
+                        <p className="quest-result-text text-slate-200 text-lg whitespace-pre-line text-center">
                           {"🗺️ At the bottom of the world so wide, where snowy silence grows.\n" +
                            "🏔️ Mountains sleep beneath the ice, where hidden fire glows.\n" +
                            "☀️ The sun may shine for weeks on end, then vanish from the sky.\n" +
@@ -393,16 +393,16 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                       </div>
                       
                       <div className="space-y-3">
-                        <p className="text-slate-700 text-base">
+                        <p className="quest-result-text text-slate-700 text-lg">
                           <span className="text-xl">🗺️</span> - Think about which continent sits at the very bottom of our planet, the farthest south you can go.
                         </p>
-                        <p className="text-slate-700 text-base">
+                        <p className="quest-result-text text-slate-700 text-lg">
                           <span className="text-xl">🏔️</span> - This speaks of volcanoes buried under thick snow and ice. Which frozen land has volcanoes sleeping under its white blanket?
                         </p>
-                        <p className="text-slate-700 text-base">
+                        <p className="quest-result-text text-slate-700 text-lg">
                           <span className="text-xl">☀️</span> - This describes the strange way day and night work at the bottom of the world: sometimes all light, sometimes all darkness for months at a time.
                         </p>
-                        <p className="text-slate-700 text-base">
+                        <p className="quest-result-text text-slate-700 text-lg">
                           <span className="text-xl">🌌</span> - These are the magical dancing lights called aurora that paint the dark polar sky in beautiful colors.
                         </p>
                       </div>

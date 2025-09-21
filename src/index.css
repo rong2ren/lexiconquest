@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gagalin&display=swap');
 
 /* Welcome Banner Background */
 .welcome-banner-bg {
@@ -36,4 +38,19 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Quest result response text styling */
+.quest-result-text {
+  font-family: 'Arimo', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+/* Quest title styling */
+.quest-title {
+  font-family: 'Gagalin', cursive;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }

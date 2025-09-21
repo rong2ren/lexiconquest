@@ -234,7 +234,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 4: Find Your Exact Position
                 </h2>
               </div>
@@ -245,7 +245,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                   <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
                     The Lumino is lost in the vast, snowy wilderness of Antarctica. To help it reach the South Pole safely, you need to figure out your exact starting point on the map.
                   </h2>
-                  <p className="text-slate-700 text-lg">
+                  <p className="quest-result-text text-slate-700 text-lg">
                     Which grid coordinate are you standing on right now?
                   </p>
                 </div>
@@ -347,7 +347,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                 <>
                   <div className="mb-8">
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Awesome work!</h3>
-                    <p className="text-slate-700 text-lg mb-6">
+                    <p className="quest-result-text text-slate-700 text-lg mb-6">
                       You've successfully found your exact position in Antarctica. Now that you know where you are, it's time for your next challenge.
                     </p>
                   </div>
@@ -408,7 +408,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                 <>
                   <div className="mb-8">
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">Uh-oh… Not quite.</h3>
-                    <p className="text-slate-700 text-lg mb-6">
+                    <p className="quest-result-text text-slate-700 text-lg mb-6">
                       That's not the correct coordinate. Look carefully at the grid and try to find the right position. 
                       Remember, you need to identify exactly where you're standing on the map to help the Lumino navigate safely.
                     </p>
@@ -416,7 +416,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                     {/* Detailed Hints */}
                     <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                       <h4 className="text-xl font-semibold text-slate-800 mb-4">Let me help you with some clearer directions:</h4>
-                      <div className="space-y-4 text-slate-700 text-lg">
+                      <div className="space-y-4 quest-result-text text-slate-700 text-lg">
                         <div className="flex items-start gap-3">
                           <span className="text-2xl">🧭</span>
                           <p>Remember that North is at the top of your map, South is at the bottom, East is to the right, and West is to the left.</p>
@@ -435,7 +435,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                         </div>
                       </div>
                       <div className="mt-6 p-4 bg-blue-600/20 rounded-xl border border-blue-500/30">
-                        <p className="text-slate-800 text-lg font-semibold">
+                        <p className="text-slate-800 text-lg font-semibold quest-result-text">
                           Now, young explorer, look at your Antarctica maps again. Which spot do the above two areas overlap?
                         </p>
                       </div>

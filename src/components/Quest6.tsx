@@ -36,23 +36,11 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     window.scrollTo({ top: 0 });
   }, [showResult]);
 
-  const getResultPicture = (choiceId: number) => {
-    switch (choiceId) {
-      case 1:
-        return '/issues/issue1/yezu-walking.gif';
-      case 2:
-        return '/issues/issue1/avalanche.gif';
-      case 3:
-        return '/issues/issue1/yezu-grab.gif';
-      default:
-        return null;
-    }
-  };
-
   const choices = [
     {
       id: 1,
       text: "Shout loudly at the Yezu to distract it from Lumino.",
+      picture: '/issues/issue1/speaker.png',
       result: {
         message: "You shout as loudly as you could: \"HEY! YOU! OVER HERE!\"\n\nThe Yezu skids to a halt, eyes snapping toward you. For a second, it stares in confusion. Then it turns and begins sprinting straight at you.\n\nYou wave your arms and ran. Your heart is pounding. Your mind is only thinking one thing: get it as far from the lumino as possible.\n\nUp ahead, you spot a cave. You dive inside just as the Yezu leaps forward to grab you. Your last shout echoed through the cliffs. Then comes the avalanche — a crashing wall of snow that falls over the cave mouth.\n\nYou hear the Yezu's furious roar from the other side, muffled beneath the snow wall.\n\nThen silence.",
         stats: { bravery: 3, wisdom: 0, curiosity: 0, empathy: 0 }
@@ -61,6 +49,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     {
       id: 2,
       text: "Throw snowballs at the Yezu to get its attention.",
+      picture: '/issues/issue1/snow ball.png',
       result: {
         message: "You quickly scoop up handfuls of snow and pack them into snowballs. With your full strength, you throw the first snowball at the massive Yezu.\n\nThe tiny snowball hits the Yezu's thick fur and crumbles into powder. The giant beast doesn't even notice - it's like throwing a pebble at a mountain.\n\nIn panic, you grab a bigger handful of snow and hurl it as hard as you can. This time, your aim goes wild - the snowball sails over the Yezu and smacks into an overhanging ledge of snow high up on the cliff face.\n\nThen you hear a soft cracking sound. Next, before you can react, an avalanche begins with a thunderous rumble! Snow pours down the cliff face like a white waterfall, crashing between you and the Yezu.\n\nFrom your snowy hiding spot, you can hear the Yezu's confused roars echoing in the distance.\n\nThen silence.",
         stats: { bravery: 3, wisdom: 0, curiosity: 0, empathy: 0 }
@@ -69,6 +58,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     {
       id: 3,
       text: "Rush to Lumino and try to scoop it up in your arms to carry it to safety.",
+      picture: '/issues/issue1/running.png',
       result: {
         message: "Without thinking, you sprint toward Lumino as fast as you can. Your heart pounds as you run across the slippery snow, determined to reach the little creature before the Yezu does.\n\nBut the Yezu is much faster than you expected. As you're still several steps away from Lumino, the massive beast reaches it first. In your desperation to help, you leap forward anyway, throwing yourself between them.\n\nThe Yezu's massive paw swipes at you, sending you flying through the air like a rag doll. You crash hard into the rocky mountainside. The impact knocks the wind out of your lungs, and snow showers down on you from above.\n\nYour crash has disturbed loose snow on the mountain. Suddenly, a loud cracking sound fills the air. With a thunderous rumble, an avalanche begins! A massive wall of white powder cascades down the mountainside, rushing between you and the Yezu.\n\nThe beast roars and scrambles away from the falling snow. When the rumbling finally stops, you find yourself half-buried in fresh powder, bruised but alive.\n\nFrom somewhere beyond the snow wall, you can hear the Yezu's angry roars in the distance.\n\nThen silence.",
         stats: { bravery: 3, wisdom: 0, curiosity: 0, empathy: 0 }
@@ -190,29 +180,19 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
               <div className="mb-6">
                 <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Incredible courage, young trainer!</h3>
                 <div className="mb-6">
-                  <p className="text-slate-700 text-lg leading-relaxed mb-6 whitespace-pre-line">
+                  <p className="quest-result-text text-slate-700 text-lg mb-6 whitespace-pre-line">
                     {choice.result.message}
                   </p>
                   
-                  {/* Result Picture */}
-                  {getResultPicture(selectedChoice) && (
-                    <div className="mb-6">
-                      <img 
-                        src={getResultPicture(selectedChoice)!} 
-                        alt="Quest result" 
-                        className="mx-auto rounded-2xl shadow-lg max-w-md w-full h-auto"
-                      />
-                    </div>
-                  )}
                 </div>
                 
                 {/* You have proven your BRAVERY section */}
                 <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                  <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-blue-600 font-bold text-xl">BRAVERY</span>.</p>
-                  <p className="text-slate-700 text-lg leading-relaxed">
+                  <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-blue-600 font-bold text-xl">BRAVERY</span>.</p>
+                  <p className="quest-result-text text-slate-700 text-lg">
                     In that moment of danger, when the mighty Yezu threatened helpless Lumino, you didn't hesitate to put yourself at risk to help. Whether your quick thinking saved Lumino or not, your heart showed the true spirit of a Kowai Trainer. You chose to act with courage.
                   </p>
-                  <p className="text-slate-700 text-lg leading-relaxed mt-3">
+                  <p className="quest-result-text text-slate-700 text-lg mt-3">
                     Now you should keep reading to find out if your action actually saved Lumino.
                   </p>
                 </div>
@@ -297,7 +277,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
         >
           {/* Quest Header */}
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+            <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
               Quest 6: Save Lumino
             </h2>
           </div>
@@ -310,23 +290,31 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
             </div>
           </div>
 
-          {/* Choices */}
-          <div className="space-y-4 mb-8">
-            {choices.map((choice) => (
+          {/* Choice Options */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {choices.map((choice, index) => (
               <motion.button
                 key={choice.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleChoiceSelect(choice.id)}
-                className={`w-full p-6 rounded-2xl border-2 text-left transition-all duration-200 cursor-pointer ${
+                className={`p-6 rounded-xl text-center transition-all duration-200 cursor-pointer ${
                   selectedChoice === choice.id
                     ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-400 shadow-lg shadow-purple-500/25'
-                    : 'bg-white/60 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
+                    : 'bg-white/60 border-2 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-800 font-semibold text-lg leading-tight">{choice.text}</span>
+                <div className="mb-4">
+                  <img 
+                    src={choice.picture} 
+                    alt={choice.text}
+                    className="w-64 h-64 mx-auto rounded-lg object-cover"
+                  />
                 </div>
+                <p className="text-slate-800 font-semibold text-lg leading-tight">{choice.text}</p>
               </motion.button>
             ))}
           </div>

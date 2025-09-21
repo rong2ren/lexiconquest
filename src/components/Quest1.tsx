@@ -173,7 +173,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-10">
-                <h2 className="mb-8 text-4xl font-bold text-slate-800 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="quest-title mb-8 text-4xl text-slate-800 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 1: Where Adventure Starts
                 </h2>
                 
@@ -242,19 +242,19 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
                     alt={getKowaiDisplayName(selectedKowai!)}
                     className="h-70 mx-auto mb-3 rounded-lg object-cover"
                   />
-                  <p className="text-slate-700 text-lg mb-4">
+                  <p className="quest-result-text text-slate-700 text-lg mb-4">
                     You have chosen <span className="text-purple-600 font-semibold">{getKowaiDisplayName(selectedKowai!)}</span> as your first Kowai companion. 
                     This magical creature has been waiting for someone special like you to come along and form an unbreakable bond.
                   </p>
-                  <p className="text-slate-700 text-lg mb-4">
+                  <p className="quest-result-text text-slate-700 text-lg mb-4">
                     This brave little creature is waiting to become your lifelong friend and trusted partner in all your future adventures. 
                     Together, you will face challenges, discover new lands, and grow stronger with each passing day.
                   </p>
-                  <p className="text-slate-700 text-lg mb-4">
+                  <p className="quest-result-text text-slate-700 text-lg mb-4">
                     But first, you must prove you are ready to be a true Kowai Trainer. The path ahead is filled with trials that will test your courage, wisdom, curiosity, and empathy. 
                     Complete all the challenges ahead to earn the right to awaken your Kowai egg and begin your journey as a legendary trainer.
                   </p>
-                  <p className="text-slate-700 text-lg">
+                  <p className="quest-result-text text-slate-700 text-lg">
                     Your adventure is just beginning, and the bond you will share with {getKowaiDisplayName(selectedKowai!)} will be the foundation of everything you accomplish together.
                   </p>
                 </div>

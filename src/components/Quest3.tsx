@@ -179,7 +179,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 3: Build Trust with Lumino
                 </h2>
               </div>
@@ -260,17 +260,17 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
                     alt="Lumino"
                     className="h-96 mx-auto mb-3 rounded-lg object-cover"
                   />
-                  <p className="text-slate-700 text-lg mb-4 whitespace-pre-line">
+                  <p className="quest-result-text text-slate-700 text-lg mb-4 whitespace-pre-line">
                     {getResultText(selectedChoice!)}
                   </p>
                 </div>
                 
                 <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                  <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
-                  <p className="text-slate-700 text-lg mb-4">
+                  <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
+                  <p className="quest-result-text text-slate-700 text-lg mb-4">
                     Though it wasn't fully successful, your kindness towards Lumino was clear. You have proven that your heart is big enough to care for magical creatures.
                   </p>
-                  <p className="text-slate-700 text-lg">
+                  <p className="quest-result-text text-slate-700 text-lg">
                     Three more challenges await you. Continue forward, and show us what else you can accomplish.
                   </p>
                 </div>

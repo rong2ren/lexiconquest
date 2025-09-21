@@ -522,7 +522,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 5: Path to the South Pole
                 </h2>
               </div>
@@ -533,7 +533,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                   <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
                     Plan the shortest possible route to get Lumino to the South Pole before it's too late.
                   </h2>
-                  <div className="text-slate-700 text-lg space-y-3">
+                  <div className="quest-result-text text-slate-700 text-lg space-y-3">
                     <p>• You must follow the grid lines - you cannot cut across the wilderness between grid points.</p>
                     <p>• You and Lumino are too weak to climb over Mount Vinson, so you must go around it.</p>
                     <p>• You cannot leave Antarctica and travel over the ocean.</p>
@@ -754,17 +754,17 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Perfect navigation, young explorer!</h3>
                     
                     <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                      <p className="text-slate-700 text-lg mb-2">
+                      <p className="quest-result-text text-slate-700 text-lg mb-2">
                         <span className="text-slate-800 font-semibold">Your Route:</span> {route.join(' → ')}
                       </p>
-                      <p className="text-slate-700 text-lg mb-4">
+                      <p className="quest-result-text text-slate-700 text-lg mb-4">
                         <span className="text-slate-800 font-semibold">Route Length:</span> {route.length} steps
                       </p>
-                      <p className="text-slate-700 text-lg mb-4">You have proven your <span className="text-yellow-600 font-bold text-xl">WISDOM</span>.</p>
-                      <p className="text-slate-700 text-lg mb-4">
+                      <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-yellow-600 font-bold text-xl">WISDOM</span>.</p>
+                      <p className="quest-result-text text-slate-700 text-lg mb-4">
                         Lumino looks at you with new respect. You have shown your ability to think clearly and solve problems even under pressure.
                       </p>
-                      <p className="text-slate-700 text-lg">
+                      <p className="quest-result-text text-slate-700 text-lg">
                         One last challenge lies ahead on your path to becoming a true Kowai Trainer. You are very close.
                       </p>
                     </div>
@@ -826,26 +826,26 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
                 <>
                   <div className="mb-8">
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">Uh-oh… the path you chose took a strange turn.</h3>
-                    <p className="text-slate-700 text-lg mb-6">
+                    <p className="quest-result-text text-slate-700 text-lg mb-6">
                       You bravely followed the direction you picked, but suddenly, a swirling black wind rose from the ground like a tornado. Before you could react, it pulled you in… a spinning, twisting black hole!
                     </p>
-                    <p className="text-slate-700 text-lg mb-6">
+                    <p className="quest-result-text text-slate-700 text-lg mb-6">
                       Just when it felt like all hope was lost, a majestic dragon-shaped Kowai burst through the storm. With a roar that shook the sky, it swooped in and caught you on its back.
                     </p>
-                    <p className="text-slate-700 text-lg mb-6">
+                    <p className="quest-result-text text-slate-700 text-lg mb-6">
                       As it flew you safely back toward land, your eyes grew heavy… the world blurred… and you slowly drifted off.
                     </p>
-                    <p className="text-slate-700 text-lg mb-6">
+                    <p className="quest-result-text text-slate-700 text-lg mb-6">
                       But before sleep took over, one thought stayed clear in your mind: 
                     </p>
-                    <p className="text-slate-700 text-lg mb-6">
+                    <p className="quest-result-text text-slate-700 text-lg mb-6">
                       You made the wrong choice — and you'll need to try again.
                     </p>
                     <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
-                      <p className="text-slate-700 text-lg mb-2">
+                      <p className="quest-result-text text-slate-700 text-lg mb-2">
                         <span className="text-slate-800 font-semibold">Your Route:</span> {route.join(' → ')}
                       </p>
-                      <p className="text-slate-700 text-lg">
+                      <p className="quest-result-text text-slate-700 text-lg">
                         <span className="text-slate-800 font-semibold">Route Length:</span> {route.length} steps
                       </p>
                     </div>
