@@ -33,6 +33,8 @@ This document outlines the redesigned quest event tracking system for Lexicon Qu
 | `About Button Clicked` | User clicks about/info button | When user clicks to view about information |
 | `Switch Profile Clicked` | User clicks switch trainer button | When user clicks to switch between trainers |
 | `Add Profile Clicked` | User clicks add new trainer button | When user clicks to create new trainer |
+| `Profile Switched` | User successfully switches to a trainer | When trainer switch is completed successfully |
+| `Profile Added` | User successfully creates a new trainer | When new trainer is created successfully |
 | `Tally Form Link Clicked` | User clicks survey/feedback form link | When user clicks survey link in ProfilePage |
 
 ## Authentication Events
@@ -421,6 +423,66 @@ trackEvent('Add Profile Clicked', {
   questStartTime: 1703123456789,
   eventTime: 1703123700000,
   currentTrainersCount: 2
+});
+```
+
+### Profile Switched
+
+```typescript
+interface ProfileSwitchedProperties {
+  issueNumber: number;                    // Issue number (e.g., 1)
+  trainerId: string;                      // ID of the trainer that was switched to
+  trainerName: string;                    // Full name of the trainer
+  trainerAge: number;                     // Age of the trainer
+  trainerStats: {                         // Current stats of the trainer
+    bravery: number;
+    wisdom: number;
+    curiosity: number;
+    empathy: number;
+  };
+  eventTime: number;                      // Timestamp when the switch occurred
+}
+```
+
+**Example:**
+```typescript
+trackEvent('Profile Switched', {
+  issueNumber: 1,
+  trainerId: 'jane_smith_10',
+  trainerName: 'Jane Smith',
+  trainerAge: 10,
+  trainerStats: { bravery: 3, wisdom: 8, curiosity: 5, empathy: 7 },
+  eventTime: 1703123750000
+});
+```
+
+### Profile Added
+
+```typescript
+interface ProfileAddedProperties {
+  issueNumber: number;                    // Issue number (e.g., 1)
+  trainerId: string;                      // ID of the newly created trainer
+  trainerName: string;                    // Full name of the new trainer
+  trainerAge: number;                     // Age of the new trainer
+  trainerStats: {                         // Initial stats of the new trainer (all 0)
+    bravery: number;
+    wisdom: number;
+    curiosity: number;
+    empathy: number;
+  };
+  eventTime: number;                      // Timestamp when the profile was created
+}
+```
+
+**Example:**
+```typescript
+trackEvent('Profile Added', {
+  issueNumber: 1,
+  trainerId: 'alex_johnson_7',
+  trainerName: 'Alex Johnson',
+  trainerAge: 7,
+  trainerStats: { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 },
+  eventTime: 1703123800000
 });
 ```
 

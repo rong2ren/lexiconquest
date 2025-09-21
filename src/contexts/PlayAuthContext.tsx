@@ -247,6 +247,16 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     setCurrentTrainer(newTrainer);
     const storage = getMultiTrainerStorage();
     setAvailableTrainers(storage.trainerSessions);
+    
+    // Track successful profile creation
+    trackEvent('Profile Added', {
+      issueNumber: 1,
+      trainerId: trainerId,
+      trainerName: `${newTrainer.firstName} ${newTrainer.lastName}`,
+      trainerAge: newTrainer.age,
+      trainerStats: newTrainer.stats,
+      eventTime: Date.now()
+    });
   };
 
   // Login existing trainer
@@ -325,6 +335,16 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
 
       // Set current trainer
       setCurrentTrainer(updatedTrainer);
+      
+      // Track successful profile switch
+      trackEvent('Profile Switched', {
+        issueNumber: 1,
+        trainerId: trainerId,
+        trainerName: `${updatedTrainer.firstName} ${updatedTrainer.lastName}`,
+        trainerAge: updatedTrainer.age,
+        trainerStats: updatedTrainer.stats,
+        eventTime: Date.now()
+      });
     } catch (error) {
       console.error('Error switching trainer:', error);
       throw error;
