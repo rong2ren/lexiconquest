@@ -15,6 +15,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [questStartTime] = useState(Date.now());
+  const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
 
   // Track quest start when component mounts
   useEffect(() => {
@@ -54,7 +55,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       text: "Shout loudly at the Yezu to distract it from Lumino.",
       result: {
         message: "You shout as loudly as you could: \"HEY! YOU! OVER HERE!\"\n\nThe Yezu skids to a halt, eyes snapping toward you. For a second, it stares in confusion. Then it turns and begins sprinting straight at you.\n\nYou wave your arms and ran. Your heart is pounding. Your mind is only thinking one thing: get it as far from the lumino as possible.\n\nUp ahead, you spot a cave. You dive inside just as the Yezu leaps forward to grab you. Your last shout echoed through the cliffs. Then comes the avalanche — a crashing wall of snow that falls over the cave mouth.\n\nYou hear the Yezu's furious roar from the other side, muffled beneath the snow wall.\n\nThen silence.",
-        stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
+        stats: { bravery: 3, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     },
     {
@@ -62,7 +63,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       text: "Throw snowballs at the Yezu to get its attention.",
       result: {
         message: "You quickly scoop up handfuls of snow and pack them into snowballs. With your full strength, you throw the first snowball at the massive Yezu.\n\nThe tiny snowball hits the Yezu's thick fur and crumbles into powder. The giant beast doesn't even notice - it's like throwing a pebble at a mountain.\n\nIn panic, you grab a bigger handful of snow and hurl it as hard as you can. This time, your aim goes wild - the snowball sails over the Yezu and smacks into an overhanging ledge of snow high up on the cliff face.\n\nThen you hear a soft cracking sound. Next, before you can react, an avalanche begins with a thunderous rumble! Snow pours down the cliff face like a white waterfall, crashing between you and the Yezu.\n\nFrom your snowy hiding spot, you can hear the Yezu's confused roars echoing in the distance.\n\nThen silence.",
-        stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
+        stats: { bravery: 3, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     },
     {
@@ -70,7 +71,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       text: "Rush to Lumino and try to scoop it up in your arms to carry it to safety.",
       result: {
         message: "Without thinking, you sprint toward Lumino as fast as you can. Your heart pounds as you run across the slippery snow, determined to reach the little creature before the Yezu does.\n\nBut the Yezu is much faster than you expected. As you're still several steps away from Lumino, the massive beast reaches it first. In your desperation to help, you leap forward anyway, throwing yourself between them.\n\nThe Yezu's massive paw swipes at you, sending you flying through the air like a rag doll. You crash hard into the rocky mountainside. The impact knocks the wind out of your lungs, and snow showers down on you from above.\n\nYour crash has disturbed loose snow on the mountain. Suddenly, a loud cracking sound fills the air. With a thunderous rumble, an avalanche begins! A massive wall of white powder cascades down the mountainside, rushing between you and the Yezu.\n\nThe beast roars and scrambles away from the falling snow. When the rumbling finally stops, you find yourself half-buried in fresh powder, bruised but alive.\n\nFrom somewhere beyond the snow wall, you can hear the Yezu's angry roars in the distance.\n\nThen silence.",
-        stats: { bravery: 5, wisdom: 0, curiosity: 0, empathy: 0 }
+        stats: { bravery: 3, wisdom: 0, curiosity: 0, empathy: 0 }
       }
     }
   ];
@@ -97,15 +98,16 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     if (selectedChoice === null || !currentTrainer) return;
 
     const choice = choices[selectedChoice - 1];
-    const statChanges = choice.result.stats;
+    const newStatChanges = choice.result.stats;
+    setStatChanges(newStatChanges);
     
     // Quest6 is always "correct" (scenario-based choice)
     // Apply stats and update quest progress
     const newStats = {
-      bravery: currentTrainer.stats.bravery + statChanges.bravery,
-      wisdom: currentTrainer.stats.wisdom + statChanges.wisdom,
-      curiosity: currentTrainer.stats.curiosity + statChanges.curiosity,
-      empathy: currentTrainer.stats.empathy + statChanges.empathy,
+      bravery: currentTrainer.stats.bravery + newStatChanges.bravery,
+      wisdom: currentTrainer.stats.wisdom + newStatChanges.wisdom,
+      curiosity: currentTrainer.stats.curiosity + newStatChanges.curiosity,
+      empathy: currentTrainer.stats.empathy + newStatChanges.empathy,
     };
 
     try {
@@ -141,7 +143,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
         questStartTime: questStartTime,
         eventTime: Date.now(),
         selectedAnswer: selectedChoice.toString(),
-        statsGained: statChanges,
+        statsGained: newStatChanges,
         totalQuestTime: totalQuestTime
       });
       
@@ -161,7 +163,6 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
 
   if (showResult && selectedChoice) {
     const choice = choices[selectedChoice - 1];
-    const statChanges = choice.result.stats;
 
     return (
       <div className="min-h-screen bg-slate-900 p-4">
@@ -220,28 +221,31 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
               {/* Stats Gained */}
               <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                 <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
-                <div className="grid grid-cols-2 sm:flex sm:justify-center sm:gap-6 gap-3">
-                  {Object.entries(statChanges).map(([stat, value]) => {
-                    const numValue = value as number;
-                    return numValue > 0 && (
-                      <div key={stat} className="flex items-center justify-center gap-2">
-                        <span className={
-                          stat === 'bravery' ? 'text-blue-400' :
-                          stat === 'wisdom' ? 'text-yellow-400' :
-                          stat === 'curiosity' ? 'text-green-400' :
-                          'text-pink-400'
-                        }>
-                          {stat === 'bravery' ? '🛡️' :
-                           stat === 'wisdom' ? '⭐' :
-                           stat === 'curiosity' ? '🔍' :
-                           '❤️'}
-                        </span>
-                        <span className="text-slate-700 font-medium">
-                          {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{numValue}
-                        </span>
-                      </div>
-                    );
-                  })}
+                <div className="flex items-center justify-center gap-6">
+                  {statChanges.bravery > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-blue-400">🛡️</span>
+                      <span className="text-slate-700">Bravery +{statChanges.bravery}</span>
+                    </span>
+                  )}
+                  {statChanges.wisdom > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-yellow-400">⭐</span>
+                      <span className="text-slate-700">Wisdom +{statChanges.wisdom}</span>
+                    </span>
+                  )}
+                  {statChanges.curiosity > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-green-400">🔍</span>
+                      <span className="text-slate-700">Curiosity +{statChanges.curiosity}</span>
+                    </span>
+                  )}
+                  {statChanges.empathy > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-pink-400">❤️</span>
+                      <span className="text-slate-700">Empathy +{statChanges.empathy}</span>
+                    </span>
+                  )}
                 </div>
               </div>
 

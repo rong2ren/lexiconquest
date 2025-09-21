@@ -93,7 +93,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
 
     // Only apply stats and update quest progress if correct
     if (correct) {
-      const newStatChanges = { bravery: 2, wisdom: 4, curiosity: 3, empathy: 1 };
+      const newStatChanges = { bravery: 0, wisdom: 3, curiosity: 0, empathy: 0 };
       setStatChanges(newStatChanges);
 
       const newStats = {
@@ -355,28 +355,31 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                   {/* Stats Gained */}
                   <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                     <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
-                    <div className="grid grid-cols-2 sm:flex sm:justify-center sm:gap-6 gap-3">
-                      {Object.entries(statChanges).map(([stat, value]) => {
-                        const numValue = value as number;
-                        return numValue > 0 && (
-                          <div key={stat} className="flex items-center justify-center gap-2">
-                            <span className={
-                              stat === 'bravery' ? 'text-blue-400' :
-                              stat === 'wisdom' ? 'text-yellow-400' :
-                              stat === 'curiosity' ? 'text-green-400' :
-                              'text-pink-400'
-                            }>
-                              {stat === 'bravery' ? '🛡️' :
-                               stat === 'wisdom' ? '⭐' :
-                               stat === 'curiosity' ? '🔍' :
-                               '❤️'}
-                            </span>
-                            <span className="text-slate-700 font-medium">
-                              {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{numValue}
-                            </span>
-                          </div>
-                        );
-                      })}
+                    <div className="flex items-center justify-center gap-6">
+                      {statChanges.bravery > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-blue-400">🛡️</span>
+                          <span className="text-slate-700">Bravery +{statChanges.bravery}</span>
+                        </span>
+                      )}
+                      {statChanges.wisdom > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-yellow-400">⭐</span>
+                          <span className="text-slate-700">Wisdom +{statChanges.wisdom}</span>
+                        </span>
+                      )}
+                      {statChanges.curiosity > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-green-400">🔍</span>
+                          <span className="text-slate-700">Curiosity +{statChanges.curiosity}</span>
+                        </span>
+                      )}
+                      {statChanges.empathy > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-pink-400">❤️</span>
+                          <span className="text-slate-700">Empathy +{statChanges.empathy}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
 

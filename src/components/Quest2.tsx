@@ -18,6 +18,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
   const [questStartTime] = useState(Date.now());
   const [attemptCount, setAttemptCount] = useState(0);
   const [allAnswers, setAllAnswers] = useState<string[]>([]);
+  const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
 
   // Track quest start when component mounts
   useEffect(() => {
@@ -71,12 +72,14 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
 
     // Only apply stats and update quest progress if correct
     if (correct) {
-      const statChanges = { bravery: 0, wisdom: 0, curiosity: 3, empathy: 0 };
+      const newStatChanges = { bravery: 0, wisdom: 0, curiosity: 3, empathy: 0 };
+      setStatChanges(newStatChanges);
+      
       const newStats = {
-        bravery: currentTrainer.stats.bravery + statChanges.bravery,
-        wisdom: currentTrainer.stats.wisdom + statChanges.wisdom,
-        curiosity: currentTrainer.stats.curiosity + statChanges.curiosity,
-        empathy: currentTrainer.stats.empathy + statChanges.empathy,
+        bravery: currentTrainer.stats.bravery + newStatChanges.bravery,
+        wisdom: currentTrainer.stats.wisdom + newStatChanges.wisdom,
+        curiosity: currentTrainer.stats.curiosity + newStatChanges.curiosity,
+        empathy: currentTrainer.stats.empathy + newStatChanges.empathy,
       };
 
       try {
@@ -116,7 +119,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
           questStartTime: questStartTime,
           eventTime: Date.now(),
           selectedAnswer: selectedContinent,
-          statsGained: statChanges,
+          statsGained: newStatChanges,
           totalQuestTime: totalQuestTime
         });
       } catch (error) {
@@ -318,11 +321,31 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                   {/* Stats Gained */}
                   <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                     <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
-                    <div className="flex justify-center">
-                      <span className="flex items-center justify-center gap-2 text-slate-700">
-                        <span className="text-green-400">🔍</span>
-                        <span>Curiosity +3</span>
-                      </span>
+                    <div className="flex items-center justify-center gap-6">
+                      {statChanges.bravery > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-blue-400">🛡️</span>
+                          <span className="text-slate-700">Bravery +{statChanges.bravery}</span>
+                        </span>
+                      )}
+                      {statChanges.wisdom > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-yellow-400">⭐</span>
+                          <span className="text-slate-700">Wisdom +{statChanges.wisdom}</span>
+                        </span>
+                      )}
+                      {statChanges.curiosity > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-green-400">🔍</span>
+                          <span className="text-slate-700">Curiosity +{statChanges.curiosity}</span>
+                        </span>
+                      )}
+                      {statChanges.empathy > 0 && (
+                        <span className="flex items-center justify-center gap-1">
+                          <span className="text-pink-400">❤️</span>
+                          <span className="text-slate-700">Empathy +{statChanges.empathy}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
 

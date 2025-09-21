@@ -15,6 +15,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
   const [selectedKowai, setSelectedKowai] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [questStartTime] = useState(Date.now());
+  const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
 
   // Track quest start when component mounts
   useEffect(() => {
@@ -57,14 +58,31 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
     if (!selectedKowai || !currentTrainer) return;
 
     // Quest1 is always "correct" (Kowai selection)
-    // Apply stats and update quest progress
-    const statChanges = { bravery: 1, wisdom: 1, curiosity: 1, empathy: 1 };
+    // Apply stats based on kowai selection
+    let newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 };
+    
+    switch (selectedKowai) {
+      case 'peblaff':
+        newStatChanges.curiosity = 1;
+        break;
+      case 'fanelle':
+        newStatChanges.empathy = 1;
+        break;
+      case 'scorki':
+        newStatChanges.bravery = 1;
+        break;
+      default:
+        // Fallback - no stat changes
+        break;
+      }
+    
+    setStatChanges(newStatChanges);
 
     const newStats = {
-      bravery: currentTrainer.stats.bravery + statChanges.bravery,
-      wisdom: currentTrainer.stats.wisdom + statChanges.wisdom,
-      curiosity: currentTrainer.stats.curiosity + statChanges.curiosity,
-      empathy: currentTrainer.stats.empathy + statChanges.empathy,
+      bravery: currentTrainer.stats.bravery + newStatChanges.bravery,
+      wisdom: currentTrainer.stats.wisdom + newStatChanges.wisdom,
+      curiosity: currentTrainer.stats.curiosity + newStatChanges.curiosity,
+      empathy: currentTrainer.stats.empathy + newStatChanges.empathy,
     };
 
     try {
@@ -103,7 +121,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
         questStartTime: questStartTime,
         eventTime: Date.now(),
         selectedAnswer: selectedKowai,
-        statsGained: statChanges,
+        statsGained: newStatChanges,
         totalQuestTime: totalQuestTime
       });
 
@@ -245,23 +263,31 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
               {/* Stats Gained */}
               <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                 <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
-                <div className="grid grid-cols-2 gap-3 text-slate-700 sm:flex sm:items-center sm:justify-center sm:gap-6">
-                  <span className="flex items-center justify-center gap-1">
-                    <span className="text-blue-400">🛡️</span>
-                    <span>Bravery +1</span>
-                  </span>
-                  <span className="flex items-center justify-center gap-1">
-                    <span className="text-yellow-400">⭐</span>
-                    <span>Wisdom +1</span>
-                  </span>
-                  <span className="flex items-center justify-center gap-1">
-                    <span className="text-green-400">🔍</span>
-                    <span>Curiosity +1</span>
-                  </span>
-                  <span className="flex items-center justify-center gap-1">
-                    <span className="text-pink-400">❤️</span>
-                    <span>Empathy +1</span>
-                  </span>
+                <div className="flex items-center justify-center gap-6">
+                  {statChanges.bravery > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-blue-400">🛡️</span>
+                      <span className="text-slate-700">Bravery +{statChanges.bravery}</span>
+                    </span>
+                  )}
+                  {statChanges.wisdom > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-yellow-400">⭐</span>
+                      <span className="text-slate-700">Wisdom +{statChanges.wisdom}</span>
+                    </span>
+                  )}
+                  {statChanges.curiosity > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-green-400">🔍</span>
+                      <span className="text-slate-700">Curiosity +{statChanges.curiosity}</span>
+                    </span>
+                  )}
+                  {statChanges.empathy > 0 && (
+                    <span className="flex items-center justify-center gap-1">
+                      <span className="text-pink-400">❤️</span>
+                      <span className="text-slate-700">Empathy +{statChanges.empathy}</span>
+                    </span>
+                  )}
                 </div>
               </div>
 
