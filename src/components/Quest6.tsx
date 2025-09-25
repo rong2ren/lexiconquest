@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { trackEvent } from '../lib/mixpanel';
+import { StatNotification } from './StatNotification';
 
 interface Quest6Props {
   onBack: () => void;
@@ -16,6 +17,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
   const [showResult, setShowResult] = useState(false);
   const [questStartTime] = useState(Date.now());
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
+  const [showStatAnimation, setShowStatAnimation] = useState(false);
 
   // Track quest start when component mounts
   useEffect(() => {
@@ -137,12 +139,24 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
         totalQuestTime: totalQuestTime
       });
       
-      // Show result
+      // Show result and stat animation
       setShowResult(true);
+      setShowStatAnimation(true);
+
+      // Hide animation after 3 seconds
+      setTimeout(() => {
+        setShowStatAnimation(false);
+      }, 3000);
     } catch (error) {
       console.error('Error updating trainer stats or quest progress:', error);
       // Still show result even if Firebase fails
       setShowResult(true);
+      setShowStatAnimation(true);
+
+      // Hide animation after 3 seconds
+      setTimeout(() => {
+        setShowStatAnimation(false);
+      }, 3000);
     }
   };
 
@@ -178,7 +192,13 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
           >
             <div className="text-left">
               <div className="mb-6">
-                <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Incredible courage, young trainer!</h3>
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <h3 className="text-3xl font-bold text-slate-800">🎉 Incredible courage, young trainer!</h3>
+                  <StatNotification 
+                    show={showStatAnimation} 
+                    statChanges={statChanges} 
+                  />
+                </div>
                 <div className="mb-6">
                   <p className="quest-result-text text-slate-700 text-lg mb-6 whitespace-pre-line">
                     {choice.result.message}

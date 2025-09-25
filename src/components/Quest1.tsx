@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { trackEvent } from '../lib/mixpanel';
+import { StatNotification } from './StatNotification';
 
 interface Quest1Props {
   onComplete: () => void;
@@ -16,6 +17,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
   const [showResult, setShowResult] = useState(false);
   const [questStartTime] = useState(Date.now());
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
+  const [showStatAnimation, setShowStatAnimation] = useState(false);
 
   // Track quest start when component mounts
   useEffect(() => {
@@ -125,12 +127,24 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
         totalQuestTime: totalQuestTime
       });
 
-      // Show result
+      // Show result and stat animation instantly
       setShowResult(true);
+      setShowStatAnimation(true);
+      
+      // Hide animation after 3 seconds
+      setTimeout(() => {
+        setShowStatAnimation(false);
+      }, 3000);
     } catch (error) {
       console.error('Failed to update trainer stats or quest progress:', error);
       // Still show result even if Firebase fails
       setShowResult(true);
+      setShowStatAnimation(true);
+      
+      // Hide animation after 3 seconds
+      setTimeout(() => {
+        setShowStatAnimation(false);
+      }, 3000);
     }
   };
 
@@ -235,7 +249,15 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
             /* Results */
             <div className="text-left">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-slate-800 mb-6"> 🎉 Kowai Chosen!</h3>
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <h3 className="text-2xl font-bold text-slate-800">🎉 Kowai Chosen!</h3>
+                  
+                  {/* Duolingo-style notification in header row */}
+                  <StatNotification 
+                    show={showStatAnimation} 
+                    statChanges={statChanges} 
+                  />
+                </div>
                 <div className="mb-6">
                   <img 
                     src={`/kowai/${selectedKowai}.png`} 
@@ -261,7 +283,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
               </div>
 
               {/* Stats Gained */}
-              <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+              <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50 relative">
                 <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
                 <div className="flex items-center justify-center gap-6">
                   {statChanges.bravery > 0 && (

@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { trackEvent } from '../lib/mixpanel';
+import { StatNotification } from './StatNotification';
 
 interface Quest4Props {
   onComplete: () => void;
@@ -20,6 +21,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
   const [isCorrect, setIsCorrect] = useState(false);
   const [questStartTime] = useState(Date.now());
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
+  const [showStatAnimation, setShowStatAnimation] = useState(false);
 
   // Track quest start when component mounts
   useEffect(() => {
@@ -176,8 +178,14 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
       });
     }
 
-    // Show result (regardless of correct/incorrect)
+    // Show result and stat animation (regardless of correct/incorrect)
     setShowResult(true);
+    setShowStatAnimation(true);
+
+    // Hide animation after 3 seconds
+    setTimeout(() => {
+      setShowStatAnimation(false);
+    }, 3000);
   };
 
   const handleNext = () => {
@@ -346,7 +354,13 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
               {isCorrect ? (
                 <>
                   <div className="mb-8">
-                    <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Awesome work!</h3>
+                    <div className="flex items-center justify-center gap-4 mb-6">
+                      <h3 className="text-3xl font-bold text-slate-800">🎉 Awesome work!</h3>
+                      <StatNotification 
+                        show={showStatAnimation} 
+                        statChanges={statChanges} 
+                      />
+                    </div>
                     <p className="quest-result-text text-slate-700 text-lg mb-6">
                       You've successfully found your exact position in Antarctica. Now that you know where you are, it's time for your next challenge.
                     </p>

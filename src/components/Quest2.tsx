@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { trackEvent } from '../lib/mixpanel';
+import { StatNotification } from './StatNotification';
 
 interface Quest2Props {
   onComplete: () => void;
@@ -19,6 +20,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
   const [attemptCount, setAttemptCount] = useState(0);
   const [allAnswers, setAllAnswers] = useState<string[]>([]);
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
+  const [showStatAnimation, setShowStatAnimation] = useState(false);
 
   // Track quest start when component mounts
   useEffect(() => {
@@ -163,8 +165,14 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
       });
     }
 
-    // Show result (regardless of correct/incorrect)
+    // Show result and stat animation (regardless of correct/incorrect)
     setShowResult(true);
+    setShowStatAnimation(true);
+
+    // Hide animation after 3 seconds
+    setTimeout(() => {
+      setShowStatAnimation(false);
+    }, 3000);
   };
 
   const handleNext = () => {
@@ -292,7 +300,13 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
               {isCorrect ? (
                 <>
                   <div className="mb-6">
-                      <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Congratulations, Explorer!</h3>
+                      <div className="flex items-center justify-center gap-4 mb-6">
+                        <h3 className="text-3xl font-bold text-slate-800">🎉 Congratulations, Explorer!</h3>
+                        <StatNotification 
+                          show={showStatAnimation} 
+                          statChanges={statChanges} 
+                        />
+                      </div>
                       <div className="mb-6">
                         <img 
                           src="/issues/issue1/antartica_map.gif" 

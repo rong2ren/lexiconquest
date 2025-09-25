@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { trackEvent } from '../lib/mixpanel';
+import { StatNotification } from './StatNotification';
 
 interface Quest5Props {
   onComplete: () => void;
@@ -23,8 +24,9 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
   const [showResult, setShowResult] = useState(false);
   const [isValidRoute, setIsValidRoute] = useState(false);
   const [questStartTime] = useState(Date.now());
-  const [routeStartTime, setRouteStartTime] = useState<number | null>(null);
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
+  const [showStatAnimation, setShowStatAnimation] = useState(false);
+  const [routeStartTime, setRouteStartTime] = useState<number | null>(null);
   const [clickedCellInfo, setClickedCellInfo] = useState<{coordinate: string, info: string, position: {x: number, y: number}} | null>(null);
   const [inputCoordinate, setInputCoordinate] = useState<string>('');
   const [inputError, setInputError] = useState<string>('');
@@ -325,8 +327,14 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
       });
     }
 
-    // Show result (regardless of valid/invalid)
+    // Show result and stat animation (regardless of valid/invalid)
     setShowResult(true);
+    setShowStatAnimation(true);
+
+    // Hide animation after 3 seconds
+    setTimeout(() => {
+      setShowStatAnimation(false);
+    }, 3000);
   };
 
   const handleNext = () => {
@@ -751,7 +759,13 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
               {isValidRoute ? (
                 <>
                   <div className="mb-6">
-                    <h3 className="text-3xl font-bold text-slate-800 mb-6">🎉 Perfect navigation, young explorer!</h3>
+                    <div className="flex items-center justify-center gap-4 mb-6">
+                      <h3 className="text-3xl font-bold text-slate-800">🎉 Perfect navigation, young explorer!</h3>
+                      <StatNotification 
+                        show={showStatAnimation} 
+                        statChanges={statChanges} 
+                      />
+                    </div>
                     
                     <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
                       <p className="quest-result-text text-slate-700 text-lg mb-2">
