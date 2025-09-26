@@ -12,7 +12,7 @@ This document outlines the redesigned quest event tracking system for Lexicon Qu
 | `Quest Option Selected` | User makes a choice/selection | When user selects an answer, choice, or option |
 | `Quest Completed` | User successfully completes a quest | When quest is finished with correct answer |
 | `Quest Failed` | User submits wrong answer | When user submits incorrect answer |
-| `Quest Retry` | User retries after wrong answer | When user tries again after failure |
+| `Quest Retried` | User retries after wrong answer | When user tries again after failure |
 | `Quest Start Failed` | Error when starting a quest | When quest start encounters an error |
 | `Quest Back Clicked` | User clicks back button in quest | When user navigates back from quest |
 
@@ -187,17 +187,17 @@ trackEvent('Quest Failed', {
 });
 ```
 
-### Quest Retry
+### Quest Retried
 
 ```typescript
-interface QuestRetryProperties extends StandardQuestProperties {
+interface QuestRetriedProperties extends StandardQuestProperties {
   // No additional properties needed - retry just resets the quest state
 }
 ```
 
 **Example:**
 ```typescript
-trackEvent('Quest Retry', {
+trackEvent('Quest Retried', {
   issueNumber: 1,
   questNumber: 2,
   trainerId: 'john_doe_8',

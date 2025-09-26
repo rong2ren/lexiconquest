@@ -128,7 +128,7 @@ export function PlayProfile() {
       console.error('Error starting issue:', error);
       
       // Track the error event
-      trackEvent('Quests Start Failed', { 
+      trackEvent('Quest Start Failed', { 
         issueNumber: 1,
         questNumber: questToStart,
         trainerId: currentTrainer?.uid,

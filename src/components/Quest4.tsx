@@ -195,7 +195,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
 
   const handleTryAgain = () => {
     // Track retry attempt
-    trackEvent('Quest Retry', {
+    trackEvent('Quest Retried', {
       issueNumber: 1,
       questNumber: 4,
       trainerId: currentTrainer?.uid,

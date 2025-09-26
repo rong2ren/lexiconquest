@@ -344,7 +344,7 @@ export function Quest5({ onComplete, onBack }: Quest5Props) {
 
   const handleReset = () => {
     // Track retry attempt
-    trackEvent('Quest Retry', {
+    trackEvent('Quest Retried', {
       issueNumber: 1,
       questNumber: 5,
       trainerId: currentTrainer?.uid,
