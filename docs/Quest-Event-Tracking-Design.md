@@ -162,6 +162,7 @@ trackEvent('Quest Completed', {
 });
 ```
 
+
 ### Quest Failed
 
 ```typescript

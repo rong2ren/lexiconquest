@@ -56,7 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (docSnap.exists()) {
         const data = docSnap.data();
-        return {
+        const profile = {
           uid: user.uid,
           email: user.email,
           kidsNames: data.kidsNames || [],
@@ -64,6 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           createdAt: data.createdAt || new Date().toISOString(),
           provider: data.provider
         };
+        return profile;
       }
       return null;
     } catch (error) {
@@ -74,17 +75,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Set up auth state listener
   useEffect(() => {
-    console.log('Setting up auth state listener...');
-    
     // Set a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      console.log('Auth timeout - setting loading to false');
       setLoading(false);
     }, 5000); // 5 second timeout
     
     try {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
         
         if (user) {
           setCurrentUser(user);

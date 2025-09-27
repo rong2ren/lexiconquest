@@ -16,19 +16,22 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-console.log('Initializing Firebase...');
+// console.log('Initializing Firebase...');
 const app = initializeApp(firebaseConfig);
-console.log('Firebase app initialized:', app);
+// console.log('Firebase app initialized:', app);
 
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
 
-console.log('Firebase services initialized:', { auth, db, analytics });
+// console.log('Firebase services initialized:', { auth, db, analytics });
 
 // Initialize Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
+// Add email scope to ensure we get the user's email
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
 
 // Export the app instance
 export default app;

@@ -87,15 +87,15 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
       empathy: currentTrainer.stats.empathy + newStatChanges.empathy,
     };
 
+    const completionTime = Date.now();
+    const totalQuestTime = completionTime - questStartTime;
+    
     try {
       // Update stats and quest progress in a single Firebase call
       await updateStatsAndQuestProgress(newStats, 1, selectedKowai);
       
       // Add the selected kowai as an egg to ownedKowai
       await addKowaiToTrainer(`${selectedKowai} egg`);
-      
-      const completionTime = Date.now();
-      const totalQuestTime = completionTime - questStartTime;
       
       // Save attempt to Firestore
       await saveAttempt({
@@ -112,21 +112,6 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
         statsAfter: newStats
       });
 
-      // Track quest completion
-      trackEvent('Quest Completed', { 
-        issueNumber: 1,
-        questNumber: 1,
-        trainerId: currentTrainer.uid,
-        trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
-        trainerAge: currentTrainer.age,
-        trainerStats: currentTrainer.stats,
-        questStartTime: questStartTime,
-        eventTime: Date.now(),
-        selectedAnswer: selectedKowai,
-        statsGained: newStatChanges,
-        totalQuestTime: totalQuestTime
-      });
-
       // Show result and stat animation instantly
       setShowResult(true);
       setShowStatAnimation(true);
@@ -137,6 +122,23 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
       }, 3000);
     } catch (error) {
       console.error('Failed to update trainer stats or quest progress:', error);
+      
+      // Track quest completion failure
+      trackEvent('Quest Completion Failed', {
+        issueNumber: 1,
+        questNumber: 1,
+        trainerId: currentTrainer.uid,
+        trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+        trainerAge: currentTrainer.age,
+        trainerStats: currentTrainer.stats,
+        questStartTime: questStartTime,
+        eventTime: Date.now(),
+        selectedAnswer: selectedKowai,
+        error: 'stats_update_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        totalQuestTime: totalQuestTime
+      });
+      
       // Still show result even if Firebase fails
       setShowResult(true);
       setShowStatAnimation(true);
@@ -146,6 +148,21 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
         setShowStatAnimation(false);
       }, 3000);
     }
+
+    // Track quest completion (always track, regardless of Firebase success)
+    trackEvent('Quest Completed', { 
+      issueNumber: 1,
+      questNumber: 1,
+      trainerId: currentTrainer.uid,
+      trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+      trainerAge: currentTrainer.age,
+      trainerStats: currentTrainer.stats,
+      questStartTime: questStartTime,
+      eventTime: Date.now(),
+      selectedAnswer: selectedKowai,
+      statsGained: newStatChanges,
+      totalQuestTime: totalQuestTime
+    });
   };
 
   const handleNext = () => {

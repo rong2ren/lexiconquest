@@ -10,15 +10,28 @@ export function useAuthWithAnalytics() {
   useEffect(() => {
     if (auth.currentUser) {
       // User is signed in - identify and register properties
+      // Use userProfile.email if available, fallback to currentUser.email
+      const email = auth.userProfile?.email || auth.currentUser.email;
+      
+      // Get a better name for the user
+      const userName = auth.userProfile?.kidsNames?.[0] || 
+                      auth.currentUser.displayName || 
+                      email?.split('@')[0] || 
+                      'unknown';
+      
       identifyUser(auth.currentUser.uid, {
-        'user_email': auth.currentUser.email,
-        'user_id': auth.currentUser.uid
+        '$email': email,
+        '$name': userName,
+        'user_id': auth.currentUser.uid,
+        'provider': auth.userProfile?.provider || (auth.currentUser?.providerData?.[0]?.providerId === 'google.com' ? 'google' : 'email'),
+        'kids_count': auth.userProfile?.kidsNames?.length || 'unknown',
+        'created_at': auth.userProfile?.createdAt || new Date().toISOString()
       });
     } else {
       // User is signed out - reset analytics
       resetUser();
     }
-  }, [auth.currentUser]);
+  }, [auth.currentUser, auth.userProfile]);
 
   // Enhanced login function with analytics
   const loginWithTracking = async (email: string, password: string) => {

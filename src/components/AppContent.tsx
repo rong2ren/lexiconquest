@@ -14,8 +14,6 @@ export function AppContent() {
   const [appState, setAppState] = useState<AppState>('loading');
 
   useEffect(() => {
-    console.log('AppContent useEffect - oldCohortLoading:', oldCohortLoading, 'playLoading:', playLoading);
-    console.log('currentUser:', currentUser, 'currentTrainer:', currentTrainer, 'availableTrainers:', availableTrainers);
     
     // Check if we're on /play route
     const isPlayRoute = window.location.pathname === '/play';

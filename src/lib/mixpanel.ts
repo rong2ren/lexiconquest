@@ -5,7 +5,7 @@ import mixpanel from 'mixpanel-browser';
 const config = {
   mixpanel: {
     token: "9ebe956e79a1871840a7eba49f9c4106",
-    debug: true,
+    debug: false,
     track_pageview: true,
     persistence: "localStorage"
   }
@@ -13,37 +13,39 @@ const config = {
 
 // Initialize Mixpanel
 try {
-  console.log('Initializing Mixpanel...');
   mixpanel.init(config.mixpanel.token, {
     debug: config.mixpanel.debug,
     track_pageview: config.mixpanel.debug,
     persistence: config.mixpanel.persistence as any,
   });
-  console.log('Mixpanel initialized successfully');
 } catch (error) {
   console.error('Mixpanel initialization error:', error);
 }
 
-// Get the referring domain
-const referringDomain = document.referrer;
-
-// Check if the referring domain matches the one you want to ignore
-if (referringDomain.includes('http://127.0.0.1:5500/')) {
-  mixpanel.register({ '$ignore': true });
-}
 
 // Export mixpanel instance
 export default mixpanel;
 
 // Utility functions for common tracking
 export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
-  mixpanel.track(eventName, properties);
+  try {
+    mixpanel.track(eventName, properties);
+  } catch (error) {
+    console.error('Error tracking event in Mixpanel:', error);
+  }
 };
 
 export const identifyUser = (userId: string, properties?: Record<string, any>) => {
-  mixpanel.identify(userId);
-  if (properties) {
-    mixpanel.register(properties);
+  try {
+    mixpanel.identify(userId);
+    if (properties) {
+      // Use people.set() to set user profile properties (shows in Users tab)
+      mixpanel.people.set(properties);
+      // Also register as super properties for events
+      mixpanel.register(properties);
+    }
+  } catch (error) {
+    console.error('Error identifying user in Mixpanel:', error);
   }
 };
 

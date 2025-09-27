@@ -3,7 +3,7 @@ import mixpanel from 'mixpanel-browser';
 // Mixpanel configuration
 export const mixpanelConfig = {
   token: "9ebe956e79a1871840a7eba49f9c4106",
-  debug: true,
+  debug: false,
   track_pageview: true,
   persistence: "localStorage"
 };

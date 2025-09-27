@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Trash2, X, AlertTriangle } from 'lucide-react';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
+import { trackEvent } from '../lib/mixpanel';
 
 interface TrainerManagementModalProps {
   isOpen: boolean;
@@ -26,6 +27,15 @@ export function TrainerManagementModal({ isOpen, onClose }: TrainerManagementMod
       await switchTrainer(trainerId);
     } catch (error) {
       console.error('Error switching trainer:', error);
+      
+      // Track trainer switching failure
+      trackEvent('Trainer Management Switch Failed', {
+        trainerId: trainerId,
+        error: 'trainer_management_switch_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
     } finally {
       setSwitchingTrainerId(null);
     }

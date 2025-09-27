@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
+import { trackEvent } from '../lib/mixpanel';
 
 export function PlayLogin() {
   const { 
@@ -28,6 +29,16 @@ export function PlayLogin() {
       await switchTrainer(trainerId);
     } catch (error) {
       console.error('Error activating trainer:', error);
+      
+      // Track trainer activation failure
+      trackEvent('Trainer Activation Failed', {
+        trainerId: trainerId,
+        error: 'trainer_activation_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
+      
       setLoginError(error instanceof Error ? error.message : 'Failed to activate trainer');
     } finally {
       setActivatingTrainerId(null);
@@ -60,6 +71,17 @@ export function PlayLogin() {
         await signup(loginData.firstName, loginData.lastName, age);
       }
     } catch (error) {
+      // Track login/signup failure
+      trackEvent('Play Login Failed', {
+        firstName: loginData.firstName,
+        lastName: loginData.lastName,
+        age: loginData.age,
+        error: 'play_login_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
+      
       setLoginError(error instanceof Error ? error.message : 'Failed to login');
     } finally {
       setIsLoading(false);

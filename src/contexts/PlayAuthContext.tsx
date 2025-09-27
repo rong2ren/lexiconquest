@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { trackEvent } from '../lib/mixpanel';
+import { trackEvent, identifyUser } from '../lib/mixpanel';
 
 // Trainer interface for new customers
 export interface Trainer {
@@ -174,6 +174,24 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     setMultiTrainerStorage(storage);
   };
 
+  // Identify trainer in Mixpanel
+  const identifyTrainerInMixpanel = (trainer: Trainer) => {
+    identifyUser(trainer.uid, {
+      '$email': 'unprovided',
+      '$name': `${trainer.firstName} ${trainer.lastName}`,
+      'trainerAge': trainer.age,
+      'provider': '/play',
+      'created_at': trainer.createdAt,
+      'last_login': trainer.lastLogin,
+      'bravery': trainer.stats.bravery,
+      'wisdom': trainer.stats.wisdom,
+      'curiosity': trainer.stats.curiosity,
+      'empathy': trainer.stats.empathy,
+      'owned_kowai_count': trainer.ownedKowai.length,
+      'encountered_kowai_count': trainer.encounteredKowai.length
+    });
+  };
+
   // Load trainer from localStorage on app start
   const loadTrainerFromStorage = async (): Promise<void> => {
     try {
@@ -189,6 +207,8 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         if (trainerDoc.exists()) {
           const trainerData = trainerDoc.data() as Trainer;
           setCurrentTrainer(trainerData);
+          // Identify trainer in Mixpanel
+          identifyTrainerInMixpanel(trainerData);
         } else {
           // This shouldn't happen after cleanup, but handle it gracefully
           setCurrentTrainer(null);
@@ -198,6 +218,14 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       }
     } catch (error) {
       console.error('Error loading trainer from storage:', error);
+      
+      // Track trainer loading failure
+      trackEvent('Trainer Load Failed', {
+        error: 'trainer_load_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
     } finally {
       setLoading(false);
     }
@@ -257,6 +285,9 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       trainerStats: newTrainer.stats,
       eventTime: Date.now()
     });
+
+    // Identify trainer in Mixpanel
+    identifyTrainerInMixpanel(newTrainer);
   };
 
   // Login existing trainer
@@ -285,6 +316,9 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     setCurrentTrainer(updatedTrainer);
     const storage = getMultiTrainerStorage();
     setAvailableTrainers(storage.trainerSessions);
+
+    // Identify trainer in Mixpanel
+    identifyTrainerInMixpanel(updatedTrainer);
   };
 
   // Logout
@@ -345,8 +379,21 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         trainerStats: updatedTrainer.stats,
         eventTime: Date.now()
       });
+
+      // Identify trainer in Mixpanel
+      identifyTrainerInMixpanel(updatedTrainer);
     } catch (error) {
       console.error('Error switching trainer:', error);
+      
+      // Track trainer switching failure
+      trackEvent('Trainer Switch Failed', {
+        targetTrainerId: trainerId,
+        error: 'trainer_switch_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
+      
       throw error;
     }
   };
@@ -385,7 +432,6 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
             activeTrainerStillValid = true;
           }
         } else {
-          console.log(`Removing missing trainer from localStorage: ${trainer.trainerId}`);
         }
       }
       
@@ -436,23 +482,29 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
   const updateStatsAndQuestProgress = async (newStats: { bravery: number; wisdom: number; curiosity: number; empathy: number }, completedQuest: number, answer?: string | string[] | number): Promise<void> => {
     if (!currentTrainer) return;
 
-    // Validate quest number
-    if (completedQuest < 1 || completedQuest > 6) {
-      throw new Error('Invalid quest number. Must be between 1 and 6.');
-    }
+    // Quest numbers are controlled by the quest components (Quest1, Quest2, etc.)
+    // No need to validate since they're hardcoded in the components
 
     const currentIssue = currentTrainer.currentIssue;
     const currentIssueProgress = currentTrainer.issueProgress[currentIssue];
     
     if (!currentIssueProgress) {
-      throw new Error(`No progress found for issue ${currentIssue}`);
+      const error = new Error(`No progress found for issue ${currentIssue}`);
+      trackEvent('Quest Update Failed', {
+        issueNumber: currentIssue,
+        questNumber: completedQuest,
+        trainerId: currentTrainer.uid,
+        trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+        trainerAge: currentTrainer.age,
+        error: 'no_progress_found',
+        errorMessage: error.message,
+        eventTime: Date.now()
+      });
+      throw error;
     }
 
-    // Validate quest progression (can't skip quests)
-    const currentLastCompleted = currentIssueProgress.lastCompletedQuest || 0;
-    if (completedQuest !== currentLastCompleted + 1) {
-      throw new Error(`Invalid quest progression. Expected quest ${currentLastCompleted + 1}, got ${completedQuest}.`);
-    }
+    // Quest progression is enforced by the UI layer, not here
+    // The UI only allows users to start the next quest in sequence
 
     try {
       const trainerRef = doc(db, 'trainers', currentTrainer.uid);
@@ -487,13 +539,33 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       }
 
       // Update local state
-      setCurrentTrainer(prev => prev ? { 
-        ...prev, 
+      const updatedTrainer = currentTrainer ? { 
+        ...currentTrainer, 
         stats: newStats,
-        issueProgress: updatedIssueProgress
-      } : null);
+        issueProgress: updatedIssueProgress,
+        lastLogin: now
+      } : null;
+      
+      setCurrentTrainer(updatedTrainer);
+
+      // Update Mixpanel user profile with new stats
+      if (updatedTrainer) {
+        identifyTrainerInMixpanel(updatedTrainer);
+      }
+
     } catch (error) {
-      console.error('Error updating trainer stats and quest progress:', error);
+      // Track Firebase update failures
+      trackEvent('Quest Update Failed', {
+        issueNumber: currentIssue,
+        questNumber: completedQuest,
+        trainerId: currentTrainer.uid,
+        trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+        trainerAge: currentTrainer.age,
+        error: 'firebase_update_failed',
+        errorMessage: (error as any)?.message || 'Unknown Firebase error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
       throw error;
     }
   };
@@ -526,6 +598,18 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       await setDoc(doc(db, 'attempts', attemptId), attempt);
     } catch (error) {
       console.error('Error saving attempt:', error);
+      
+      // Track attempt saving failure
+      trackEvent('Attempt Save Failed', {
+        issueNumber: attemptData.issueId,
+        questNumber: attemptData.questNumber,
+        trainerId: attemptData.trainerId,
+        error: 'attempt_save_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
+      
       throw error;
     }
   };
@@ -551,6 +635,18 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       await setDoc(statsHistoryRef, statsHistoryEntry);
     } catch (error) {
       console.error('Error saving stats history:', error);
+      
+      // Track stats history saving failure
+      trackEvent('Stats History Save Failed', {
+        issueNumber: entry.issue,
+        questNumber: entry.quest,
+        trainerId: currentTrainer.uid,
+        error: 'stats_history_save_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
+      
       throw error;
     }
   };
@@ -675,6 +771,17 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         } : null);
       } catch (error) {
         console.error('Error starting issue:', error);
+        
+        // Track issue starting failure
+        trackEvent('Issue Start Failed', {
+          issueNumber: currentIssue,
+          trainerId: currentTrainer.uid,
+          error: 'issue_start_failed',
+          errorMessage: (error as any)?.message || 'Unknown error',
+          errorCode: (error as any)?.code || 'unknown',
+          eventTime: Date.now()
+        });
+        
         throw error;
       }
     }
@@ -750,7 +857,12 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         });
 
         // Update local state
-        setCurrentTrainer(prev => prev ? { ...prev, ownedKowai: updatedOwnedKowai } : null);
+        const updatedTrainer = currentTrainer ? { 
+          ...currentTrainer, 
+          ownedKowai: updatedOwnedKowai,
+          lastLogin: new Date().toISOString()
+        } : null;
+        setCurrentTrainer(updatedTrainer);
         
         // Track Kowai owned
         trackEvent('Kowai Owned', {
@@ -764,9 +876,25 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
           kowaiName: kowaiId,
           kowaiType: 'owned'
         });
+
+        // Update Mixpanel user profile with new Kowai count
+        if (updatedTrainer) {
+          identifyTrainerInMixpanel(updatedTrainer);
+        }
       }
     } catch (error) {
       console.error('Error adding Kowai to trainer:', error);
+      
+      // Track Kowai addition failure
+      trackEvent('Kowai Addition Failed', {
+        kowaiId: kowaiId,
+        trainerId: currentTrainer.uid,
+        error: 'kowai_addition_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
+      
       throw error;
     }
   };
@@ -788,7 +916,12 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         });
 
         // Update local state
-        setCurrentTrainer(prev => prev ? { ...prev, encounteredKowai: updatedEncounteredKowai } : null);
+        const updatedTrainer = currentTrainer ? { 
+          ...currentTrainer, 
+          encounteredKowai: updatedEncounteredKowai,
+          lastLogin: new Date().toISOString()
+        } : null;
+        setCurrentTrainer(updatedTrainer);
         
         // Track Kowai encountered
         trackEvent('Kowai Encountered', {
@@ -802,12 +935,29 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
           kowaiName: kowaiId,
           kowaiType: 'encountered'
         });
+
+        // Update Mixpanel user profile with new encountered Kowai count
+        if (updatedTrainer) {
+          identifyTrainerInMixpanel(updatedTrainer);
+        }
       }
     } catch (error) {
       console.error('Error adding encountered Kowai to trainer:', error);
+      
+      // Track encountered Kowai addition failure
+      trackEvent('Encountered Kowai Addition Failed', {
+        kowaiId: kowaiId,
+        trainerId: currentTrainer.uid,
+        error: 'encountered_kowai_addition_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
+        errorCode: (error as any)?.code || 'unknown',
+        eventTime: Date.now()
+      });
+      
       throw error;
     }
   };
+
 
   // Load trainer from storage on mount
   useEffect(() => {

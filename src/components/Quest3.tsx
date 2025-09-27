@@ -80,12 +80,12 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
       empathy: currentTrainer.stats.empathy + newStatChanges.empathy,
     };
 
+    const completionTime = Date.now();
+    const totalQuestTime = completionTime - questStartTime;
+    
     try {
       // Update stats and quest progress in a single Firebase call
       await updateStatsAndQuestProgress(newStats, 3, selectedChoice);
-      
-      const completionTime = Date.now();
-      const totalQuestTime = completionTime - questStartTime;
       
       // Save attempt to Firestore
       await saveAttempt({
@@ -101,9 +101,11 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
         statsBefore: currentTrainer.stats,
         statsAfter: newStats
       });
+    } catch (error) {
+      console.error('Failed to update trainer stats or quest progress:', error);
       
-      // Track quest completion
-      trackEvent('Quest Completed', { 
+      // Track quest completion failure
+      trackEvent('Quest Completion Failed', {
         issueNumber: 1,
         questNumber: 3,
         trainerId: currentTrainer.uid,
@@ -113,29 +115,35 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
         questStartTime: questStartTime,
         eventTime: Date.now(),
         selectedAnswer: selectedChoice,
-        statsGained: newStatChanges,
+        error: 'stats_update_failed',
+        errorMessage: (error as any)?.message || 'Unknown error',
         totalQuestTime: totalQuestTime
       });
-
-      // Show result and stat animation
-      setShowResult(true);
-      setShowStatAnimation(true);
-
-      // Hide animation after 3 seconds
-      setTimeout(() => {
-        setShowStatAnimation(false);
-      }, 3000);
-    } catch (error) {
-      console.error('Failed to update trainer stats or quest progress:', error);
-      // Still show result even if Firebase fails
-      setShowResult(true);
-      setShowStatAnimation(true);
-
-      // Hide animation after 3 seconds
-      setTimeout(() => {
-        setShowStatAnimation(false);
-      }, 3000);
     }
+
+    // Track quest completion (always track, regardless of Firebase success)
+    trackEvent('Quest Completed', { 
+      issueNumber: 1,
+      questNumber: 3,
+      trainerId: currentTrainer.uid,
+      trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+      trainerAge: currentTrainer.age,
+      trainerStats: currentTrainer.stats,
+      questStartTime: questStartTime,
+      eventTime: Date.now(),
+      selectedAnswer: selectedChoice,
+      statsGained: newStatChanges,
+      totalQuestTime: totalQuestTime
+    });
+
+    // Show result and stat animation
+    setShowResult(true);
+    setShowStatAnimation(true);
+
+    // Hide animation after 3 seconds
+    setTimeout(() => {
+      setShowStatAnimation(false);
+    }, 3000);
   };
 
   const handleNext = () => {

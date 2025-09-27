@@ -84,12 +84,12 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
         empathy: currentTrainer.stats.empathy + newStatChanges.empathy,
       };
 
+      const completionTime = Date.now();
+      const totalQuestTime = completionTime - questStartTime;
+      
       try {
         // Update stats and quest progress in a single Firebase call
         await updateStatsAndQuestProgress(newStats, 2, selectedContinent);
-        
-        const completionTime = Date.now();
-        const totalQuestTime = completionTime - questStartTime;
         
         // Save attempt to Firestore
         try {
@@ -109,9 +109,11 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
         } catch (error) {
           console.error('Failed to save attempt:', error);
         }
-
-        // Track quest completion
-        trackEvent('Quest Completed', { 
+      } catch (error) {
+        console.error('Failed to update trainer stats or quest progress:', error);
+        
+        // Track quest completion failure
+        trackEvent('Quest Completion Failed', {
           issueNumber: 1,
           questNumber: 2,
           trainerId: currentTrainer.uid,
@@ -121,12 +123,26 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
           questStartTime: questStartTime,
           eventTime: Date.now(),
           selectedAnswer: selectedContinent,
-          statsGained: newStatChanges,
+          error: 'stats_update_failed',
+          errorMessage: (error as any)?.message || 'Unknown error',
           totalQuestTime: totalQuestTime
         });
-      } catch (error) {
-        console.error('Failed to update trainer stats or quest progress:', error);
       }
+
+      // Track quest completion (always track, regardless of Firebase success)
+      trackEvent('Quest Completed', { 
+        issueNumber: 1,
+        questNumber: 2,
+        trainerId: currentTrainer.uid,
+        trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
+        trainerAge: currentTrainer.age,
+        trainerStats: currentTrainer.stats,
+        questStartTime: questStartTime,
+        eventTime: Date.now(),
+        selectedAnswer: selectedContinent,
+        statsGained: newStatChanges,
+        totalQuestTime: totalQuestTime
+      });
     } else {
       // Save attempt to Firestore (wrong answer)
       const completionTime = Date.now();
