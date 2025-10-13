@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from './ui/button';
-import { usePlayAuth } from '../contexts/PlayAuthContext';
-import { trackEvent } from '../lib/mixpanel';
-import { StatNotification } from './StatNotification';
+import { Button } from '../ui/button';
+import { usePlayAuth } from '../../contexts/PlayAuthContext';
+import { trackEvent } from '../../lib/mixpanel';
+import { StatNotification } from '../StatNotification';
 
-interface Quest1Props {
+interface Quest3Props {
   onComplete: () => void;
   onBack: () => void;
 }
 
-export function Quest1({ onComplete, onBack }: Quest1Props) {
-  const { currentTrainer, updateStatsAndQuestProgress, saveAttempt, addKowaiToTrainer } = usePlayAuth();
-  const [selectedKowai, setSelectedKowai] = useState<string | null>(null);
+export function Quest3({ onComplete, onBack }: Quest3Props) {
+  const { currentTrainer, updateStatsAndQuestProgress, saveAttempt } = usePlayAuth();
+  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [questStartTime] = useState(Date.now());
   const [statChanges, setStatChanges] = useState({ bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 });
@@ -23,7 +23,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
   useEffect(() => {
     trackEvent('Quest Started', {
       issueNumber: 1,
-      questNumber: 1,
+      questNumber: 3,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
@@ -38,45 +38,38 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
     window.scrollTo({ top: 0 });
   }, [showResult]);
 
-  const handleKowaiSelect = (kowai: string) => {
-    setSelectedKowai(kowai);
+  const handleChoiceSelect = (choice: string) => {
+    setSelectedChoice(choice);
     
-    // Track Kowai selection with detailed context
+    // Track choice selection with detailed context
     trackEvent('Quest Answer Selected', {
       issueNumber: 1,
-      questNumber: 1,
+      questNumber: 3,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
       trainerStats: currentTrainer?.stats,
       questStartTime: questStartTime,
       eventTime: Date.now(),
-      optionType: 'kowai',
-      selectedAnswer: kowai
+      optionType: 'choice',
+      selectedAnswer: choice
     });
   };
 
   const handleSubmit = async () => {
-    if (!selectedKowai || !currentTrainer) return;
+    if (!selectedChoice || !currentTrainer) return;
 
-    // Quest1 is always "correct" (Kowai selection)
-    // Apply stats based on kowai selection
+    // Quest3 is always "correct" (scenario-based choice)
+    // Apply stats and update quest progress
     let newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 };
     
-    switch (selectedKowai) {
-      case 'peblaff':
-        newStatChanges.curiosity = 1;
-        break;
-      case 'fanelle':
-        newStatChanges.empathy = 1;
-        break;
-      case 'scorki':
-        newStatChanges.bravery = 1;
-        break;
-      default:
-        // Fallback - no stat changes
-        break;
-      }
+    if (selectedChoice === 'approach') {
+      newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 3 };
+    } else if (selectedChoice === 'wait') {
+      newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 3 };
+    } else if (selectedChoice === 'cookies') {
+      newStatChanges = { bravery: 0, wisdom: 0, curiosity: 0, empathy: 3 };
+    }
     
     setStatChanges(newStatChanges);
 
@@ -92,18 +85,15 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
     
     try {
       // Update stats and quest progress in a single Firebase call
-      await updateStatsAndQuestProgress(newStats, 1, selectedKowai);
-      
-      // Add the selected kowai as an egg to ownedKowai
-      await addKowaiToTrainer(`${selectedKowai} egg`);
+      await updateStatsAndQuestProgress(newStats, 3, selectedChoice);
       
       // Save attempt to Firestore
       await saveAttempt({
         trainerId: currentTrainer.uid,
         issueId: currentTrainer.currentIssue,
-        questNumber: 1,
-        answer: selectedKowai,
-        answerType: 'kowai_selection',
+        questNumber: 3,
+        answer: selectedChoice,
+        answerType: 'scenario_choice',
         isCorrect: true,
         questStartTime: new Date(questStartTime).toISOString(),
         submittedAt: new Date(completionTime).toISOString(),
@@ -111,58 +101,49 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
         statsBefore: currentTrainer.stats,
         statsAfter: newStats
       });
-
-      // Show result and stat animation instantly
-      setShowResult(true);
-      setShowStatAnimation(true);
-      
-      // Hide animation after 3 seconds
-      setTimeout(() => {
-        setShowStatAnimation(false);
-      }, 3000);
     } catch (error) {
       console.error('Failed to update trainer stats or quest progress:', error);
       
       // Track quest completion failure
       trackEvent('Quest Completion Failed', {
         issueNumber: 1,
-        questNumber: 1,
+        questNumber: 3,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
         trainerAge: currentTrainer.age,
         trainerStats: currentTrainer.stats,
         questStartTime: questStartTime,
         eventTime: Date.now(),
-        selectedAnswer: selectedKowai,
+        selectedAnswer: selectedChoice,
         error: 'stats_update_failed',
         errorMessage: (error as any)?.message || 'Unknown error',
         totalQuestTime: totalQuestTime
       });
-      
-      // Still show result even if Firebase fails
-      setShowResult(true);
-      setShowStatAnimation(true);
-      
-      // Hide animation after 3 seconds
-      setTimeout(() => {
-        setShowStatAnimation(false);
-      }, 3000);
     }
 
     // Track quest completion (always track, regardless of Firebase success)
     trackEvent('Quest Completed', { 
       issueNumber: 1,
-      questNumber: 1,
+      questNumber: 3,
       trainerId: currentTrainer.uid,
       trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
       trainerAge: currentTrainer.age,
       trainerStats: currentTrainer.stats,
       questStartTime: questStartTime,
       eventTime: Date.now(),
-      selectedAnswer: selectedKowai,
+      selectedAnswer: selectedChoice,
       statsGained: newStatChanges,
       totalQuestTime: totalQuestTime
     });
+
+    // Show result and stat animation
+    setShowResult(true);
+    setShowStatAnimation(true);
+
+    // Hide animation after 3 seconds
+    setTimeout(() => {
+      setShowStatAnimation(false);
+    }, 3000);
   };
 
   const handleNext = () => {
@@ -170,12 +151,28 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
     onComplete();
   };
 
-  const getKowaiDisplayName = (kowai: string) => {
-    switch (kowai) {
-      case 'fanelle': return 'Fanelle';
-      case 'scorki': return 'Scorki';
-      case 'peblaff': return 'Peblaff';
-      default: return kowai;
+
+  const getResultText = (choice: string) => {
+    switch (choice) {
+      case 'approach': 
+        return 'You slowly walk toward Lumino with your hands held open, showing that you\'re not carrying anything dangerous.\n\nAt first, Lumino seems curious about your gentle approach. It tilts its head and watches you carefully, not running away like you expected.\n\nBut as you get closer, Lumino suddenly sees your shadow stretching across the snow toward it. In the wild, shadows often mean danger - predators swooping down from above.\n\nLumino panics! It leaps backward with a frightened yelp, stumbles in the deep snow, and tumbles tail-over-head into a small snowbank.\n\nYou stop immediately and step back, feeling terrible. But slowly, as Lumino brushes the snow off its fur, it seems to realize that you didn\'t mean to hurt it.\n\nYou were trying to be gentle. Even if it didn\'t work out perfectly, Lumino understands you.';
+      case 'wait': 
+        return 'You decide that the best approach is to be patient. You sit down gently in the snow, cross your legs, and stay very still.\n\nAt first, your plan seems to work perfectly. Lumino tilts its head curiously and begins walking in a slow circle around you, keeping a safe distance but clearly studying you.\n\nBut as the minutes pass, sitting in the freezing snow becomes really uncomfortable. The cold snow soaks through your pants, making your legs numb and stiff.\n\nYou can\'t take it anymore, so you start to extend one leg very slowly and carefully. But the sudden movement startles Lumino!\n\nIn its panic, Lumino slips on a patch of smooth ice and goes sliding, until it crashes into a pile of soft snow with a surprised squeak.\n\nWell, the good thing is that it doesn\'t seem scared of you anymore. Your patience showed kindness.';
+      case 'cookies': 
+        return 'You slowly pull out some cookies from your backpack and hold them out toward Lumino.\n\nThe little creature tilts its head curiously, watching you with those big, sparkling eyes.\n\nLumino takes a few careful steps closer, sniffing the air. It looks at the cookies, then at you, then back at the cookies.\n\nFinally, Lumino darts forward quickly, grabs one cookie in its mouth, and runs back to a safe distance.\n\nBut then Lumino starts coughing and spits out the cookie! It shakes its head and makes a disgusted face. Clearly, magical creatures can\'t eat the same food as humans.\n\nYou feel a little disappointed that your gift didn\'t work. But at least Lumino isn\'t running away, and its eyes look softer now, less afraid.\n\nYou\'ve made your first small step toward friendship.';
+      default: return '';
+    }
+  };
+
+  const getResultPicture = (choice: string) => {
+    switch (choice) {
+      case 'approach': 
+        return '/issues/issue1/lumino shakes snow off.gif';
+      case 'wait': 
+        return '/issues/issue1/lumino-sliding.gif';
+      case 'cookies': 
+        return '/issues/issue1/lumino coughs cookie.gif';
+      default: return '/kowai/lumino.png';
     }
   };
 
@@ -203,50 +200,62 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
           {!showResult ? (
             <>
               {/* Quest Header */}
-              <div className="text-center mb-10">
-                <h2 className="quest-title mb-8 text-4xl text-slate-800 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
-                  Quest 1: Where Adventure Starts
+              <div className="text-center mb-8">
+                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                  Quest 3: Build Trust with Lumino
                 </h2>
-                
-                  {/* Question Container */}
-                  <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50 text-left">
-                    <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
-                      Which kowai do you want your egg to hatch into?
-                    </h2>
-                  <div className="flex items-center justify-center gap-2 text-slate-700">
-                    <p className="text-lg">
-                      Before you choose, make sure you have read the pages to learn about each one's personality and its power.
-                    </p>
-                  </div>
+              </div>
+
+              {/* Question */}
+              <div className="text-left mb-12">
+                <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
+                  <h2 className="text-slate-800 text-2xl font-semibold">
+                    You want to help the lost and helpless young Lumino. But first, you need to gain its trust. What would you do?
+                  </h2>
                 </div>
               </div>
 
-              {/* Kowai Choices */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Choice Options */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 {[
-                  { id: 'fanelle', name: 'Fanelle' },
-                  { id: 'scorki', name: 'Scorki' },
-                  { id: 'peblaff', name: 'Peblaff' }
-                ].map((kowai) => (
+                  { 
+                    id: 'approach', 
+                    text: 'Slowly approach the Lumino with your hands open to show you\'re friendly.',
+                    image: '/issues/issue1/mittens.png'
+                  },
+                  { 
+                    id: 'wait', 
+                    text: 'Sit in the snow and let Lumino decide if it wants to come closer.',
+                    image: '/issues/issue1/sitting.png'
+                  },
+                  { 
+                    id: 'cookies', 
+                    text: 'Take out cookies from your backpack to share as a friendship gift.',
+                    image: '/issues/issue1/cookies.png'
+                  }
+                ].map((option, index) => (
                   <motion.button
-                    key={kowai.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleKowaiSelect(kowai.id)}
-                    className={`p-6 rounded-xl text-center transition-all duration-200 border-2 cursor-pointer ${
-                      selectedKowai === kowai.id
+                    key={option.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleChoiceSelect(option.id)}
+                    className={`p-6 rounded-xl text-center transition-all duration-200 cursor-pointer ${
+                      selectedChoice === option.id
                         ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-400 shadow-lg shadow-purple-500/25'
-                        : 'bg-white/60 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
+                        : 'bg-white/60 border-2 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
                     }`}
                   >
                     <div className="mb-4">
-                      <span className="text-slate-800 font-bold text-lg">{kowai.name}</span>
+                      <img 
+                        src={option.image} 
+                        alt={option.text}
+                        className="w-64 h-64 mx-auto rounded-lg object-cover"
+                      />
                     </div>
-                    <img 
-                      src={`/kowai/${kowai.id}.png`} 
-                      alt={kowai.name}
-                      className="mx-auto rounded-lg object-contain"
-                    />
+                    <p className="text-slate-800 font-semibold text-lg leading-tight">{option.text}</p>
                   </motion.button>
                 ))}
               </div>
@@ -255,10 +264,10 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
               <div className="text-center">
                 <Button
                   onClick={handleSubmit}
-                  disabled={!selectedKowai}
+                  disabled={!selectedChoice}
                   className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3 disabled:opacity-50 cursor-pointer"
                 >
-                  Choose my Kowai →
+                  Submit
                 </Button>
               </div>
             </>
@@ -267,9 +276,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
             <div className="text-left">
               <div className="mb-6">
                 <div className="flex items-center justify-center gap-4 mb-6">
-                  <h3 className="text-2xl font-bold text-slate-800">🎉 Kowai Chosen!</h3>
-                  
-                  {/* Duolingo-style notification in header row */}
+                  <h3 className="text-3xl font-bold text-slate-800">🎉 Congratulations, Explorer!</h3>
                   <StatNotification 
                     show={showStatAnimation} 
                     statChanges={statChanges} 
@@ -277,30 +284,28 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
                 </div>
                 <div className="mb-6">
                   <img 
-                    src={`/kowai/${selectedKowai}.png`} 
-                    alt={getKowaiDisplayName(selectedKowai!)}
-                    className="h-70 mx-auto mb-3 rounded-lg object-cover"
+                    src={getResultPicture(selectedChoice!)}
+                    alt="Lumino"
+                    className="h-96 mx-auto mb-3 rounded-lg object-cover"
                   />
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">
-                    You have chosen <span className="text-purple-600 font-semibold">{getKowaiDisplayName(selectedKowai!)}</span> as your first Kowai companion. 
-                    This magical creature has been waiting for someone special like you to come along and form an unbreakable bond.
+                  <p className="quest-result-text text-slate-700 text-lg mb-4 whitespace-pre-line">
+                    {getResultText(selectedChoice!)}
                   </p>
+                </div>
+                
+                <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
+                  <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
                   <p className="quest-result-text text-slate-700 text-lg mb-4">
-                    This brave little creature is waiting to become your lifelong friend and trusted partner in all your future adventures. 
-                    Together, you will face challenges, discover new lands, and grow stronger with each passing day.
-                  </p>
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">
-                    But first, you must prove you are ready to be a true Kowai Trainer. The path ahead is filled with trials that will test your courage, wisdom, curiosity, and empathy. 
-                    Complete all the challenges ahead to earn the right to awaken your Kowai egg and begin your journey as a legendary trainer.
+                    Though it wasn't fully successful, your kindness towards Lumino was clear. You have proven that your heart is big enough to care for magical creatures.
                   </p>
                   <p className="quest-result-text text-slate-700 text-lg">
-                    Your adventure is just beginning, and the bond you will share with {getKowaiDisplayName(selectedKowai!)} will be the foundation of everything you accomplish together.
+                    Three more challenges await you. Continue forward, and show us what else you can accomplish.
                   </p>
                 </div>
               </div>
 
               {/* Stats Gained */}
-              <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50 relative">
+              <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                 <h4 className="text-xl font-semibold text-slate-800 mb-4 text-center">Stats Gained:</h4>
                 <div className="flex items-center justify-center gap-6">
                   {statChanges.bravery > 0 && (
@@ -340,7 +345,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
                 </div>
               </div>
 
-              {/* Next Button */}
+              {/* Continue Button */}
               <div className="text-center">
                 <Button 
                   onClick={handleNext}

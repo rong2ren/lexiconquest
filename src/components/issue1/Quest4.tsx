@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { usePlayAuth } from '../contexts/PlayAuthContext';
-import { trackEvent } from '../lib/mixpanel';
-import { StatNotification } from './StatNotification';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { usePlayAuth } from '../../contexts/PlayAuthContext';
+import { trackEvent } from '../../lib/mixpanel';
+import { StatNotification } from '../StatNotification';
 
 interface Quest4Props {
   onComplete: () => void;
