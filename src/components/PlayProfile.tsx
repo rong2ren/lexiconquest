@@ -12,9 +12,10 @@ import { Quest3 } from './issue1/Quest3';
 import { Quest4 } from './issue1/Quest4';
 import { Quest5 } from './issue1/Quest5';
 import Quest6 from './issue1/Quest6';
+import { FlexibleStoryReader } from './story/FlexibleStoryReader';
 import { Footer } from './Footer';
 import { useState, useEffect } from 'react';
-import { trackEvent } from '../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../lib/mixpanel';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 
 // Current issue configuration - hardcoded for now
@@ -31,6 +32,9 @@ export function PlayProfile() {
   
   // Quest state
   const [currentQuest, setCurrentQuest] = useState<number | null>(null);
+  
+  // Story reader state
+  const [showStoryReader, setShowStoryReader] = useState(false);
 
   // Initialize quest state (never auto-start quests)
   useEffect(() => {
@@ -44,7 +48,7 @@ export function PlayProfile() {
     } else {
       // Track Kowai picture clicked
       trackEvent('Kowai Picture Clicked', {
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         trainerId: currentTrainer?.uid,
         trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
         trainerAge: currentTrainer?.age,
@@ -63,7 +67,7 @@ export function PlayProfile() {
     // Track Kowai modal closed
     if (selectedKowai) {
       trackEvent('Kowai Modal Closed', {
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         trainerId: currentTrainer?.uid,
         trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
         trainerAge: currentTrainer?.age,
@@ -100,7 +104,7 @@ export function PlayProfile() {
           // All quests completed - redirect to Issue 2 purchase - hardcoded for now
           // Track purchase link clicked
           trackEvent('Purchase Link Clicked', {
-            issueNumber: 1,
+            issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
             trainerId: currentTrainer?.uid,
             trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
             trainerAge: currentTrainer?.age,
@@ -129,7 +133,7 @@ export function PlayProfile() {
       
       // Track the error event
       trackEvent('Quest Start Failed', { 
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         questNumber: questToStart,
         trainerId: currentTrainer?.uid,
         trainerName: `${currentTrainer?.firstName} ${currentTrainer?.lastName}`,
@@ -178,6 +182,20 @@ export function PlayProfile() {
     setCurrentQuest(null);
   };
 
+  // Story reader handlers
+  const handleStartStory = () => {
+    setShowStoryReader(true);
+    trackEvent('Story Reader Started', {
+      issueNumber: 1,
+      trainerId: currentTrainer?.uid,
+      trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null
+    });
+  };
+
+  const handleStoryBack = () => {
+    setShowStoryReader(false);
+  };
+
 
   const displayName = currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : 'Adventurer';
   const stats = currentTrainer?.stats || { bravery: 0, wisdom: 0, curiosity: 0, empathy: 0 };
@@ -188,6 +206,16 @@ export function PlayProfile() {
   
   // Check if user has started quests (for button text)
   const hasStartedQuests = currentIssueProgress && currentIssueProgress.lastCompletedQuest > 0;
+
+  // Render story reader if active
+  if (showStoryReader) {
+    return (
+      <FlexibleStoryReader 
+        issueId={currentTrainer?.currentIssue || "issue1"}
+        onBack={handleStoryBack}
+      />
+    );
+  }
 
   // Render quest pages if active
   if (currentQuest === 1) {
@@ -282,13 +310,23 @@ export function PlayProfile() {
                 ) : (
                   <>
                     <p className="text-lg sm:text-xl md:text-2xl text-slate-100 mb-6 sm:mb-10 drop-shadow-lg font-medium">Your magical journey awaits!</p>
-                    <div className="relative inline-block">
-                      <Button 
-                        onClick={handleBeginQuest}
-                        className="relative px-8 sm:px-16 py-4 sm:py-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-2xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
-                      >
-                        <span className="relative z-10">{hasStartedQuests ? 'Continue Your Quest' : 'Begin Your Quest'}</span>
-                      </Button>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                      <div className="relative inline-block">
+                        <Button 
+                          onClick={handleStartStory}
+                          className="relative px-6 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-500 hover:via-emerald-500 hover:to-teal-500 text-white font-black text-lg sm:text-xl rounded-2xl shadow-xl hover:shadow-green-500/30 hover:scale-105 transition-all duration-300 border-0"
+                        >
+                          <span className="relative z-10">📖 Read Story</span>
+                        </Button>
+                      </div>
+                      <div className="relative inline-block">
+                        <Button 
+                          onClick={handleBeginQuest}
+                          className="relative px-6 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
+                        >
+                          <span className="relative z-10">{hasStartedQuests ? 'Continue Your Quest' : 'Begin Your Quest'}</span>
+                        </Button>
+                      </div>
                     </div>
                   </>
                 )}

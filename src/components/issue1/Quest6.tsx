@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { usePlayAuth } from '../../contexts/PlayAuthContext';
-import { trackEvent } from '../../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../../lib/mixpanel';
 import { StatNotification } from '../StatNotification';
 
 interface Quest6Props {
@@ -22,7 +22,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
   // Track quest start when component mounts
   useEffect(() => {
     trackEvent('Quest Started', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 6,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -73,7 +73,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     
     // Track choice selection
     trackEvent('Quest Answer Selected', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 6,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -128,7 +128,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       
       // Track quest completion failure
       trackEvent('Quest Completion Failed', {
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         questNumber: 6,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -145,7 +145,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
 
     // Track quest completion (always track, regardless of Firebase success)
     trackEvent('Quest Completed', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 6,
       trainerId: currentTrainer.uid,
       trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -272,7 +272,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
                   onClick={handleContinue}
                   className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                 >
-                  Continue to the next quest
+                  Continue to Next Page
                 </Button>
               </div>
             </div>

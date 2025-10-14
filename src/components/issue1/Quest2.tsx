@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import { usePlayAuth } from '../../contexts/PlayAuthContext';
-import { trackEvent } from '../../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../../lib/mixpanel';
 import { StatNotification } from '../StatNotification';
 
 interface Quest2Props {
@@ -25,7 +25,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
   // Track quest start when component mounts
   useEffect(() => {
     trackEvent('Quest Started', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 2,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -46,7 +46,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
     
     // Track answer selection with detailed context
     trackEvent('Quest Answer Selected', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 2,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -114,7 +114,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
         
         // Track quest completion failure
         trackEvent('Quest Completion Failed', {
-          issueNumber: 1,
+          issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
           questNumber: 2,
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -131,7 +131,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
 
       // Track quest completion (always track, regardless of Firebase success)
       trackEvent('Quest Completed', { 
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         questNumber: 2,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -168,7 +168,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
 
       // Track wrong answer (no stats or quest progress)
       trackEvent('Quest Failed', { 
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         questNumber: 2,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -199,7 +199,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
   const handleTryAgain = () => {
     // Track retry attempt
     trackEvent('Quest Retried', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 2,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -395,7 +395,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                       onClick={handleNext}
                       className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                     >
-                      Continue to the next quest
+                      Continue to Next Page
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>

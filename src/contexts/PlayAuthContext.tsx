@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { trackEvent, identifyUser } from '../lib/mixpanel';
+import { trackEvent, identifyUser, getIssueNumber } from '../lib/mixpanel';
 
 // Trainer interface for new customers
 export interface Trainer {
@@ -24,6 +24,9 @@ export interface Trainer {
       lastCompletedQuest: number; // 0-6, 0 if none completed
       startedAt: string | null;
       completedAt: string | null;
+      currentChapter: number; // Story reading position
+      currentPage: number; // Story reading position
+      lastReadAt: string | null; // When they last read the story
     };
   };
   createdAt: string;
@@ -107,6 +110,10 @@ interface PlayAuthContextType {
   switchToIssue: (issueId: string) => Promise<void>;
   addKowaiToTrainer: (kowaiId: string) => Promise<void>;
   addEncounteredKowai: (kowaiId: string) => Promise<void>;
+  saveStoryProgress: (currentChapter: number, currentPage: number) => Promise<void>;
+  getStoryProgress: () => { currentChapter: number; currentPage: number } | null;
+  setStoryStarted: () => Promise<void>;
+  setStoryCompleted: () => Promise<void>;
 }
 
 // Create the context
@@ -256,8 +263,11 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       issueProgress: {
         issue1: {
           lastCompletedQuest: 0, // No quests completed yet
-          startedAt: null, // Will be set when they first click "Start Your Quest"
-          completedAt: null
+          startedAt: null, // Will be set when they first open story reader
+          completedAt: null, // Will be set when they finish reading story
+          currentChapter: 0, // Start at first chapter
+          currentPage: 0, // Start at first page
+          lastReadAt: null// Set to now for new users
         }
       },
       createdAt: new Date().toISOString(),
@@ -278,7 +288,7 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     
     // Track successful profile creation
     trackEvent('Profile Added', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(newTrainer.currentIssue),
       trainerId: trainerId,
       trainerName: `${newTrainer.firstName} ${newTrainer.lastName}`,
       trainerAge: newTrainer.age,
@@ -372,7 +382,7 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
       
       // Track successful profile switch
       trackEvent('Profile Switched', {
-        issueNumber: 1,
+        issueNumber: getIssueNumber(updatedTrainer.currentIssue),
         trainerId: trainerId,
         trainerName: `${updatedTrainer.firstName} ${updatedTrainer.lastName}`,
         trainerAge: updatedTrainer.age,
@@ -797,8 +807,11 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         ...currentTrainer.issueProgress,
         [issueId]: {
           lastCompletedQuest: 0,
-          startedAt: null, // Will be set when they first click "Start Your Quest"
-          completedAt: null
+          startedAt: null, // Will be set when they first open story reader
+          completedAt: null, // Will be set when they finish reading story
+          currentChapter: 0, // Start at first chapter
+          currentPage: 0, // Start at first page
+          lastReadAt: null // Set to null for new issues
         }
       };
 
@@ -866,7 +879,7 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         
         // Track Kowai owned
         trackEvent('Kowai Owned', {
-          issueNumber: 1,
+          issueNumber: getIssueNumber(currentTrainer.currentIssue),
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
           trainerAge: currentTrainer.age,
@@ -925,7 +938,7 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
         
         // Track Kowai encountered
         trackEvent('Kowai Encountered', {
-          issueNumber: 1,
+          issueNumber: getIssueNumber(currentTrainer.currentIssue),
           trainerId: currentTrainer.uid,
           trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
           trainerAge: currentTrainer.age,
@@ -958,6 +971,172 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     }
   };
 
+  // Save story reading progress
+  const saveStoryProgress = async (currentChapter: number, currentPage: number): Promise<void> => {
+    if (!currentTrainer) return;
+
+    // Validate chapter and page numbers
+    if (currentChapter < 0 || currentPage < 0) {
+      throw new Error('Invalid story position. Chapter and page must be non-negative.');
+    }
+
+    const currentIssue = currentTrainer.currentIssue;
+    const currentIssueProgress = currentTrainer.issueProgress[currentIssue];
+    
+    if (!currentIssueProgress) {
+      throw new Error(`No progress found for issue ${currentIssue}`);
+    }
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      const now = new Date().toISOString();
+      
+      // Initialize story progress fields if they don't exist (for existing users)
+      const updatedIssueProgress = {
+        ...currentTrainer.issueProgress,
+        [currentIssue]: {
+          ...currentIssueProgress,
+          currentChapter: currentChapter + 1, // Convert from 0-indexed to 1-indexed for storage
+          currentPage: currentPage + 1, // Convert from 0-indexed to 1-indexed for storage
+          lastReadAt: now,
+          // Initialize startedAt if it doesn't exist and this is the first save
+          startedAt: currentIssueProgress.startedAt || now
+        }
+      };
+
+      await updateDoc(trainerRef, {
+        issueProgress: updatedIssueProgress,
+        lastLogin: now
+      });
+
+      // Update local state
+      setCurrentTrainer(prev => prev ? {
+        ...prev,
+        issueProgress: updatedIssueProgress,
+        lastLogin: now
+      } : null);
+
+      trackEvent('Story Progress Saved', {
+        issueId: currentIssue,
+        chapter: currentChapter,
+        page: currentPage,
+        trainerId: currentTrainer.uid
+      });
+    } catch (error) {
+      console.error('Error saving story progress:', error);
+      throw error;
+    }
+  };
+
+  // Get story reading progress
+  const getStoryProgress = (): { currentChapter: number; currentPage: number } | null => {
+    if (!currentTrainer) return null;
+    
+    const currentIssue = currentTrainer.currentIssue;
+    const issueProgress = currentTrainer.issueProgress[currentIssue];
+    
+    if (!issueProgress) {
+      return null;
+    }
+
+    // Check if story progress fields exist (for existing users)
+    if (typeof issueProgress.currentChapter === 'undefined' || typeof issueProgress.currentPage === 'undefined') {
+      return null; // Return null to trigger fallback to chapter 0, page 0
+    }
+
+    return {
+      currentChapter: issueProgress.currentChapter - 1, // Convert from 1-indexed to 0-indexed
+      currentPage: issueProgress.currentPage - 1 // Convert from 1-indexed to 0-indexed
+    };
+  };
+
+  // Set story as started (when user first opens story reader)
+  const setStoryStarted = async (): Promise<void> => {
+    if (!currentTrainer) return;
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      const currentIssue = currentTrainer.currentIssue;
+      const issueProgress = currentTrainer.issueProgress[currentIssue];
+      
+      // Only set startedAt if it's null
+      if (issueProgress && issueProgress.startedAt === null) {
+        const now = new Date().toISOString();
+        
+        const updatedIssueProgress = {
+          ...currentTrainer.issueProgress,
+          [currentIssue]: {
+            ...issueProgress,
+            startedAt: now
+          }
+        };
+
+        await updateDoc(trainerRef, {
+          issueProgress: updatedIssueProgress,
+          lastLogin: now
+        });
+
+        // Update local state
+        setCurrentTrainer(prev => prev ? {
+          ...prev,
+          issueProgress: updatedIssueProgress,
+          lastLogin: now
+        } : null);
+
+        trackEvent('Story Started', {
+          issueId: currentIssue,
+          trainerId: currentTrainer.uid
+        });
+      }
+    } catch (error) {
+      console.error('Error setting story started:', error);
+      throw error;
+    }
+  };
+
+  // Set story as completed (when user finishes reading)
+  const setStoryCompleted = async (): Promise<void> => {
+    if (!currentTrainer) return;
+
+    try {
+      const trainerRef = doc(db, 'trainers', currentTrainer.uid);
+      const currentIssue = currentTrainer.currentIssue;
+      const issueProgress = currentTrainer.issueProgress[currentIssue];
+      
+      // Only set completedAt if it's null
+      if (issueProgress && issueProgress.completedAt === null) {
+        const now = new Date().toISOString();
+        
+        const updatedIssueProgress = {
+          ...currentTrainer.issueProgress,
+          [currentIssue]: {
+            ...issueProgress,
+            completedAt: now
+          }
+        };
+
+        await updateDoc(trainerRef, {
+          issueProgress: updatedIssueProgress,
+          lastLogin: now
+        });
+
+        // Update local state
+        setCurrentTrainer(prev => prev ? {
+          ...prev,
+          issueProgress: updatedIssueProgress,
+          lastLogin: now
+        } : null);
+
+        trackEvent('Story Completed', {
+          issueId: currentIssue,
+          trainerId: currentTrainer.uid
+        });
+      }
+    } catch (error) {
+      console.error('Error setting story completed:', error);
+      throw error;
+    }
+  };
 
   // Load trainer from storage on mount
   useEffect(() => {
@@ -988,7 +1167,11 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
     startIssue,
     switchToIssue,
     addKowaiToTrainer,
-    addEncounteredKowai
+    addEncounteredKowai,
+    saveStoryProgress,
+    getStoryProgress,
+    setStoryStarted,
+    setStoryCompleted
   };
 
   return (

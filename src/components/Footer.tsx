@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { InfoModal } from './InfoModal';
-import { trackEvent } from '../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../lib/mixpanel';
 
 export const Footer: React.FC = () => {
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -13,8 +13,8 @@ export const Footer: React.FC = () => {
             <button 
               onClick={() => {
                 // Track about button clicked
-                trackEvent('About Button Clicked', {
-                  issueNumber: 1,
+                trackEvent('Footer About Button Clicked', {
+                  issueNumber: getIssueNumber("issue1"),
                   trainerId: null,
                   trainerName: null,
                   trainerAge: null,

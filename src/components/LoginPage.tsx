@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, HelpCircle } from 'lucide-react';
 import { useAuthWithAnalytics } from '../hooks/useAuthWithAnalytics';
 import { InfoModal } from './InfoModal';
-import { trackEvent } from '../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../lib/mixpanel';
 
 type LoginMode = 'login' | 'signup' | 'forgot-password';
 
@@ -337,7 +337,7 @@ export function LoginPage() {
               onClick={() => {
                 // Track about button clicked
                 trackEvent('About Button Clicked', {
-                  issueNumber: 1,
+                  issueNumber: getIssueNumber("issue1"),
                   trainerId: null,
                   trainerName: null,
                   trainerAge: null,
