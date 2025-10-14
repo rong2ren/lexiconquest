@@ -50,7 +50,7 @@ export function HTMLStoryRenderer({
 
   return (
     <div 
-      className="max-w-4xl mx-auto p-8 leading-relaxed bg-gradient-to-br from-sky-200/90 via-blue-100/80 to-cyan-100/70 rounded-3xl shadow-2xl border-2 border-blue-200/40"
+      className="max-w-4xl mx-auto p-4 leading-relaxed rounded-3xl shadow-2xl border-2 border-blue-200/40 min-h-[60vh] sm:min-h-[65vh] md:min-h-[70vh] lg:min-h-[75vh] font-arimo bg-gradient-to-br from-sky-200/90 via-blue-100/80 to-cyan-100/70 text-slate-800"
       dangerouslySetInnerHTML={{ __html: content.htmlContent }}
     />
   );

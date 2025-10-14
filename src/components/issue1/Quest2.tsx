@@ -239,15 +239,15 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="font-gagalin text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 2: Find the Continent
                 </h2>
               </div>
 
               {/* Riddle */}
-              <div className="text-left mb-12">
+              <div className="text-left mb-4">
                 
-                <div className="relative rounded-2xl p-8 overflow-hidden mb-8 shadow-lg shadow-blue-500/20" style={{
+                <div className="relative rounded-2xl p-8 overflow-hidden mb-4 shadow-lg shadow-blue-500/20" style={{
                   backgroundImage: 'url(/kowai/riddle_i1q2.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
@@ -265,38 +265,165 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                   </div>
                 </div>
                 
-                <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
-                  <h2 className="text-slate-800 text-2xl font-semibold">
+                <div className="bg-white/60 rounded-2xl p-6 border border-blue-300/50">
+                  <h2 className="text-slate-800 text-2xl font-semibold text-center">
                     Which continent the magic has brought you to?
                   </h2>
+                  <p className="text-slate-600 text-lg font-medium text-center">Click on the continent you think the riddle describes!</p>
                 </div>
               </div>
 
-              {/* Continent Choices */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-                {[
-                  'Asia',
-                  'Africa', 
-                  'Australia',
-                  'Antarctica',
-                  'Europe',
-                  'North America',
-                  'South America'
-                ].map((continent) => (
-                  <motion.button
-                    key={continent}
+              {/* Interactive World Map */}
+              <div className="relative mb-4">
+                <div className="relative mx-auto max-w-4xl">
+                  {/* World Map Image */}
+                  <img 
+                    src="/issues/issue1/continents.png" 
+                    alt="World Map" 
+                    className="w-full h-auto rounded-lg shadow-lg"
+                  />
+                  
+                  {/* Clickable Continent Overlays - Matching the yellow dashed rectangles */}
+                  {/* Antarctica - The correct answer (bottom of map) */}
+                  <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => handleContinentSelect(continent.toLowerCase().replace(' ', '_'))}
-                    className={`p-4 rounded-lg text-center transition-all duration-200 cursor-pointer ${
-                      selectedContinent === continent.toLowerCase().replace(' ', '_')
-                        ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-400 shadow-lg shadow-purple-500/25'
-                        : 'bg-white/60 border-2 border-blue-300/50 hover:bg-white/80 hover:border-blue-400/70'
+                    onClick={() => handleContinentSelect('antarctica')}
+                    className={`absolute cursor-pointer transition-all duration-300 ${
+                      selectedContinent === 'antarctica'
+                        ? 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                        : 'hover:bg-red-500/10 hover:border-2 hover:border-red-300'
                     }`}
-                  >
-                    <p className="text-slate-800 font-medium">{continent}</p>
-                  </motion.button>
-                ))}
+                    style={{
+                      bottom: '1%',
+                      left: '41%',
+                      width: '26%',
+                      height: '7%',
+                      borderRadius: '4px'
+                    }}
+                    title="Antarctica - Click here!"
+                  />
+                  
+                  {/* North America - Wrong answer (top left) */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleContinentSelect('north_america')}
+                    className={`absolute cursor-pointer transition-all duration-300 ${
+                      selectedContinent === 'north_america'
+                        ? 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                        : 'hover:bg-red-500/10 hover:border-2 hover:border-red-300'
+                    }`}
+                    style={{
+                      top: '26%',
+                      left: '16%',
+                      width: '14%',
+                      height: '12%',
+                      borderRadius: '4px'
+                    }}
+                    title="North America"
+                  />
+                  
+                  {/* South America - Wrong answer (left side) */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleContinentSelect('south_america')}
+                    className={`absolute cursor-pointer transition-all duration-300 ${
+                      selectedContinent === 'south_america'
+                        ? 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                        : 'hover:bg-red-500/10 hover:border-2 hover:border-red-300'
+                    }`}
+                    style={{
+                      top: '53%',
+                      left: '25%',
+                      width: '14%',
+                      height: '12%',
+                      borderRadius: '4px'
+                    }}
+                    title="South America"
+                  />
+                  
+                  {/* Europe - Wrong answer (top center-left) */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleContinentSelect('europe')}
+                    className={`absolute cursor-pointer transition-all duration-300 ${
+                      selectedContinent === 'europe'
+                        ? 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                        : 'hover:bg-red-500/10 hover:border-2 hover:border-red-300'
+                    }`}
+                    style={{
+                      top: '27%',
+                      left: '50%',
+                      width: '13%',
+                      height: '6%',
+                      borderRadius: '4px'
+                    }}
+                    title="Europe"
+                  />
+                  
+                  {/* Africa - Wrong answer (center) */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleContinentSelect('africa')}
+                    className={`absolute cursor-pointer transition-all duration-300 ${
+                      selectedContinent === 'africa'
+                        ? 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                        : 'hover:bg-red-500/10 hover:border-2 hover:border-red-300'
+                    }`}
+                    style={{
+                      top: '43%',
+                      left: '43%',
+                      width: '14%',
+                      height: '7%',
+                      borderRadius: '4px'
+                    }}
+                    title="Africa"
+                  />
+                  
+                  {/* Asia - Wrong answer (top right) */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleContinentSelect('asia')}
+                    className={`absolute cursor-pointer transition-all duration-300 ${
+                      selectedContinent === 'asia'
+                        ? 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                        : 'hover:bg-red-500/10 hover:border-2 hover:border-red-300'
+                    }`}
+                    style={{
+                      top: '29%',
+                      left: '69%',
+                      width: '13%',
+                      height: '6%',
+                      borderRadius: '4px'
+                    }}
+                    title="Asia"
+                  />
+                  
+                  {/* Australia - Wrong answer (bottom right) */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleContinentSelect('australia')}
+                    className={`absolute cursor-pointer transition-all duration-300 ${
+                      selectedContinent === 'australia'
+                        ? 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                        : 'hover:bg-red-500/10 hover:border-2 hover:border-red-300'
+                    }`}
+                    style={{
+                      top: '61%',
+                      left: '75%',
+                      width: '16%',
+                      height: '7%',
+                      borderRadius: '4px'
+                    }}
+                    title="Australia"
+                  />
+                </div>
               </div>
 
               {/* Submit Button */}
@@ -327,21 +454,21 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                         <img 
                           src="/issues/issue1/antartica_map.gif" 
                           alt="Antarctica Map" 
-                          className="mx-auto max-w-md w-full"
+                          className="mx-auto max-w-md w-100"
                         />
                       </div>
                     
                     <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                      <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-green-600 font-bold text-xl">CURIOSITY</span>.</p>
-                      <p className="quest-result-text text-slate-700 text-lg mb-4">
+                      <p className="font-arimo text-slate-700 text-lg mb-4">You have proven your <span className="text-green-600 font-bold text-xl">CURIOSITY</span>.</p>
+                      <p className="font-arimo text-slate-700 text-lg mb-4">
                         You looked at the clues, studied the world, and found the answers hidden in the frozen land of Antarctica. 
                         This is exactly the kind of thinking that separates true Kowai Trainers from ordinary people.
                       </p>
-                      <p className="quest-result-text text-slate-700 text-lg mb-4">
+                      <p className="font-arimo text-slate-700 text-lg mb-4">
                         Your ability to observe, analyze, and connect the dots shows that you have the mind of a true explorer. 
                         You didn't just guess - you used your intelligence to piece together the puzzle and discover the truth.
                       </p>
-                      <p className="quest-result-text text-slate-700 text-lg">
+                      <p className="font-arimo text-slate-700 text-lg">
                         But do not celebrate too long, for your trials have only just begun. 
                         Three greater challenges still lie ahead of you, each one designed to test a different part of your character.
                       </p>
@@ -406,15 +533,15 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">Uh-oh… Not quite.</h3>
                     
                     <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
-                      <p className="quest-result-text text-slate-700 text-lg mb-4">
+                      <p className="font-arimo text-slate-700 text-lg mb-4">
                         Your answer shows promise, but you have not yet solved the riddle completely. Do not worry - even the greatest explorers sometimes need help.
                       </p>
-                      <p className="quest-result-text text-slate-700 text-lg mb-6">
+                      <p className="font-arimo text-slate-700 text-lg mb-6">
                         Let me give you with a little more light to help you see the path:
                       </p>
                       
                       <div className="bg-slate-600/50 rounded-xl p-4 mb-4">
-                        <p className="quest-result-text text-slate-200 text-lg whitespace-pre-line text-center">
+                        <p className="font-arimo text-slate-200 text-lg whitespace-pre-line text-center">
                           {"🗺️ At the bottom of the world so wide, where snowy silence grows.\n" +
                            "🏔️ Mountains sleep beneath the ice, where hidden fire glows.\n" +
                            "☀️ The sun may shine for weeks on end, then vanish from the sky.\n" +
@@ -423,16 +550,16 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
                       </div>
                       
                       <div className="space-y-3">
-                        <p className="quest-result-text text-slate-700 text-lg">
+                        <p className="font-arimo text-slate-700 text-lg">
                           <span className="text-xl">🗺️</span> - Think about which continent sits at the very bottom of our planet, the farthest south you can go.
                         </p>
-                        <p className="quest-result-text text-slate-700 text-lg">
+                        <p className="font-arimo text-slate-700 text-lg">
                           <span className="text-xl">🏔️</span> - This speaks of volcanoes buried under thick snow and ice. Which frozen land has volcanoes sleeping under its white blanket?
                         </p>
-                        <p className="quest-result-text text-slate-700 text-lg">
+                        <p className="font-arimo text-slate-700 text-lg">
                           <span className="text-xl">☀️</span> - This describes the strange way day and night work at the bottom of the world: sometimes all light, sometimes all darkness for months at a time.
                         </p>
-                        <p className="quest-result-text text-slate-700 text-lg">
+                        <p className="font-arimo text-slate-700 text-lg">
                           <span className="text-xl">🌌</span> - These are the magical dancing lights called aurora that paint the dark polar sky in beautiful colors.
                         </p>
                       </div>

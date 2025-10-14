@@ -32,16 +32,12 @@ export interface InteractiveElement {
 export interface StoryChapter {
   id: string;
   title: string;
-  description?: string;
   pages: StoryPage[];
-  backgroundMusic?: string;
-  theme?: 'adventure' | 'mystery' | 'friendship' | 'discovery';
 }
 
 // Story issue configuration
 export interface StoryIssue {
   id: string;
-  backgroundTheme?: string;
   chapters: StoryChapter[];
 }
 

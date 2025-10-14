@@ -258,7 +258,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="font-gagalin text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 4: Find Your Exact Position
                 </h2>
               </div>
@@ -269,7 +269,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                   <h2 className="text-slate-800 text-2xl mb-4 font-semibold">
                     The Lumino is lost in the vast, snowy wilderness of Antarctica. To help it reach the South Pole safely, you need to figure out your exact starting point on the map.
                   </h2>
-                  <p className="quest-result-text text-slate-700 text-lg">
+                  <p className="font-arimo text-slate-700 text-lg">
                     Which grid coordinate are you standing on right now?
                   </p>
                 </div>
@@ -308,48 +308,61 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                 </div>
               </div>
 
-              {/* Desktop: Coordinate Grid */}
-              <div className="hidden md:block mb-8">
-                <div className="bg-white/60 rounded-lg p-6 border border-blue-300/50">
-                  <div className="grid grid-cols-11 gap-1 max-w-fit mx-auto">
-                    {/* Empty top-left corner */}
-                    <div className="w-8 h-8"></div>
-                    
-                    {/* Column headers */}
-                    {columns.map((col) => (
-                      <div key={col} className="w-8 h-8 flex items-center justify-center text-slate-800 font-bold text-sm">
-                        {col}
-                      </div>
-                    ))}
-                    
-                    {/* Grid cells */}
-                    {rows.map((row) => (
-                      <div key={row} className="contents">
-                        {/* Row header */}
-                        <div className="w-8 h-8 flex items-center justify-center text-slate-800 font-bold text-sm">
-                          {row}
-                        </div>
-                        
-                        {/* Grid cells for this row */}
-                        {columns.map((col) => {
-                          const coordinate = `${col}${row}`;
-                          return (
-                            <motion.button
-                              key={coordinate}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleCoordinateSelect(coordinate)}
-                              className={`w-8 h-8 rounded border-2 transition-all duration-200 cursor-pointer ${
-                                selectedCoordinate === coordinate
-                                  ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-400 shadow-lg shadow-purple-500/25'
-                                  : 'bg-white/60 border-blue-300/50 hover:border-blue-400/70'
-                              }`}
-                            />
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
+              {/* Interactive Map */}
+              <div className="relative mb-8">
+                <div className="relative mx-auto max-w-4xl">
+                  {/* Map Image */}
+                  <img 
+                    src="/issues/issue1/map.png" 
+                    alt="Antarctica Map" 
+                    className="w-full h-auto rounded-lg shadow-lg"
+                  />
+                  
+                  {/* Clickable Grid Overlays */}
+                  {rows.map((row) => 
+                    columns.map((col) => {
+                      const coordinate = `${col}${row}`;
+                      const isCorrect = coordinate === 'D4'; // The correct answer
+                      
+                      return (
+                        <button
+                          key={coordinate}
+                          onClick={() => handleCoordinateSelect(coordinate)}
+                          className={`absolute cursor-pointer transition-all duration-300 ${
+                            selectedCoordinate === coordinate
+                              ? isCorrect 
+                                ? 'bg-green-500/30 border-2 border-green-400 shadow-lg shadow-green-500/25'
+                                : 'bg-red-500/30 border-2 border-red-400 shadow-lg shadow-red-500/25'
+                              : 'hover:bg-blue-500/20 hover:border-2 hover:border-blue-400'
+                          }`}
+                          style={{
+                            // Position each grid cell on the map
+                            top: `${(row - 1) * 12.5 + 5}%`,
+                            left: `${(col.charCodeAt(0) - 65) * 9 + 5}%`,
+                            width: '8%',
+                            height: '10%',
+                            borderRadius: '4px'
+                          }}
+                          title={`Grid coordinate: ${coordinate}`}
+                        />
+                      );
+                    })
+                  )}
+                </div>
+                
+                {/* Selected Coordinate Display */}
+                <div className="mt-4 text-center">
+                  {selectedCoordinate ? (
+                    <div className="bg-blue-100 rounded-lg p-4 border border-blue-300">
+                      <p className="text-slate-800 text-lg font-semibold">
+                        Selected Coordinate: <span className="text-blue-600 font-bold text-xl">{selectedCoordinate}</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-slate-600 text-lg">
+                      Click on the map to select your grid coordinate
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -377,7 +390,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                         statChanges={statChanges} 
                       />
                     </div>
-                    <p className="quest-result-text text-slate-700 text-lg mb-6">
+                    <p className="font-arimo text-slate-700 text-lg mb-6">
                       You've successfully found your exact position in Antarctica. Now that you know where you are, it's time for your next challenge.
                     </p>
                   </div>
@@ -438,7 +451,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                 <>
                   <div className="mb-8">
                     <h3 className="text-3xl font-bold text-slate-800 mb-6">Uh-oh… Not quite.</h3>
-                    <p className="quest-result-text text-slate-700 text-lg mb-6">
+                    <p className="font-arimo text-slate-700 text-lg mb-6">
                       That's not the correct coordinate. Look carefully at the grid and try to find the right position. 
                       Remember, you need to identify exactly where you're standing on the map to help the Lumino navigate safely.
                     </p>
@@ -446,7 +459,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                     {/* Detailed Hints */}
                     <div className="bg-white/60 rounded-2xl p-6 mb-6 border border-blue-300/50">
                       <h4 className="text-xl font-semibold text-slate-800 mb-4">Let me help you with some clearer directions:</h4>
-                      <div className="space-y-4 quest-result-text text-slate-700 text-lg">
+                      <div className="space-y-4 font-arimo text-slate-700 text-lg">
                         <div className="flex items-start gap-3">
                           <span className="text-2xl">🧭</span>
                           <p>Remember that North is at the top of your map, South is at the bottom, East is to the right, and West is to the left.</p>
@@ -465,7 +478,7 @@ export function Quest4({ onComplete, onBack }: Quest4Props) {
                         </div>
                       </div>
                       <div className="mt-6 p-4 bg-blue-600/20 rounded-xl border border-blue-500/30">
-                        <p className="text-slate-800 text-lg font-semibold quest-result-text">
+                        <p className="text-slate-800 text-lg font-semibold font-arimo">
                           Now, young explorer, look at your Antarctica maps again. Which spot do the above two areas overlap?
                         </p>
                       </div>

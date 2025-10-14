@@ -208,7 +208,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
                   />
                 </div>
                 <div className="mb-6">
-                  <p className="quest-result-text text-slate-700 text-lg mb-6 whitespace-pre-line">
+                  <p className="font-arimo text-slate-700 text-lg mb-6 whitespace-pre-line">
                     {choice.result.message}
                   </p>
                   
@@ -216,11 +216,11 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
                 
                 {/* You have proven your BRAVERY section */}
                 <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-blue-600 font-bold text-xl">BRAVERY</span>.</p>
-                  <p className="quest-result-text text-slate-700 text-lg">
+                  <p className="font-arimo text-slate-700 text-lg mb-4">You have proven your <span className="text-blue-600 font-bold text-xl">BRAVERY</span>.</p>
+                  <p className="font-arimo text-slate-700 text-lg">
                     In that moment of danger, when the mighty Yezu threatened helpless Lumino, you didn't hesitate to put yourself at risk to help. Whether your quick thinking saved Lumino or not, your heart showed the true spirit of a Kowai Trainer. You chose to act with courage.
                   </p>
-                  <p className="quest-result-text text-slate-700 text-lg mt-3">
+                  <p className="font-arimo text-slate-700 text-lg mt-3">
                     Now you should keep reading to find out if your action actually saved Lumino.
                   </p>
                 </div>
@@ -305,7 +305,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
         >
           {/* Quest Header */}
           <div className="text-center mb-8">
-            <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+            <h2 className="font-gagalin text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
               Quest 6: Save Lumino
             </h2>
           </div>
