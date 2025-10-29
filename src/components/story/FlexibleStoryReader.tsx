@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { storyIssues } from '../../data/storyIndex';
 import { usePlayAuth } from '../../contexts/PlayAuthContext';
 import { trackEvent } from '../../lib/mixpanel';
-import { HTMLStoryRenderer } from './HTMLStoryRenderer';
+import { JSONStoryRenderer } from './JSONStoryRenderer';
 
 // Import quest components
 import { Quest1 } from '../issue1/Quest1';
@@ -233,30 +233,6 @@ export function FlexibleStoryReader({ issueId, onBack }: FlexibleStoryReaderProp
     setCurrentQuest(null);
   };
 
-  // Handle choice selection
-  const handleChoiceSelect = (choiceId: string) => {
-    if (!currentPageData) return;
-    
-    trackEvent('Story Choice Selected', {
-      issueId,
-      pageId: currentPageData.id,
-      choiceId,
-      trainerId: currentTrainer?.uid
-    });
-  };
-
-  // Handle interactive actions
-  const handleInteractiveAction = (elementId: string, value: any) => {
-    if (!currentPageData) return;
-    
-    trackEvent('Story Interactive Action', {
-      issueId,
-      pageId: currentPageData.id,
-      elementId,
-      value,
-      trainerId: currentTrainer?.uid
-    });
-  };
 
   // Render quest component if active
   if (showQuest && currentQuest) {
@@ -345,11 +321,9 @@ export function FlexibleStoryReader({ issueId, onBack }: FlexibleStoryReaderProp
           {/* Story content - same size as before */}
           <div className="w-full">
             {currentPageData && (
-              <HTMLStoryRenderer
+              <JSONStoryRenderer
                 content={currentPageData}
-                onChoiceSelect={handleChoiceSelect}
                 onQuestStart={handleQuestStart}
-                onInteractiveAction={handleInteractiveAction}
               />
             )}
           </div>

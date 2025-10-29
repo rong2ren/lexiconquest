@@ -248,7 +248,7 @@ export function Quest2({ onComplete, onBack }: Quest2Props) {
               <div className="text-left mb-4">
                 
                 <div className="relative rounded-2xl p-8 overflow-hidden mb-4 shadow-lg shadow-blue-500/20" style={{
-                  backgroundImage: 'url(/kowai/riddle_i1q2.png)',
+                  backgroundImage: 'url(/issues/issue1/riddle_i1q2.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat'
