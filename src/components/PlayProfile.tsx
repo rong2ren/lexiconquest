@@ -314,19 +314,19 @@ export function PlayProfile() {
                       <div className="relative inline-block">
                         <Button 
                           onClick={handleStartStory}
-                          className="relative px-6 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-500 hover:via-emerald-500 hover:to-teal-500 text-white font-black text-lg sm:text-xl rounded-2xl shadow-xl hover:shadow-green-500/30 hover:scale-105 transition-all duration-300 border-0"
+                          className="relative px-6 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
                         >
-                          <span className="relative z-10">📖 Read Story</span>
+                          <span className="relative z-10">Enter Lexicon Quest</span>
                         </Button>
                       </div>
-                      <div className="relative inline-block">
+                      {/* <div className="relative inline-block">
                         <Button 
                           onClick={handleBeginQuest}
                           className="relative px-6 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg sm:text-xl rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0"
                         >
                           <span className="relative z-10">{hasStartedQuests ? 'Continue Your Quest' : 'Begin Your Quest'}</span>
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   </>
                 )}
