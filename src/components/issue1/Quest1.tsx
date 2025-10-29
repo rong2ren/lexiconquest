@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import { usePlayAuth } from '../../contexts/PlayAuthContext';
-import { trackEvent } from '../../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../../lib/mixpanel';
 import { StatNotification } from '../StatNotification';
 
 interface Quest1Props {
@@ -22,7 +22,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
   // Track quest start when component mounts
   useEffect(() => {
     trackEvent('Quest Started', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 1,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -43,7 +43,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
     
     // Track Kowai selection with detailed context
     trackEvent('Quest Answer Selected', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 1,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -125,7 +125,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
       
       // Track quest completion failure
       trackEvent('Quest Completion Failed', {
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         questNumber: 1,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -151,7 +151,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
 
     // Track quest completion (always track, regardless of Firebase success)
     trackEvent('Quest Completed', { 
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 1,
       trainerId: currentTrainer.uid,
       trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -204,7 +204,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-10">
-                <h2 className="quest-title mb-8 text-4xl text-slate-800 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="font-gagalin mb-8 text-4xl text-slate-800 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 1: Where Adventure Starts
                 </h2>
                 
@@ -281,19 +281,19 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
                     alt={getKowaiDisplayName(selectedKowai!)}
                     className="h-70 mx-auto mb-3 rounded-lg object-cover"
                   />
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">
+                  <p className="font-arimo text-slate-700 text-lg mb-4">
                     You have chosen <span className="text-purple-600 font-semibold">{getKowaiDisplayName(selectedKowai!)}</span> as your first Kowai companion. 
                     This magical creature has been waiting for someone special like you to come along and form an unbreakable bond.
                   </p>
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">
+                  <p className="font-arimo text-slate-700 text-lg mb-4">
                     This brave little creature is waiting to become your lifelong friend and trusted partner in all your future adventures. 
                     Together, you will face challenges, discover new lands, and grow stronger with each passing day.
                   </p>
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">
+                  <p className="font-arimo text-slate-700 text-lg mb-4">
                     But first, you must prove you are ready to be a true Kowai Trainer. The path ahead is filled with trials that will test your courage, wisdom, curiosity, and empathy. 
                     Complete all the challenges ahead to earn the right to awaken your Kowai egg and begin your journey as a legendary trainer.
                   </p>
-                  <p className="quest-result-text text-slate-700 text-lg">
+                  <p className="font-arimo text-slate-700 text-lg">
                     Your adventure is just beginning, and the bond you will share with {getKowaiDisplayName(selectedKowai!)} will be the foundation of everything you accomplish together.
                   </p>
                 </div>
@@ -346,7 +346,7 @@ export function Quest1({ onComplete, onBack }: Quest1Props) {
                   onClick={handleNext}
                   className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                 >
-                  Continue to the next quest
+                  Continue to Next Page
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>

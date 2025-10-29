@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { usePlayAuth } from '../../contexts/PlayAuthContext';
-import { trackEvent } from '../../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../../lib/mixpanel';
 import { StatNotification } from '../StatNotification';
 
 interface Quest6Props {
@@ -22,7 +22,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
   // Track quest start when component mounts
   useEffect(() => {
     trackEvent('Quest Started', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 6,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -73,7 +73,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
     
     // Track choice selection
     trackEvent('Quest Answer Selected', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 6,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -128,7 +128,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
       
       // Track quest completion failure
       trackEvent('Quest Completion Failed', {
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         questNumber: 6,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -145,7 +145,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
 
     // Track quest completion (always track, regardless of Firebase success)
     trackEvent('Quest Completed', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 6,
       trainerId: currentTrainer.uid,
       trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -208,7 +208,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
                   />
                 </div>
                 <div className="mb-6">
-                  <p className="quest-result-text text-slate-700 text-lg mb-6 whitespace-pre-line">
+                  <p className="font-arimo text-slate-700 text-lg mb-6 whitespace-pre-line">
                     {choice.result.message}
                   </p>
                   
@@ -216,11 +216,11 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
                 
                 {/* You have proven your BRAVERY section */}
                 <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-blue-600 font-bold text-xl">BRAVERY</span>.</p>
-                  <p className="quest-result-text text-slate-700 text-lg">
+                  <p className="font-arimo text-slate-700 text-lg mb-4">You have proven your <span className="text-blue-600 font-bold text-xl">BRAVERY</span>.</p>
+                  <p className="font-arimo text-slate-700 text-lg">
                     In that moment of danger, when the mighty Yezu threatened helpless Lumino, you didn't hesitate to put yourself at risk to help. Whether your quick thinking saved Lumino or not, your heart showed the true spirit of a Kowai Trainer. You chose to act with courage.
                   </p>
-                  <p className="quest-result-text text-slate-700 text-lg mt-3">
+                  <p className="font-arimo text-slate-700 text-lg mt-3">
                     Now you should keep reading to find out if your action actually saved Lumino.
                   </p>
                 </div>
@@ -272,7 +272,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
                   onClick={handleContinue}
                   className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                 >
-                  Continue to the next quest
+                  Continue to Next Page
                 </Button>
               </div>
             </div>
@@ -305,7 +305,7 @@ const Quest6: React.FC<Quest6Props> = ({ onBack, onComplete }) => {
         >
           {/* Quest Header */}
           <div className="text-center mb-8">
-            <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+            <h2 className="font-gagalin text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
               Quest 6: Save Lumino
             </h2>
           </div>

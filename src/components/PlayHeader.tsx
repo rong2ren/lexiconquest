@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { usePlayAuth } from '../contexts/PlayAuthContext';
 import { TrainerManagementModal } from './TrainerManagementModal';
 import { NewTrainerForm } from './NewTrainerForm';
-import { trackEvent } from '../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../lib/mixpanel';
 
 export function PlayHeader() {
   const { logout, availableTrainers, currentTrainer } = usePlayAuth();
@@ -16,7 +16,7 @@ export function PlayHeader() {
   const handleAddProfile = () => {
     // Track add profile clicked
     trackEvent('Add Profile Clicked', {
-      issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
@@ -32,7 +32,7 @@ export function PlayHeader() {
   const handleSwitchProfile = () => {
     // Track switch profile clicked
     trackEvent('Switch Profile Clicked', {
-      issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,
@@ -53,7 +53,7 @@ export function PlayHeader() {
   const handleBuyIssue = () => {
     // Track purchase link clicked
     trackEvent('Purchase Link Clicked', {
-      issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
       trainerAge: currentTrainer?.age,

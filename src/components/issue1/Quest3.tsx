@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import { usePlayAuth } from '../../contexts/PlayAuthContext';
-import { trackEvent } from '../../lib/mixpanel';
+import { trackEvent, getIssueNumber } from '../../lib/mixpanel';
 import { StatNotification } from '../StatNotification';
 
 interface Quest3Props {
@@ -22,7 +22,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
   // Track quest start when component mounts
   useEffect(() => {
     trackEvent('Quest Started', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 3,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -43,7 +43,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
     
     // Track choice selection with detailed context
     trackEvent('Quest Answer Selected', {
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 3,
       trainerId: currentTrainer?.uid,
       trainerName: currentTrainer ? `${currentTrainer.firstName} ${currentTrainer.lastName}` : null,
@@ -106,7 +106,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
       
       // Track quest completion failure
       trackEvent('Quest Completion Failed', {
-        issueNumber: 1,
+        issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
         questNumber: 3,
         trainerId: currentTrainer.uid,
         trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -123,7 +123,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
 
     // Track quest completion (always track, regardless of Firebase success)
     trackEvent('Quest Completed', { 
-      issueNumber: 1,
+      issueNumber: getIssueNumber(currentTrainer?.currentIssue || "issue1"),
       questNumber: 3,
       trainerId: currentTrainer.uid,
       trainerName: `${currentTrainer.firstName} ${currentTrainer.lastName}`,
@@ -201,7 +201,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
             <>
               {/* Quest Header */}
               <div className="text-center mb-8">
-                <h2 className="quest-title text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <h2 className="font-gagalin text-4xl text-slate-800 mb-4 bg-gradient-to-r from-yellow-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   Quest 3: Build Trust with Lumino
                 </h2>
               </div>
@@ -288,17 +288,17 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
                     alt="Lumino"
                     className="h-96 mx-auto mb-3 rounded-lg object-cover"
                   />
-                  <p className="quest-result-text text-slate-700 text-lg mb-4 whitespace-pre-line">
+                  <p className="font-arimo text-slate-700 text-lg mb-4 whitespace-pre-line">
                     {getResultText(selectedChoice!)}
                   </p>
                 </div>
                 
                 <div className="bg-gradient-to-r from-blue-200/60 to-purple-200/60 rounded-xl p-4 mb-6 border-2 border-blue-400/50">
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
-                  <p className="quest-result-text text-slate-700 text-lg mb-4">
+                  <p className="font-arimo text-slate-700 text-lg mb-4">You have proven your <span className="text-pink-600 font-bold text-xl">EMPATHY</span>.</p>
+                  <p className="font-arimo text-slate-700 text-lg mb-4">
                     Though it wasn't fully successful, your kindness towards Lumino was clear. You have proven that your heart is big enough to care for magical creatures.
                   </p>
-                  <p className="quest-result-text text-slate-700 text-lg">
+                  <p className="font-arimo text-slate-700 text-lg">
                     Three more challenges await you. Continue forward, and show us what else you can accomplish.
                   </p>
                 </div>
@@ -351,7 +351,7 @@ export function Quest3({ onComplete, onBack }: Quest3Props) {
                   onClick={handleNext}
                   className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 border-0 px-8 py-3"
                 >
-                  Continue to the next quest
+                  Continue to Next Page
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>

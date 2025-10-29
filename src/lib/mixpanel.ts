@@ -52,3 +52,10 @@ export const identifyUser = (userId: string, properties?: Record<string, any>) =
 export const resetUser = () => {
   mixpanel.reset();
 };
+
+// Helper function to extract issue number from issue ID
+export const getIssueNumber = (issueId: string): number => {
+  // Extract number from "issue1", "issue2", etc.
+  const match = issueId.match(/issue(\d+)/);
+  return match ? parseInt(match[1], 10) : 1; // Default to 1 if no match
+};
