@@ -1,11 +1,12 @@
 // Mixpanel configuration and utilities
 import mixpanel from 'mixpanel-browser';
 
-// Configuration (exact same as original HTML)
+// TODO: Replace with YOUR Mixpanel token from Mixpanel Console
+// Go to: Settings → Project Settings → Project Token
 const config = {
   mixpanel: {
-    token: "9ebe956e79a1871840a7eba49f9c4106",
-    debug: false,
+    token: "62dec12f4af536c493e121902112fb14",
+    debug: false, // Set to true for development to see events in console
     track_pageview: true,
     persistence: "localStorage"
   }

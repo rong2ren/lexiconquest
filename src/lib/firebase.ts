@@ -4,15 +4,16 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
-// Your web app's Firebase configuration (exact same as original HTML)
+// TODO: Replace with YOUR Firebase configuration from Firebase Console
+// Go to: Project Settings → General → Your apps → SDK setup and configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAddHjvRgjBUfR4OBAwWJs_rhuf3gkX-2Q",
-  authDomain: "lexicon-quest.firebaseapp.com",
-  projectId: "lexicon-quest",
-  storageBucket: "lexicon-quest.firebasestorage.app",
-  messagingSenderId: "107916687613",
-  appId: "1:107916687613:web:dcc3236f8eb84d6a0da694",
-  measurementId: "G-Y5R9TTH4PT"
+  apiKey: "AIzaSyA-d9W68bg6xIplZK9EQgNcBNU9x6nMJ9g",
+  authDomain: "lexiconquest-243fb.firebaseapp.com",
+  projectId: "lexiconquest-243fb",
+  storageBucket: "lexiconquest-243fb.firebasestorage.app",
+  messagingSenderId: "375627109251",
+  appId: "1:375627109251:web:dda77f9de4e189d9f21cb6",
+  measurementId: "G-DT3GB0P84D"
 };
 
 // Initialize Firebase
