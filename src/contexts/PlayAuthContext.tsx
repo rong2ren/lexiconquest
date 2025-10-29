@@ -265,9 +265,9 @@ export function PlayAuthProvider({ children }: PlayAuthProviderProps) {
           lastCompletedQuest: 0, // No quests completed yet
           startedAt: null, // Will be set when they first open story reader
           completedAt: null, // Will be set when they finish reading story
-          currentChapter: 0, // Start at first chapter
-          currentPage: 0, // Start at first page
-          lastReadAt: null// Set to now for new users
+          currentChapter: 1, // Start at first chapter (1-indexed)
+          currentPage: 1, // Start at first page (1-indexed)
+          lastReadAt: null // Set to now for new users
         }
       },
       createdAt: new Date().toISOString(),
